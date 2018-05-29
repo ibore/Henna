@@ -1,6 +1,6 @@
 package me.ibore.http;
 
-import me.ibore.http.progress.ProgressInfo;
+import me.ibore.http.progress.Progress;
 import me.ibore.http.progress.ProgressListener;
 
 /**
@@ -18,7 +18,7 @@ public abstract class DownloadObserver extends HttpObserver<HttpInfo> implements
     }
 
     @Override
-    public void onProgress(ProgressInfo progressInfo) {
+    public void onProgress(Progress progressInfo) {
 
     }
 

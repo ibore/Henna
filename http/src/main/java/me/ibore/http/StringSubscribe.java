@@ -6,7 +6,7 @@ import java.util.Arrays;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import me.ibore.http.exception.HttpException;
-import me.ibore.http.progress.ProgressInfo;
+import me.ibore.http.progress.Progress;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -27,7 +27,7 @@ public class StringSubscribe implements ObservableOnSubscribe<HttpInfo> {
         InputStream inputStream = null;
         try {
             RequestInfo requestInfo = httpInfo.getRequestInfo();
-            ProgressInfo progressInfo = httpInfo.getProgressInfo();
+            Progress progressInfo = httpInfo.getProgressInfo();
             StringInfo stringInfo = httpInfo.getResponseInfo();
             Request request = new Request.Builder()
                     .url(requestInfo.getUrl())

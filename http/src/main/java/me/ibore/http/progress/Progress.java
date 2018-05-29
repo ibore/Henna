@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by Administrator on 2018/2/6.
  */
 
-public class ProgressInfo implements Serializable {
+public class Progress implements Serializable {
 
     /**
      * 模式——下载
@@ -35,19 +35,11 @@ public class ProgressInfo implements Serializable {
     /**
      * 当前进度（以10000为单位）
      */
-    private int progress;
+    private double progress;
     /**
      * 网速bytes/m
      */
     private long speed;
-    /**
-     * TAG
-     */
-    private Object tag;
-    /**
-     * 添加自定义的数据
-     */
-    private Object data;
 
     public int getMode() {
         return mode;
@@ -81,11 +73,11 @@ public class ProgressInfo implements Serializable {
         this.total = total;
     }
 
-    public int getProgress() {
+    public double getProgress() {
         return progress;
     }
 
-    public void setProgress(int progress) {
+    public void setProgress(double progress) {
         this.progress = progress;
     }
 
@@ -97,22 +89,6 @@ public class ProgressInfo implements Serializable {
         this.speed = speed;
     }
 
-    public Object getTag() {
-        return tag;
-    }
-
-    public void setTag(Object tag) {
-        this.tag = tag;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
-
     @Override
     public String toString() {
         return "ProgressInfo{" +
@@ -122,8 +98,6 @@ public class ProgressInfo implements Serializable {
                 ", total=" + total +
                 ", progress=" + progress +
                 ", speed=" + speed +
-                ", tag=" + tag +
-                ", data=" + data +
                 '}';
     }
 }

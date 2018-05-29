@@ -6,7 +6,7 @@ import java.io.InputStream;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import me.ibore.http.exception.HttpException;
-import me.ibore.http.progress.ProgressInfo;
+import me.ibore.http.progress.Progress;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -28,7 +28,7 @@ public class DownloadSubscribe implements ObservableOnSubscribe<HttpInfo> {
         FileOutputStream fileOutputStream = null;
         try {
             RequestInfo requestInfo = httpInfo.getRequestInfo();
-            ProgressInfo progressInfo = httpInfo.getProgressInfo();
+            Progress progressInfo = httpInfo.getProgressInfo();
             DownloadInfo downloadInfo  = httpInfo.getResponseInfo();
             if (progressInfo.getCurrent() == progressInfo.getTotal()) {
                 observer.onNext(httpInfo);

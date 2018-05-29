@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 
 import me.ibore.http.exception.HttpException;
-import me.ibore.http.progress.ProgressInfo;
+import me.ibore.http.progress.Progress;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -34,8 +34,8 @@ class Utils {
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setUrl(url);
         // 创建ProgressInfo
-        ProgressInfo progressInfo = new ProgressInfo();
-        progressInfo.setMode(ProgressInfo.DOWNLOAD);
+        Progress progressInfo = new Progress();
+        progressInfo.setMode(Progress.DOWNLOAD);
         progressInfo.setUrl(url);
         progressInfo.setTotal(getContentLength(url));
         // 创建DownloadInfo
@@ -61,8 +61,8 @@ class Utils {
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setUrl(url);
         // 创建ProgressInfo
-        ProgressInfo progressInfo = new ProgressInfo();
-        progressInfo.setMode(ProgressInfo.DOWNLOAD);
+        Progress progressInfo = new Progress();
+        progressInfo.setMode(Progress.DOWNLOAD);
         progressInfo.setUrl(url);
         // 创建StringInfo
         StringInfo stringInfo = new StringInfo();

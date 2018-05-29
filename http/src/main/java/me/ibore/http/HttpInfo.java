@@ -1,6 +1,6 @@
 package me.ibore.http;
 
-import me.ibore.http.progress.ProgressInfo;
+import me.ibore.http.progress.Progress;
 
 /**
  * Created by Administrator on 2018/2/6.
@@ -8,15 +8,15 @@ import me.ibore.http.progress.ProgressInfo;
 
 public class HttpInfo<T> {
 
-    private ProgressInfo progressInfo;
+    private Progress progressInfo;
     private RequestInfo requestInfo;
     private T responseInfo;
 
-    public ProgressInfo getProgressInfo() {
+    public Progress getProgressInfo() {
         return progressInfo;
     }
 
-    public void setProgressInfo(ProgressInfo progressInfo) {
+    public void setProgressInfo(Progress progressInfo) {
         this.progressInfo = progressInfo;
     }
 

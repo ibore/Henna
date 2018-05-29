@@ -9,6 +9,6 @@ package me.ibore.http.progress;
 
 public interface ProgressListener {
 
-    void onProgress(ProgressInfo progressInfo);
+    void onProgress(Progress progressInfo);
 
 }

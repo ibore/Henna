@@ -19,15 +19,15 @@ public final class ProgressRequestBody extends RequestBody {
 
     private RequestBody mDelegate;
     private ProgressListener mListener;
-    private ProgressInfo mProgressInfo;
+    private Progress mProgress;
     private BufferedSink mBufferedSink;
 
     public ProgressRequestBody(String url, RequestBody delegate, ProgressListener listener) {
         this.mDelegate = delegate;
         this.mListener = listener;
-        this.mProgressInfo = new ProgressInfo();
-        this.mProgressInfo.setMode(ProgressInfo.UPLOAD);
-        this.mProgressInfo.setUrl(url);
+        this.mProgress = new Progress();
+        this.mProgress.setMode(Progress.UPLOAD);
+        this.mProgress.setUrl(url);
     }
 
     @Override
@@ -66,24 +66,24 @@ public final class ProgressRequestBody extends RequestBody {
         @Override
         public void write(Buffer source, long byteCount) throws IOException {
             super.write(source, byteCount);
-            if (mProgressInfo.getTotal() == 0) {
-                mProgressInfo.setTotal(contentLength());
+            if (mProgress.getTotal() == 0) {
+                mProgress.setTotal(contentLength());
             }
             bytesWritten += byteCount;
             if (mListener != null) {
                 long curTime = System.currentTimeMillis();
                 lastWriteBytes = 0L;
-                if (curTime - lastRefreshUiTime >= XHttp.REFRESH_TIME || bytesWritten == mProgressInfo.getTotal()) {
+                if (curTime - lastRefreshUiTime >= XHttp.REFRESH_TIME || bytesWritten == mProgress.getTotal()) {
                     long diffTime = (curTime - lastRefreshUiTime) / 1000;
                     if (diffTime == 0) diffTime += 1;
                     long diffBytes = bytesWritten - lastWriteBytes;
                     final long networkSpeed = diffBytes / diffTime;
                     lastRefreshUiTime = curTime;
                     lastWriteBytes = bytesWritten;
-                    mProgressInfo.setSpeed(networkSpeed);
-                    mProgressInfo.setCurrent(bytesWritten);
-                    mProgressInfo.setProgress((int) (bytesWritten * 10000 / mProgressInfo.getTotal()));
-                    XHttp.Handler.post(() -> mListener.onProgress(mProgressInfo));
+                    mProgress.setSpeed(networkSpeed);
+                    mProgress.setCurrent(bytesWritten);
+                    mProgress.setProgress((int) (bytesWritten * 10000 / mProgress.getTotal()));
+                    XHttp.Handler.post(() -> mListener.onProgress(mProgress));
                 }
             }
         }

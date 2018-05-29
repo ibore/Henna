@@ -9,6 +9,7 @@ import java.io.File;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import me.ibore.http.converter.file.FileConverterFactory;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -77,11 +78,26 @@ public class XHttp {
      * @param baseUrl 公共网址
      * @return Retrofit
      */
-    public static Retrofit createRetrofit(String baseUrl) {
+    public static Retrofit createGsonRetrofit(String baseUrl) {
         Retrofit retrofit= new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .client(getOkHttpClient())
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        return retrofit;
+    }
+
+    /**
+     * 创建Retrofit
+     * @param baseUrl 公共网址
+     * @return Retrofit
+     */
+    public static Retrofit createFileRetrofit(String baseUrl) {
+        Retrofit retrofit= new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .client(getOkHttpClient())
+                .addConverterFactory(FileConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         return retrofit;
@@ -116,10 +132,6 @@ public class XHttp {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(observer);
-    }
-
-    public static void get(String url) {
-
     }
 
     /**
