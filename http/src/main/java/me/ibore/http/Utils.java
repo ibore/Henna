@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 
 import me.ibore.http.exception.HttpException;
-import me.ibore.http.progress.Progress;
 import okhttp3.Request;
 import okhttp3.Response;
 

@@ -1,8 +1,11 @@
 package me.ibore.http.progress;
 
-import java.io.IOException;
+import android.os.Handler;
+import android.os.SystemClock;
 
-import me.ibore.http.XHttp;
+import java.io.IOException;
+import java.util.List;
+
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import okio.Buffer;
@@ -17,17 +20,19 @@ import okio.Source;
 
 public final class ProgressResponseBody extends ResponseBody {
 
-    private ResponseBody mDelegate;
-    private ProgressListener mListener;
-    private Progress mProgress;
-    private BufferedSource bufferedSource;
+    protected Handler mHandler;
+    protected int mRefreshTime;
+    protected final ResponseBody mDelegate;
+    protected final ProgressListener[] mListeners;
+    protected final Progress mProgress;
+    private BufferedSource mBufferedSource;
 
-    public ProgressResponseBody(String url, ResponseBody delegate, ProgressListener listener) {
-        this.mDelegate = delegate;
-        this.mListener = listener;
-        this.mProgress = new Progress();
-        this.mProgress.setMode(Progress.DOWNLOAD);
-        this.mProgress.setUrl(url);
+    public ProgressResponseBody(Handler handler, ResponseBody responseBody, List<ProgressListener> listeners, int refreshTime) {
+        this.mDelegate = responseBody;
+        this.mListeners = listeners.toArray(new ProgressListener[listeners.size()]);
+        this.mHandler = handler;
+        this.mRefreshTime = refreshTime;
+        this.mProgress = new Progress(System.currentTimeMillis());
     }
 
     @Override
@@ -42,50 +47,64 @@ public final class ProgressResponseBody extends ResponseBody {
 
     @Override
     public BufferedSource source() {
-        if (bufferedSource == null) {
-            bufferedSource = Okio.buffer(source(mDelegate.source()));
+        if (mBufferedSource == null) {
+            mBufferedSource = Okio.buffer(source(mDelegate.source()));
         }
-        return bufferedSource;
+        return mBufferedSource;
     }
 
     private Source source(Source source) {
-        return new CountingSource(source);
-    }
+        return new ForwardingSource(source) {
+            private long totalBytesRead = 0L;
+            private long lastRefreshTime = 0L;  //最后一次刷新的时间
+            private long tempSize = 0L;
 
-    private final class CountingSource extends ForwardingSource {
-
-        private long bytesWritten = 0L;
-        private long lastRefreshUiTime = 0L;
-        private long lastWriteBytes = 0L;
-
-        public CountingSource(Source delegate) {
-            super(delegate);
-        }
-
-        @Override
-        public long read(Buffer sink, long byteCount) throws IOException {
-            if (mProgress.getTotal() == 0) {
-                mProgress.setTotal(contentLength());
-            }
-            bytesWritten += byteCount;
-            if (mListener != null) {
-                long curTime = System.currentTimeMillis();
-                lastWriteBytes = 0L;
-                if (curTime - lastRefreshUiTime >= XHttp.REFRESH_TIME || bytesWritten == mProgress.getTotal()) {
-                    long diffTime = (curTime - lastRefreshUiTime) / 1000;
-                    if (diffTime == 0) diffTime += 1;
-                    long diffBytes = bytesWritten - lastWriteBytes;
-                    final long networkSpeed = diffBytes / diffTime;
-                    lastRefreshUiTime = curTime;
-                    lastWriteBytes = bytesWritten;
-                    mProgress.setSpeed(networkSpeed);
-                    mProgress.setCurrent(bytesWritten);
-                    mProgress.setProgress((int) (bytesWritten * 10000 / mProgress.getTotal()));
-                    XHttp.Handler.post(() -> mListener.onProgress(mProgress));
+            @Override
+            public long read(Buffer sink, long byteCount) throws IOException {
+                long bytesRead = 0L;
+                try {
+                    bytesRead = super.read(sink, byteCount);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    for (int i = 0; i < mListeners.length; i++) {
+                        mListeners[i].onError(mProgress.getId(), e);
+                    }
+                    throw e;
                 }
+                if (mProgress.getContentLength() == 0) { //避免重复调用 contentLength()
+                    mProgress.setContentLength(contentLength());
+                }
+                // read() returns the number of bytes read, or -1 if this source is exhausted.
+                totalBytesRead += bytesRead != -1 ? bytesRead : 0;
+                tempSize += bytesRead != -1 ? bytesRead : 0;
+                if (mListeners != null) {
+                    long curTime = SystemClock.elapsedRealtime();
+                    if (curTime - lastRefreshTime >= mRefreshTime || bytesRead == -1 || totalBytesRead == mProgress.getContentLength()) {
+                        final long finalBytesRead = bytesRead;
+                        final long finalTempSize = tempSize;
+                        final long finalTotalBytesRead = totalBytesRead;
+                        final long finalIntervalTime = curTime - lastRefreshTime;
+                        for (int i = 0; i < mListeners.length; i++) {
+                            final ProgressListener listener = mListeners[i];
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Runnable 里的代码是通过 Handler 执行在主线程的,外面代码可能执行在其他线程
+                                    // 所以我必须使用 final ,保证在 Runnable 执行前使用到的变量,在执行时不会被修改
+                                    mProgress.setEachBytes(finalBytesRead != -1 ? finalTempSize : -1);
+                                    mProgress.setCurrentBytes(finalTotalBytesRead);
+                                    mProgress.setIntervalTime(finalIntervalTime);
+                                    mProgress.setFinish(finalBytesRead == -1 && finalTotalBytesRead == mProgress.getContentLength());
+                                    listener.onProgress(mProgress);
+                                }
+                            });
+                        }
+                        lastRefreshTime = curTime;
+                        tempSize = 0;
+                    }
+                }
+                return bytesRead;
             }
-
-            return super.read(sink, byteCount);
-        }
+        };
     }
 }

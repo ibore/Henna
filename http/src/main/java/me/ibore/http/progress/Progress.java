@@ -1,103 +1,156 @@
+/**
+ * Copyright 2017 JessYan
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package me.ibore.http.progress;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
- * Created by Administrator on 2018/2/6.
+ * ================================================
+ * {@link Progress} 用于存储与进度有关的变量,已实现 {@link Parcelable}
+ * <p>
+ * Created by JessYan on 07/06/2017 12:09
+ * <a href="mailto:jess.yan.effort@gmail.com">Contact me</a>
+ * <a href="https://github.com/JessYanCoding">Follow me</a>
+ * ================================================
  */
+public class Progress implements Parcelable {
+    private long currentBytes; //当前已上传或下载的总长度
+    private long contentLength; //数据总长度
+    private long intervalTime; //本次调用距离上一次被调用所间隔的时间(毫秒)
+    private long eachBytes; //本次调用距离上一次被调用的间隔时间内上传或下载的byte长度
+    private long id; //如果同一个 Url 地址,上一次的上传或下载操作都还没结束,
+    //又开始了新的上传或下载操作(比如用户多次点击上传或下载同一个 Url 地址,当然你也可以在上层屏蔽掉用户的重复点击),
+    //此 id (请求开始时的时间)就变得尤为重要,用来区分正在执行的进度信息,因为是以请求开始时的时间作为 id ,所以值越大,说明该请求越新
+    private boolean finish; //进度是否完成
 
-public class Progress implements Serializable {
+
+    public Progress(long id) {
+        this.id = id;
+    }
+
+    void setCurrentBytes(long currentbytes) {
+        this.currentBytes = currentbytes;
+    }
+
+    void setContentLength(long contentLength) {
+        this.contentLength = contentLength;
+    }
+
+    void setIntervalTime(long intervalTime) {
+        this.intervalTime = intervalTime;
+    }
+
+    void setEachBytes(long eachBytes) {
+        this.eachBytes = eachBytes;
+    }
+
+    void setFinish(boolean finish) {
+        this.finish = finish;
+    }
+
+    public long getCurrentBytes() {
+        return currentBytes;
+    }
+
+    public long getContentLength() {
+        return contentLength;
+    }
+
+    public long getIntervalTime() {
+        return intervalTime;
+    }
+
+    public long getEachBytes() {
+        return eachBytes;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public boolean isFinish() {
+        return finish;
+    }
 
     /**
-     * 模式——下载
+     * 获取百分比,该计算舍去了小数点,如果你想得到更精确的值,请自行计算
+     *
+     * @return
      */
-    public final static int DOWNLOAD = 1;
+    public int getPercent() {
+        if (getCurrentBytes() <= 0 || getContentLength() <= 0) return 0;
+        return (int) ((100 * getCurrentBytes()) / getContentLength());
+    }
+
     /**
-     * 模式——上传
+     * 获取上传或下载网络速度,单位为byte/s,如果你想得到更精确的值,请自行计算
+     *
+     * @return
      */
-    public final static int UPLOAD = 2;
-    /**
-     * 模式
-     */
-    private int mode = DOWNLOAD;
-    /**
-     * 请求网址
-     */
-    private String url;
-    /**
-     * 当前长度
-     */
-    private long current;
-    /**
-     * 总长度
-     */
-    private long total;
-    /**
-     * 当前进度（以10000为单位）
-     */
-    private double progress;
-    /**
-     * 网速bytes/m
-     */
-    private long speed;
-
-    public int getMode() {
-        return mode;
-    }
-
-    public void setMode(int mode) {
-        this.mode = mode;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public long getCurrent() {
-        return current;
-    }
-
-    public void setCurrent(long current) {
-        this.current = current;
-    }
-
-    public long getTotal() {
-        return total;
-    }
-
-    public void setTotal(long total) {
-        this.total = total;
-    }
-
-    public double getProgress() {
-        return progress;
-    }
-
-    public void setProgress(double progress) {
-        this.progress = progress;
-    }
-
     public long getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(long speed) {
-        this.speed = speed;
+        if (getEachBytes() <= 0 || getIntervalTime() <= 0) return 0;
+        return getEachBytes() * 1000 / getIntervalTime();
     }
 
     @Override
     public String toString() {
-        return "ProgressInfo{" +
-                "mode=" + (mode == 1 ? "DOWNLOAD" : "UPLOAD") +
-                ", url='" + url + '\'' +
-                ", current=" + current +
-                ", total=" + total +
-                ", progress=" + progress +
-                ", speed=" + speed +
+        return "Progress{" +
+                "id=" + id +
+                ", currentBytes=" + currentBytes +
+                ", contentLength=" + contentLength +
+                ", eachBytes=" + eachBytes +
+                ", intervalTime=" + intervalTime +
+                ", finish=" + finish +
                 '}';
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(this.currentBytes);
+        dest.writeLong(this.contentLength);
+        dest.writeLong(this.intervalTime);
+        dest.writeLong(this.eachBytes);
+        dest.writeLong(this.id);
+        dest.writeByte(this.finish ? (byte) 1 : (byte) 0);
+    }
+
+    protected Progress(Parcel in) {
+        this.currentBytes = in.readLong();
+        this.contentLength = in.readLong();
+        this.intervalTime = in.readLong();
+        this.eachBytes = in.readLong();
+            this.id = in.readLong();
+        this.finish = in.readByte() != 0;
+    }
+
+    public static final Creator<Progress> CREATOR = new Creator<Progress>() {
+        @Override
+        public Progress createFromParcel(Parcel source) {
+            return new Progress(source);
+        }
+
+        @Override
+        public Progress[] newArray(int size) {
+            return new Progress[size];
+        }
+    };
 }

@@ -1,6 +1,5 @@
 package me.ibore.http;
 
-import me.ibore.http.progress.Progress;
 import me.ibore.http.progress.ProgressListener;
 
 /**

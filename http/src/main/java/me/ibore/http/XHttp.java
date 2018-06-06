@@ -9,7 +9,7 @@ import java.io.File;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import me.ibore.http.converter.file.FileConverterFactory;
+import me.ibore.http.converter.FileConverterFactory;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import me.ibore.http.exception.HttpException;
-import me.ibore.http.progress.Progress;
 import okhttp3.Request;
 import okhttp3.Response;
 
