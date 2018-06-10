@@ -1,4 +1,4 @@
-package me.ibore.http;
+package me.ibore.http.interceptor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import okio.Buffer;
  * website: ibore.me
  */
 
-public class HttpInterceptor implements Interceptor {
+public class HttpLogInterceptor implements Interceptor {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
     private volatile Level printLevel = Level.NONE;
@@ -41,7 +41,7 @@ public class HttpInterceptor implements Interceptor {
         BODY        //所有数据全部打印
     }
 
-    public HttpInterceptor(String tag) {
+    public HttpLogInterceptor(String tag) {
         logger = Logger.getLogger(tag);
     }
 

@@ -3,8 +3,6 @@
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import me.ibore.http.StringInfo;
-import me.ibore.http.StringObserver;
 import me.ibore.http.XHttp;
 import me.ibore.http.exception.HttpException;
 
