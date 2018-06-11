@@ -1,10 +1,11 @@
 package me.ibore.http.download.db;
 
-import com.yuan.library.dmanager.download.DownloadManager;
-import com.yuan.library.dmanager.download.TaskEntity;
-import com.yuan.library.dmanager.download.TaskEntityDao;
 
 import java.util.List;
+
+import me.ibore.http.download.download.DownloadManager;
+import me.ibore.http.download.download.TaskEntity;
+import me.ibore.http.download.download.TaskEntityDao;
 
 /**
  * Created by Yuan on 8/17/16.
