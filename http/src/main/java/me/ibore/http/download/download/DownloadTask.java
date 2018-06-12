@@ -6,10 +6,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.yuan.library.dmanager.db.DaoManager;
-import com.yuan.library.dmanager.utils.FileUtils;
-import com.yuan.library.dmanager.utils.IOUtils;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,6 +15,8 @@ import java.io.RandomAccessFile;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 
+import me.ibore.http.download.db.DaoManager;
+import me.ibore.http.download.utils.FileUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -36,7 +34,7 @@ public class DownloadTask implements Runnable {
 
     private TaskEntity mTaskEntity;
 
-    private DownloadTaskListener mListener;
+    private DownloadListener mListener;
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -166,7 +164,13 @@ public class DownloadTask implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            IOUtils.close(bis, inputStream, tempFile);
+            try {
+                bis.close();
+                inputStream.close();
+                tempFile.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -195,7 +199,7 @@ public class DownloadTask implements Runnable {
         this.mClient = mClient;
     }
 
-    public void setListener(DownloadTaskListener listener) {
+    public void setListener(DownloadListener listener) {
         mListener = listener;
     }
 

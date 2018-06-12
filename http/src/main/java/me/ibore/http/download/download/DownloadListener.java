@@ -6,7 +6,7 @@ package me.ibore.http.download.download;
  * Description:com.yuan.library.dmanager.download.DownloadTaskListener
  */
 
-public interface DownloadTaskListener {
+public interface DownloadListener {
 
 
     void onQueue(DownloadTask downloadTask);

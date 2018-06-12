@@ -25,19 +25,14 @@ public class FileConverterFactory extends Converter.Factory {
 
     public static FileConverterFactory create(File filePath){
         return new FileConverterFactory(filePath);
+
     }
 
     @Override
     public Converter<ResponseBody, File> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
         return value -> {
             File tempFile = new File(filePath, File.separator + System.currentTimeMillis());
-            try {
-                Okio.buffer(Okio.sink(tempFile)).writeAll(Okio.buffer(Okio.source(value.byteStream())));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }catch (IOException ex){
-                ex.printStackTrace();
-            }
+            Okio.buffer(Okio.sink(tempFile)).writeAll(Okio.buffer(Okio.source(value.byteStream())));
             return tempFile;
         };
 
