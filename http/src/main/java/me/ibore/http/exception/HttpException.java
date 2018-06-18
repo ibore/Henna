@@ -1,7 +1,5 @@
 package me.ibore.http.exception;
 
-import android.text.TextUtils;
-
 /**
  * description:
  * author: Ibore Xie
@@ -11,27 +9,24 @@ import android.text.TextUtils;
 
 public class HttpException extends Exception {
 
-    public static final int NetworkNotConnected = 1000;
-    public static final int SocketTimeout = 1001;
-    public static final int NetworkNotAvailable = 1002;
+    private long id;
 
-    private int mCode;
-
-    public HttpException(int code, String detailMessage) {
-        super(TextUtils.isEmpty(detailMessage) ? "" : detailMessage);
-        this.mCode = code;
+    public HttpException(String detailMessage) {
+        super(detailMessage);
+        this.id = -1;
     }
 
-    /** 获取错误状态码 */
-    public int getCode() {
-        return mCode;
+    public HttpException(long id, Throwable cause) {
+        super(cause);
+        this.id = id;
     }
 
-    @Override public String toString() {
-        return "HttpException{" +
-                "code=" + mCode +
-                ", detailMessage='" + getMessage() + '\'' +
-                '}';
+    public HttpException(Throwable cause) {
+        super(cause);
+    }
+
+    public long getId() {
+        return id;
     }
 
 }

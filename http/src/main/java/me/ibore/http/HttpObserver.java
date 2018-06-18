@@ -1,10 +1,8 @@
 package me.ibore.http;
 
-import android.content.Context;
 import android.content.DialogInterface;
 
 import io.reactivex.observers.DisposableObserver;
-import me.ibore.http.exception.HttpException;
 
 
 /**
@@ -18,13 +16,8 @@ public abstract class HttpObserver<T> extends DisposableObserver<T> implements D
 
     @Override
     protected void onStart() {
-        if (!Utils.isNetworkConnected(XHttp.getContext())) {
-            dispose();
-            onError(new HttpException(HttpException.NetworkNotConnected, "网络未连接"));
-        } else if (!Utils.isNetworkAvailable(XHttp.getContext())) {
-            dispose();
-            onError(new HttpException(HttpException.NetworkNotAvailable, "无法上网"));
-        }
+
+
     }
 
     @Override

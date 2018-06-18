@@ -6,6 +6,7 @@ import android.os.SystemClock;
 import java.io.IOException;
 import java.util.List;
 
+import me.ibore.http.exception.HttpException;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okio.Buffer;
@@ -18,7 +19,7 @@ import okio.Sink;
  * Created by Administrator on 2018/2/7.
  */
 
-public class ProgressRequestBody extends RequestBody {
+public final class ProgressRequestBody extends RequestBody {
 
     protected Handler mHandler;
     protected int mRefreshTime;
@@ -27,6 +28,14 @@ public class ProgressRequestBody extends RequestBody {
     protected final Progress mProgress;
     private BufferedSink mBufferedSink;
 
+
+    public ProgressRequestBody(Handler handler, RequestBody delegate, ProgressListener listener, int refreshTime) {
+        this.mDelegate = delegate;
+        this.mListeners = new ProgressListener[]{listener};
+        this.mHandler = handler;
+        this.mRefreshTime = refreshTime;
+        this.mProgress = new Progress(System.currentTimeMillis());
+    }
 
     public ProgressRequestBody(Handler handler, RequestBody delegate, List<ProgressListener> listeners, int refreshTime) {
         this.mDelegate = delegate;
@@ -62,7 +71,13 @@ public class ProgressRequestBody extends RequestBody {
         } catch (IOException e) {
             e.printStackTrace();
             for (int i = 0; i < mListeners.length; i++) {
-                mListeners[i].onError(mProgress.getId(), e);
+                ProgressListener listener = mListeners[i];
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onError(new HttpException(mProgress.getId(), e));
+                    }
+                });
             }
             throw e;
         }
@@ -84,7 +99,13 @@ public class ProgressRequestBody extends RequestBody {
             } catch (IOException e) {
                 e.printStackTrace();
                 for (int i = 0; i < mListeners.length; i++) {
-                    mListeners[i].onError(mProgress.getId(), e);
+                    ProgressListener listener = mListeners[i];
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onError(new HttpException(mProgress.getId(), e));
+                        }
+                    });
                 }
                 throw e;
             }

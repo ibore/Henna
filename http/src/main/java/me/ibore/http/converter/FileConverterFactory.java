@@ -1,8 +1,6 @@
 package me.ibore.http.converter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -25,7 +23,6 @@ public class FileConverterFactory extends Converter.Factory {
 
     public static FileConverterFactory create(File filePath){
         return new FileConverterFactory(filePath);
-
     }
 
     @Override

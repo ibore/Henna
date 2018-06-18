@@ -6,6 +6,7 @@ import android.os.SystemClock;
 import java.io.IOException;
 import java.util.List;
 
+import me.ibore.http.exception.HttpException;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import okio.Buffer;
@@ -26,6 +27,14 @@ public final class ProgressResponseBody extends ResponseBody {
     protected final ProgressListener[] mListeners;
     protected final Progress mProgress;
     private BufferedSource mBufferedSource;
+
+    public ProgressResponseBody(Handler handler, ResponseBody responseBody, ProgressListener listener, int refreshTime) {
+        this.mDelegate = responseBody;
+        this.mListeners = new ProgressListener[]{listener};
+        this.mHandler = handler;
+        this.mRefreshTime = refreshTime;
+        this.mProgress = new Progress(System.currentTimeMillis());
+    }
 
     public ProgressResponseBody(Handler handler, ResponseBody responseBody, List<ProgressListener> listeners, int refreshTime) {
         this.mDelegate = responseBody;
@@ -67,7 +76,13 @@ public final class ProgressResponseBody extends ResponseBody {
                 } catch (IOException e) {
                     e.printStackTrace();
                     for (int i = 0; i < mListeners.length; i++) {
-                        mListeners[i].onError(mProgress.getId(), e);
+                        ProgressListener listener = mListeners[i];
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onError(new HttpException(mProgress.getId(), e));
+                            }
+                        });
                     }
                     throw e;
                 }

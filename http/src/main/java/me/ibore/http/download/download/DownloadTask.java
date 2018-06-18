@@ -80,10 +80,7 @@ public class DownloadTask implements Runnable {
         InputStream inputStream = null;
         BufferedInputStream bis = null;
         RandomAccessFile tempFile = null;
-
         try {
-
-
             String fileName = TextUtils.isEmpty(mTaskEntity.getFileName()) ? FileUtils.getFileNameFromUrl(mTaskEntity.getUrl()) : mTaskEntity.getFileName();
             String filePath = TextUtils.isEmpty(mTaskEntity.getFilePath()) ? FileUtils.getDefaultFilePath() : mTaskEntity.getFilePath();
             mTaskEntity.setFileName(fileName);
@@ -140,7 +137,6 @@ public class DownloadTask implements Runnable {
                             DaoManager.instance().update(mTaskEntity);
                             handler.sendEmptyMessage(TaskStatus.TASK_STATUS_DOWNLOADING);
                         }
-
                         if (completedSize == mTaskEntity.getTotalSize()) {
                             handler.sendEmptyMessage(TaskStatus.TASK_STATUS_DOWNLOADING);
                             mTaskEntity.setTaskStatus(TaskStatus.TASK_STATUS_FINISH);
@@ -153,8 +149,6 @@ public class DownloadTask implements Runnable {
                 mTaskEntity.setTaskStatus(TaskStatus.TASK_STATUS_REQUEST_ERROR);
                 handler.sendEmptyMessage(TaskStatus.TASK_STATUS_REQUEST_ERROR);
             }
-
-
         } catch (FileNotFoundException e) {
             mTaskEntity.setTaskStatus(TaskStatus.TASK_STATUS_STORAGE_ERROR);
             handler.sendEmptyMessage(TaskStatus.TASK_STATUS_STORAGE_ERROR);

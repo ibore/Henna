@@ -37,13 +37,12 @@ public class Progress implements Parcelable {
     //此 id (请求开始时的时间)就变得尤为重要,用来区分正在执行的进度信息,因为是以请求开始时的时间作为 id ,所以值越大,说明该请求越新
     private boolean finish; //进度是否完成
 
-
     public Progress(long id) {
         this.id = id;
     }
 
-    void setCurrentBytes(long currentbytes) {
-        this.currentBytes = currentbytes;
+    void setCurrentBytes(long currentBytes) {
+        this.currentBytes = currentBytes;
     }
 
     void setContentLength(long contentLength) {

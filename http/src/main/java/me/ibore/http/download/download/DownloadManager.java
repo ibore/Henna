@@ -6,10 +6,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.yuan.library.BuildConfig;
-import com.yuan.library.dmanager.db.DaoManager;
-import com.yuan.library.dmanager.utils.Constants;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +14,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import me.ibore.http.BuildConfig;
+import me.ibore.http.download.db.DaoManager;
 import okhttp3.OkHttpClient;
 
 public class DownloadManager {
@@ -77,15 +75,12 @@ public class DownloadManager {
 
     public void init(@NonNull Context context, int threadCount, @NonNull OkHttpClient client) {
         setupDatabase(context);
-
         recoveryTaskState();
         mClient = client;
         mThreadCount = threadCount < 1 ? 1 : threadCount <= Constants.MAX_THREAD_COUNT ? threadCount : Constants.MAX_THREAD_COUNT;
         mExecutor = new ThreadPoolExecutor(mThreadCount, mThreadCount, 20, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
         mCurrentTaskList = new HashMap<>();
         mQueue = (LinkedBlockingQueue<Runnable>) mExecutor.getQueue();
-
-
     }
 
     private void setupDatabase(Context context) {
@@ -98,7 +93,6 @@ public class DownloadManager {
     public DaoSession getDaoSession() {
         return mDaoSession;
     }
-
 
     /**
      * generate default client

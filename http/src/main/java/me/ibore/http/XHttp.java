@@ -1,26 +1,20 @@
 package me.ibore.http;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import me.ibore.http.converter.FileConverterFactory;
-import me.ibore.http.interceptor.HttpLogInterceptor;
+import javax.net.ssl.SSLSocketFactory;
+
+import me.ibore.http.cookie.XCookieStore;
+import okhttp3.Cache;
 import okhttp3.Call;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-
-import static me.ibore.http.Utils.CHECKNULL;
-import static me.ibore.http.Utils.createDownloadInfo;
-import static me.ibore.http.Utils.createStringInfo;
-
 
 /**
  * description:
@@ -31,136 +25,199 @@ import static me.ibore.http.Utils.createStringInfo;
 
 public class XHttp {
 
-    public static int RETRY_COUNT = 3;
+    private OkHttpClient okHttpClient;
+    private int timeout;
+    private int refreshTime;
+    private int retryCount;
+    private Cache cache;
+    private XCookieStore cookieStore;
+    private List<Interceptor> interceptors;
+    private List<Interceptor> networkInterceptors;
+    private SSLSocketFactory sslSocketFactory;
+    private LinkedHashMap<String, String> headers;
+    private LinkedHashMap<String, String> params;
 
-    public static int REFRESH_TIME = 300;
-
-    public static int TIME_OUT = 10000;
-
-    private static Context mContext;
-
-    private static OkHttpClient mOkHttpClient;
-
-    public static final Handler Handler = new Handler(Looper.getMainLooper());
-
-    /**
-     * 初始化
-     * @param okHttpClient 自定义的OKHttpClient
-     * @param RETRY_COUNT 重试次数(默认3次)
-     * @param REFRESH_TIME 进度刷新时间(默认300)
-     */
-    public static void init(Context mContext, OkHttpClient okHttpClient, int RETRY_COUNT, int REFRESH_TIME) {
-        XHttp.mContext = mContext;
-        XHttp.mOkHttpClient = okHttpClient;
-        XHttp.RETRY_COUNT = RETRY_COUNT;
-        XHttp.REFRESH_TIME = REFRESH_TIME;
-        XHttp.TIME_OUT = okHttpClient.connectTimeoutMillis();
+    public OkHttpClient okHttpClient() {
+        return okHttpClient;
     }
 
-    public static Context getContext() {
-        return mContext;
+    public int timeout() {
+        return timeout;
     }
 
-    /**
-     * 获取OkHttpClient
-     * @return OkHttpClient
-     */
-    public static OkHttpClient getOkHttpClient() {
-        if (null == mOkHttpClient) {
-            HttpLogInterceptor httpInterceptor = new HttpLogInterceptor("HTTP");
-            httpInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
-            mOkHttpClient = new OkHttpClient.Builder().addInterceptor(httpInterceptor).build();
-        }
-        return mOkHttpClient;
+    public int refreshTime() {
+        return refreshTime;
     }
 
-    /**
-     * 创建Retrofit
-     * @param baseUrl 公共网址
-     * @return Retrofit
-     */
-    public static Retrofit createGsonRetrofit(String baseUrl) {
-        Retrofit retrofit= new Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .client(getOkHttpClient())
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-        return retrofit;
+    public int retryCount() {
+        return retryCount;
     }
 
-    /**
-     * 创建Retrofit
-     * @param baseUrl 公共网址
-     * @return Retrofit
-     */
-    public static Retrofit createFileRetrofit(String baseUrl) {
-        Retrofit retrofit= new Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .client(getOkHttpClient())
-                .addConverterFactory(FileConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-        return retrofit;
+    public Cache cache() {
+        return cache;
     }
 
-    /**
-     * 下载文件（带缓存）支持断点下载
-     * @param url
-     * @param fileDirs
-     * @param observer
-     */
-    public static void download(String url, File fileDirs, DownloadObserver observer) {
-        CHECKNULL(getOkHttpClient());
-        Observable.just(url)
-                .flatMap(s -> Observable.just(createDownloadInfo(s, fileDirs)))
-                .flatMap(httpInfo -> Observable.create(new DownloadSubscribe(httpInfo)))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(observer);
+    public XCookieStore cookieStore() {
+        return cookieStore;
     }
 
-    /**
-     * 下载数据
-     * @param url 网址
-     * @param observer 回调
-     */
-    public static void download(String url, StringObserver observer) {
-        CHECKNULL(getOkHttpClient());
-        Observable.just(url)
-                .flatMap(s -> Observable.just(createStringInfo(s)))
-                .flatMap(httpInfo -> Observable.create(new StringSubscribe(httpInfo)))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(observer);
+    public List<Interceptor> interceptors() {
+        return networkInterceptors;
     }
 
-    /**
-     * 取消单个请求
-     * @param tag
-     */
-    public static void cancel(Object tag) {
-        for (Call call : getOkHttpClient().dispatcher().queuedCalls()) {
+    public List<Interceptor> networkInterceptors() {
+        return interceptors;
+    }
+
+    public LinkedHashMap<String, String> headers() {
+        return headers;
+    }
+
+    public LinkedHashMap<String, String> params() {
+        return params;
+    }
+
+    public final static Handler mDelivery = new Handler(Looper.getMainLooper());
+
+    private XHttp(OkHttpClient okHttpClient, int timeout, int refreshTime, int retryCount, Cache cache, XCookieStore cookieStore,
+                   List<Interceptor> interceptors, List<Interceptor> networkInterceptors,
+                   SSLSocketFactory sslSocketFactory, LinkedHashMap<String, String> headers,
+                   LinkedHashMap<String, String> params) {
+        this.okHttpClient = okHttpClient;
+        this.timeout = timeout;
+        this.refreshTime = refreshTime;
+        this.retryCount = retryCount;
+        this.cache = cache;
+        this.cookieStore = cookieStore;
+        this.interceptors = interceptors;
+        this.networkInterceptors = networkInterceptors;
+        this.sslSocketFactory = sslSocketFactory;
+        this.headers = headers;
+        this.params = params;
+    }
+
+    public <T> GetRequest<T> get(String url) {
+        return new GetRequest<>(url, this);
+    }
+
+    public PostRequest post(String url) {
+        return new PostRequest(url, this);
+    }
+
+    public static Handler getDelivery() {
+        return mDelivery;
+    }
+
+    public void cancelTag(Object tag) {
+        for (Call call : okHttpClient().dispatcher().queuedCalls()) {
             if (tag.equals(call.request().tag())) {
                 call.cancel();
             }
         }
-        for (Call call : getOkHttpClient().dispatcher().runningCalls()) {
+        for (Call call : okHttpClient().dispatcher().runningCalls()) {
             if (tag.equals(call.request().tag())) {
                 call.cancel();
             }
         }
     }
 
-    /**
-     * 取消全部请求
-     */
-    public static void cancelAll() {
-        getOkHttpClient().dispatcher().cancelAll();
+    public void cancelAll() {
+        for (Call call : okHttpClient().dispatcher().queuedCalls()) {
+            call.cancel();
+        }
+        for (Call call : okHttpClient().dispatcher().runningCalls()) {
+            call.cancel();
+        }
     }
 
+    public static class Builder {
 
+        private int timeout;
+        private int refreshTime;
+        private int retryCount;
+        private Cache cache;
+        private XCookieStore cookieStore;
+        private List<Interceptor> interceptors;
+        private List<Interceptor> networkInterceptors;
+        private SSLSocketFactory sslSocketFactory;
+        private LinkedHashMap<String, String> headers;
+        private LinkedHashMap<String, String> params;
 
+        public Builder() {
+            this.timeout = 60000;
+            this.refreshTime = 300;
+            this.retryCount = 1;
+            interceptors = new ArrayList<>();
+            networkInterceptors = new ArrayList<>();
+            headers = new LinkedHashMap<>();
+            params = new LinkedHashMap<>();
+        }
+
+        public Builder(XHttp http) {
+            this.timeout = http.timeout();
+            this.refreshTime = http.refreshTime();
+            this.retryCount = http.retryCount();
+            this.cache = http.cache();
+            this.cookieStore = http.cookieStore();
+            this.interceptors = http.interceptors();
+            this.networkInterceptors = http.networkInterceptors();
+            this.headers = http.headers();
+            this.params = http.params();
+        }
+
+        public Builder timeout(int timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+        public Builder refreshTime(int refreshTime) {
+            this.refreshTime = refreshTime;
+            return this;
+        }
+        public Builder cookieJar(XCookieStore cookieStore) {
+            this.cookieStore = cookieStore;
+            return this;
+        }
+        public Builder addInterceptor(Interceptor interceptor) {
+            interceptors.add(interceptor);
+            return this;
+        }
+        public Builder addNetworkInterceptor(Interceptor interceptor) {
+            networkInterceptors.add(interceptor);
+            return this;
+        }
+        public Builder cache(Cache cache) {
+            this.cache = cache;
+            return this;
+        }
+        public Builder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+            this.sslSocketFactory = sslSocketFactory;
+            return this;
+        }
+        public Builder header(String key, String value) {
+            headers.put(key, value);
+            return this;
+        }
+        public Builder param(String key, String value) {
+            params.put(key, value);
+            return this;
+        }
+        public XHttp builder() {
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            builder.connectTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .readTimeout(timeout, TimeUnit.MILLISECONDS)
+                    .writeTimeout(timeout, TimeUnit.MILLISECONDS);
+            if (null != cache) builder.cache(cache);
+            if (null != sslSocketFactory) builder.sslSocketFactory(sslSocketFactory);
+            for (Interceptor interceptor : interceptors) {
+                builder.addInterceptor(interceptor);
+            }
+            for (Interceptor networkInterceptor : networkInterceptors) {
+                builder.addNetworkInterceptor(networkInterceptor);
+            }
+            return new XHttp(builder.build(), timeout, refreshTime, retryCount, cache, cookieStore,
+                    interceptors, networkInterceptors, sslSocketFactory, headers, params);
+        }
+    }
 
 
 }

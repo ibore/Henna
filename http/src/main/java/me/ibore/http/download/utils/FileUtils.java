@@ -4,9 +4,9 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.yuan.library.BuildConfig;
-
 import java.io.File;
+
+import me.ibore.http.BuildConfig;
 
 /**
  * Created by yuan on 07/12/2016.

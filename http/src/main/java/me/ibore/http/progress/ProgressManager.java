@@ -14,14 +14,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import me.ibore.http.exception.HttpException;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.internal.http2.Header;
 
+/**
+ * ================================================
+ * ProgressManager 一行代码即可监听 App 中所有网络链接的上传以及下载进度,包括 Glide(需要将下载引擎切换为 Okhttp)的图片加载进度,
+ * 基于 Okhttp 的 {@link Interceptor},所以使用前请确保你使用 Okhttp 或 Retrofit 进行网络请求
+ * 实现原理类似 EventBus,你可在 App 中的任何地方,将多个监听器,以 {@code url} 地址作为标识符,注册到本管理器
+ * 当此 {@code url} 地址存在下载或者上传的动作时,管理器会主动调用所有使用此 {@code url} 地址注册过的监听器,达到多个模块的同步更新
+ * <p>
+ * Created by JessYan on 02/06/2017 18:37
+ * <a href="mailto:jess.yan.effort@gmail.com">Contact me</a>
+ * <a href="https://github.com/JessYanCoding">Follow me</a>
+ * ================================================
+ */
 public final class ProgressManager {
-
     /**
      * 因为 {@link WeakHashMap} 将 {@code key} 作为弱键 (弱引用的键), 所以当 java 虚拟机 GC 时会将某个不在被引用的 {@code key} 回收并加入 {@link ReferenceQueue}
      * 在下一次操作 {@link WeakHashMap} 时,会比对 {@link ReferenceQueue} 中的 {@code key}
@@ -40,12 +52,12 @@ public final class ProgressManager {
 
     private static volatile ProgressManager mProgressManager;
 
-    public static final String OKHTTP_PACKAGE_NAME = "okhttp3.OkHttpClient";
-    public static final boolean DEPENDENCY_OKHTTP;
-    public static final int DEFAULT_REFRESH_TIME = 150;
-    public static final String IDENTIFICATION_NUMBER = "?JessYan=";
-    public static final String IDENTIFICATION_HEADER = "JessYan";
-    public static final String LOCATION_HEADER = "Location";
+    private static final String OKHTTP_PACKAGE_NAME = "okhttp3.OkHttpClient";
+    private static final boolean DEPENDENCY_OKHTTP;
+    private static final int DEFAULT_REFRESH_TIME = 150;
+    private static final String IDENTIFICATION_NUMBER = "?JessYan=";
+    private static final String IDENTIFICATION_HEADER = "JessYan";
+    private static final String LOCATION_HEADER = "Location";
 
 
     static {
@@ -92,6 +104,7 @@ public final class ProgressManager {
      * @param refreshTime 间隔时间,单位毫秒
      */
     public void setRefreshTime(int refreshTime) {
+        if (refreshTime < 0 ) throw new IllegalArgumentException("refreshTime must be >= 0");
         this.mRefreshTime = refreshTime;
     }
 
@@ -102,6 +115,8 @@ public final class ProgressManager {
      * @param listener 当此 {@code url} 地址存在上传的动作时,此监听器将被调用
      */
     public void addRequestListener(String url, ProgressListener listener) {
+        checkNotNull(url, "url cannot be null");
+        checkNotNull(listener, "listener cannot be null");
         List<ProgressListener> progressListeners;
         synchronized (ProgressManager.class) {
             progressListeners = mRequestListeners.get(url);
@@ -120,6 +135,8 @@ public final class ProgressManager {
      * @param listener 当此 {@code url} 地址存在下载的动作时,此监听器将被调用
      */
     public void addResponseListener(String url, ProgressListener listener) {
+        checkNotNull(url, "url cannot be null");
+        checkNotNull(listener, "listener cannot be null");
         List<ProgressListener> progressListeners;
         synchronized (ProgressManager.class) {
             progressListeners = mResponseListeners.get(url);
@@ -135,13 +152,14 @@ public final class ProgressManager {
     /**
      * 当在 {@link ProgressRequestBody} 和 {@link ProgressResponseBody} 内部处理二进制流时发生错误
      * 会主动调用 {@link ProgressListener#onError(long, Exception)},但是有些错误并不是在它们内部发生的
-     * 但同样会引起网络请求的失败,所以向外面提供{@link ProgressManager#notifyOnError},当外部发生错误时
+     * 但同样会引起网络请求的失败,所以向外面提供{@link ProgressManager#notifyOnErorr},当外部发生错误时
      * 手动调用此方法,以通知所有的监听器
      *
      * @param url {@code url} 作为标识符
      * @param e   错误
      */
     public void notifyOnError(String url, Exception e) {
+        checkNotNull(url, "url cannot be null");
         forEachListenersOnError(mRequestListeners, url, e);
         forEachListenersOnError(mResponseListeners, url, e);
     }
@@ -153,7 +171,9 @@ public final class ProgressManager {
      * @return
      */
     public OkHttpClient.Builder with(OkHttpClient.Builder builder) {
-        return builder.addNetworkInterceptor(mInterceptor);
+        checkNotNull(builder, "builder cannot be null");
+        return builder
+                .addNetworkInterceptor(mInterceptor);
     }
 
     /**
@@ -412,15 +432,20 @@ public final class ProgressManager {
         return location;
     }
 
-
     private void forEachListenersOnError(Map<String, List<ProgressListener>> map, String url, Exception e) {
         if (map.containsKey(url)) {
             List<ProgressListener> progressListeners = map.get(url);
             ProgressListener[] array = progressListeners.toArray(new ProgressListener[progressListeners.size()]);
             for (int i = 0; i < array.length; i++) {
-                array[i].onError(-1, e);
+                array[i].onError(new HttpException(-1, e));
             }
         }
     }
 
+    static <T> T checkNotNull(T object, String message) {
+        if (object == null) {
+            throw new NullPointerException(message);
+        }
+        return object;
+    }
 }

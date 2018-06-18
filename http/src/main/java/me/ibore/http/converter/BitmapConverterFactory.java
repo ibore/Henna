@@ -1,7 +1,6 @@
 package me.ibore.http.converter;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -20,9 +19,8 @@ public class BitmapConverterFactory extends Converter.Factory {
     }
 
     @Override
-    public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
-        return (Converter<ResponseBody, Bitmap>) value ->
-                BitmapFactory.decodeByteArray(value.bytes(), 0, value.bytes().length);
+    public Converter<ResponseBody, Bitmap> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
+        return new BitmapConverter();
     }
 
 }
