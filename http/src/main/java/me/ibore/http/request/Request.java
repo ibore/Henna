@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import me.ibore.http.FileWrapper;
-import me.ibore.http.HttpListener;
 import me.ibore.http.XHttp;
+import me.ibore.http.callback.Callback;
 import me.ibore.http.exception.HttpException;
-import me.ibore.http.progress.ProgressListener;
 import okhttp3.CacheControl;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -36,7 +34,7 @@ public abstract class Request<T, R extends Request> {
     protected Headers.Builder headersBuilder;
     protected Object tag;
     protected CacheControl cacheControl;
-    private ProgressListener downloadListener;
+    private boolean isProgress;
 
     public Request(String url, XHttp http) {
         this.url = url;
@@ -105,8 +103,8 @@ public abstract class Request<T, R extends Request> {
         return (R) this;
     }
 
-    public R download(ProgressListener downloadListener) {
-        this.downloadListener = downloadListener;
+    public R progress(boolean isProgress) {
+        this.isProgress = isProgress;
         return (R) this;
     }
 
@@ -115,12 +113,12 @@ public abstract class Request<T, R extends Request> {
         return http.okHttpClient().newCall(request).execute();
     }
 
-    public void enqueue(HttpListener<File> listener) {
-        okhttp3.Request request = generateRequest(listener);
-        http.okHttpClient().newCall(request).enqueue(new Callback() {
+    public void enqueue(Callback callback) {
+        okhttp3.Request request = generateRequest(callback);
+        http.okHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                listener.onError(new HttpException(e));
+                callback.onError(new HttpException(e));
             }
 
             @Override
@@ -141,6 +139,6 @@ public abstract class Request<T, R extends Request> {
         return headersBuilder.build();
     }
 
-    protected abstract okhttp3.Request generateRequest(HttpListener listener);
+    protected abstract okhttp3.Request generateRequest(Callback callback);
 
 }
