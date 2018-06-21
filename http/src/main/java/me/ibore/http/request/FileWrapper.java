@@ -1,4 +1,4 @@
-package me.ibore.http;
+package me.ibore.http.request;
 
 import java.io.File;
 

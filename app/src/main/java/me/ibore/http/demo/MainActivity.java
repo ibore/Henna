@@ -2,9 +2,17 @@
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import java.util.logging.Level;
 
 import me.ibore.http.XHttp;
 import me.ibore.http.exception.HttpException;
+import me.ibore.http.interceptor.HttpLogInterceptor;
+import me.ibore.http.listener.StringListener;
+import me.ibore.http.progress.Progress;
+import me.ibore.http.progress.ProgressListener;
+import okhttp3.Call;
 
     public class MainActivity extends AppCompatActivity {
 
@@ -13,17 +21,51 @@ import me.ibore.http.exception.HttpException;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        XHttp.download("http://msoftdl.360.cn/mobilesafe/shouji360/360safe/500192/360MobileSafe.apk", new StringObserver() {
 
-            @Override
-            public void onSuccess(StringInfo stringInfo) {
+        HttpLogInterceptor logInterceptor = new HttpLogInterceptor("OkHttp");
+        logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
+        logInterceptor.setColorLevel(Level.WARNING);
 
-            }
+        XHttp xHttp = new XHttp.Builder()
+                .header("ce", "ddd")
+                .header("dddd", "dddddd")
+                .param("ddd", "ddss")
+                .addInterceptor(logInterceptor)
+                .builder();
 
-            @Override
-            public void onError(HttpException e) {
+//        xHttp.get("http://hot.m.shouji.360tpcdn.com/170710/e00dec2d22177d1bd36260e9dbbff9d0/com.qihoo.appstore_300070091.apk")
+        xHttp.post("http://www.so.com/")
+                .header("test1", "test")
+                .param("test", "test")
+                .param("test", "fddsfdsfsf")
+                .upload(new ProgressListener() {
+                    @Override
+                    public void onProgress(Progress progress) {
+                        Log.d("----", progress.getPercent() + "");
+                    }
 
-            }
-        });
+                    @Override
+                    public void onError(HttpException e) {
+                        Log.d("----", "ProgressListener_onError");
+                    }
+                })
+//                .progress(true)
+                .enqueue(new StringListener() {
+                    @Override
+                    public void onSuccess(String s) {
+//                        Log.d("----",s);
+                    }
+
+                    @Override
+                    public void onProgress(Progress progress) {
+                        Log.d("----", progress.getPercent() + "");
+                    }
+
+                    @Override
+                    public void onError(HttpException e) {
+                        e.printStackTrace();
+                        Log.d("----", "StringListener_onError");
+                    }
+                });
     }
 }

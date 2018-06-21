@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
 import me.ibore.http.cookie.XCookieStore;
+import me.ibore.http.request.GetRequest;
+import me.ibore.http.request.PostRequest;
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Interceptor;
@@ -96,8 +98,8 @@ public class XHttp {
         this.params = params;
     }
 
-    public <T> GetRequest<T> get(String url) {
-        return new GetRequest<>(url, this);
+    public GetRequest get(String url) {
+        return new GetRequest(url, this);
     }
 
     public PostRequest post(String url) {

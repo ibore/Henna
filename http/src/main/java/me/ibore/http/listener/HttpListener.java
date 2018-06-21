@@ -1,4 +1,4 @@
-package me.ibore.http;
+package me.ibore.http.listener;
 
 import me.ibore.http.exception.HttpException;
 
