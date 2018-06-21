@@ -26,7 +26,7 @@ public final class ProgressRequestBody extends RequestBody {
     protected final RequestBody mDelegate;
     protected final ProgressListener[] mListeners;
     protected final Progress mProgress;
-    private BufferedSink mBufferedSink;
+    private CountingSink countingSink;
 
 
     public ProgressRequestBody(Handler handler, RequestBody delegate, ProgressListener listener, int refreshTime) {
@@ -62,12 +62,11 @@ public final class ProgressRequestBody extends RequestBody {
 
     @Override
     public void writeTo(BufferedSink sink) throws IOException {
-        if (mBufferedSink == null) {
-            mBufferedSink = Okio.buffer(new CountingSink(sink));
-        }
+        countingSink = new CountingSink(sink);
+        BufferedSink bufferedSink = Okio.buffer(countingSink);
         try {
-            mDelegate.writeTo(mBufferedSink);
-            mBufferedSink.flush();
+            mDelegate.writeTo(bufferedSink);
+            bufferedSink.flush();
         } catch (IOException e) {
             e.printStackTrace();
             for (int i = 0; i < mListeners.length; i++) {

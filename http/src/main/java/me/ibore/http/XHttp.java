@@ -110,6 +110,10 @@ public class XHttp {
         return mDelivery;
     }
 
+    public static void runOnUiThread(Runnable runnable) {
+        mDelivery.post(runnable);
+    }
+
     public void cancelTag(Object tag) {
         for (Call call : okHttpClient().dispatcher().queuedCalls()) {
             if (tag.equals(call.request().tag())) {
@@ -144,6 +148,8 @@ public class XHttp {
         private SSLSocketFactory sslSocketFactory;
         private LinkedHashMap<String, String> headers;
         private LinkedHashMap<String, String> params;
+        private OkHttpClient client;
+        private OkHttpClient.Builder builder;
 
         public Builder() {
             this.timeout = 60000;
@@ -167,6 +173,14 @@ public class XHttp {
             this.params = http.params();
         }
 
+        public Builder client(OkHttpClient client) {
+            this.client = client;
+            return this;
+        }
+        public Builder clientBuilder(OkHttpClient.Builder builder) {
+            this.builder = builder;
+            return this;
+        }
         public Builder timeout(int timeout) {
             this.timeout = timeout;
             return this;

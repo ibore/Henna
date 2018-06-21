@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.ibore.http.XHttp;
+import me.ibore.http.exception.HttpException;
 import me.ibore.http.listener.AbsHttpListener;
 import me.ibore.http.progress.ProgressResponseBody;
 import okhttp3.CacheControl;
@@ -114,7 +115,7 @@ public abstract class Request<R extends Request> {
         http.okHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                XHttp.runOnUiThread(() -> listener.onError(new HttpException(e)));
             }
 
             @Override
@@ -124,14 +125,9 @@ public abstract class Request<R extends Request> {
                         response = response.newBuilder().body(new ProgressResponseBody(XHttp.getDelivery(), response.body(), listener, http.refreshTime())).build();
                     }
                     Object object = listener.convert(response.body());
-                    XHttp.getDelivery().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onSuccess(object);
-                        }
-                    });
+                    XHttp.runOnUiThread(() -> listener.onSuccess(object));
                 } catch (Exception e)  {
-
+                    XHttp.runOnUiThread(() -> listener.onError(new HttpException(e)));
                 }
             }
         });

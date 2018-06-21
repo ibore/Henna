@@ -9,10 +9,13 @@ import java.util.logging.Level;
 import me.ibore.http.XHttp;
 import me.ibore.http.exception.HttpException;
 import me.ibore.http.interceptor.HttpLogInterceptor;
+import me.ibore.http.listener.JsonListener;
 import me.ibore.http.listener.StringListener;
 import me.ibore.http.progress.Progress;
 import me.ibore.http.progress.ProgressListener;
+import me.ibore.http.progress.ProgressManager;
 import okhttp3.Call;
+import okhttp3.OkHttpClient;
 
     public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +28,8 @@ import okhttp3.Call;
         HttpLogInterceptor logInterceptor = new HttpLogInterceptor("OkHttp");
         logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
         logInterceptor.setColorLevel(Level.WARNING);
+
+        OkHttpClient okHttpClient = ProgressManager.getInstance().with(new OkHttpClient.Builder()).build();
 
         XHttp xHttp = new XHttp.Builder()
                 .header("ce", "ddd")
@@ -41,7 +46,7 @@ import okhttp3.Call;
                 .upload(new ProgressListener() {
                     @Override
                     public void onProgress(Progress progress) {
-                        Log.d("----", progress.getPercent() + "");
+                        Log.d("----", "progress");
                     }
 
                     @Override
@@ -49,7 +54,7 @@ import okhttp3.Call;
                         Log.d("----", "ProgressListener_onError");
                     }
                 })
-//                .progress(true)
+                .progress(true)
                 .enqueue(new StringListener() {
                     @Override
                     public void onSuccess(String s) {
@@ -58,7 +63,7 @@ import okhttp3.Call;
 
                     @Override
                     public void onProgress(Progress progress) {
-                        Log.d("----", progress.getPercent() + "");
+                        Log.d("----", "progress" + "++");
                     }
 
                     @Override
@@ -67,5 +72,17 @@ import okhttp3.Call;
                         Log.d("----", "StringListener_onError");
                     }
                 });
+
+        ProgressManager.getInstance().addRequestListener("http://www.so.com/", new ProgressListener() {
+            @Override
+            public void onProgress(Progress progress) {
+                Log.d("----", "onProgress:" + progress.getPercent() + "");
+            }
+
+            @Override
+            public void onError(HttpException e) {
+
+            }
+        });
     }
 }
