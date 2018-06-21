@@ -1,18 +1,14 @@
 package me.ibore.http.request;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.ibore.http.FileWrapper;
 import me.ibore.http.XHttp;
-import me.ibore.http.callback.Callback;
-import me.ibore.http.exception.HttpException;
+import me.ibore.http.listener.AbsHttpListener;
+import me.ibore.http.progress.ProgressResponseBody;
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Headers;
@@ -20,7 +16,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
-public abstract class Request<T, R extends Request> {
+public abstract class Request<R extends Request> {
 
     public static final MediaType MEDIA_TYPE_PLAIN = MediaType.parse("text/plain;charset=utf-8");
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json;charset=utf-8");
@@ -113,32 +109,38 @@ public abstract class Request<T, R extends Request> {
         return http.okHttpClient().newCall(request).execute();
     }
 
-    public void enqueue(Callback callback) {
-        okhttp3.Request request = generateRequest(callback);
+    public void enqueue(AbsHttpListener listener) {
+        okhttp3.Request request = generateRequest(listener);
         http.okHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                callback.onError(new HttpException(e));
+
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
+                try {
+                    if (isProgress) {
+                        response = response.newBuilder().body(new ProgressResponseBody(XHttp.getDelivery(), response.body(), listener, http.refreshTime())).build();
+                    }
+                    Object object = listener.convert(response.body());
+                    XHttp.getDelivery().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onSuccess(object);
+                        }
+                    });
+                } catch (Exception e)  {
 
-
+                }
             }
         });
-
-        ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
-        Type type = parameterizedType.getActualTypeArguments()[0];
-        if (type instanceof File) {
-
-        }
     }
 
     protected Headers generateHeaders() {
         return headersBuilder.build();
     }
 
-    protected abstract okhttp3.Request generateRequest(Callback callback);
+    protected abstract okhttp3.Request generateRequest(AbsHttpListener listener);
 
 }

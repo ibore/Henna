@@ -41,6 +41,8 @@ public class DownloadManager {
     // greenDao seesion
     private DaoSession mDaoSession;
 
+    private int MAX_THREAD_COUNT = 3;
+
     private DownloadManager() {
 
     }
@@ -77,7 +79,7 @@ public class DownloadManager {
         setupDatabase(context);
         recoveryTaskState();
         mClient = client;
-        mThreadCount = threadCount < 1 ? 1 : threadCount <= Constants.MAX_THREAD_COUNT ? threadCount : Constants.MAX_THREAD_COUNT;
+        mThreadCount = threadCount < 1 ? 1 : threadCount <= MAX_THREAD_COUNT ? threadCount : MAX_THREAD_COUNT;
         mExecutor = new ThreadPoolExecutor(mThreadCount, mThreadCount, 20, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
         mCurrentTaskList = new HashMap<>();
         mQueue = (LinkedBlockingQueue<Runnable>) mExecutor.getQueue();

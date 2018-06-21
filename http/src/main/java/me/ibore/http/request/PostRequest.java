@@ -1,4 +1,4 @@
-package me.ibore.http;
+package me.ibore.http.request;
 
 import java.io.File;
 import java.net.FileNameMap;
@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import me.ibore.http.XHttp;
+import me.ibore.http.listener.AbsHttpListener;
 import me.ibore.http.progress.ProgressListener;
 import me.ibore.http.progress.ProgressRequestBody;
-import me.ibore.http.request.Request;
 import okhttp3.CacheControl;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -116,7 +117,7 @@ public final class PostRequest extends Request<PostRequest> {
 
 
     @Override
-    protected okhttp3.Request generateRequest(HttpListener listener) {
+    protected okhttp3.Request generateRequest(AbsHttpListener listener) {
         if (null == requestBody) requestBody = generateRequestBody();
         if (null != uploadListener) {
             requestBody = new ProgressRequestBody(XHttp.getDelivery(), requestBody, uploadListener, http.refreshTime());

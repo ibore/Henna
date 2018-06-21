@@ -4,8 +4,6 @@ apply plugin: 'org.greenrobot.greendao'
 android {
     compileSdkVersion 27
 
-
-
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27

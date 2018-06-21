@@ -10,6 +10,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        XHttp.init(this, new OkHttpClient.Builder().build(), 3, 3);
+
+
     }
 }

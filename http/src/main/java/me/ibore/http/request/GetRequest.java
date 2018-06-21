@@ -1,14 +1,15 @@
-package me.ibore.http;
+package me.ibore.http.request;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
-import me.ibore.http.request.Request;
+import me.ibore.http.XHttp;
+import me.ibore.http.listener.AbsHttpListener;
 import okhttp3.CacheControl;
 
-public class GetRequest<T> extends Request<T, GetRequest> {
+public class GetRequest extends Request<GetRequest> {
 
     private String appendUrl = "";
 
@@ -17,7 +18,7 @@ public class GetRequest<T> extends Request<T, GetRequest> {
     }
 
     @Override
-    protected okhttp3.Request generateRequest(HttpListener listener) {
+    protected okhttp3.Request generateRequest(AbsHttpListener listener) {
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .get()
                 .url(generateUrlParams())
