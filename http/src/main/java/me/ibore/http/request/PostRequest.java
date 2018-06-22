@@ -120,7 +120,6 @@ public final class PostRequest extends Request<PostRequest> {
     protected okhttp3.Request generateRequest(AbsHttpListener listener) {
         if (null == requestBody) requestBody = generateRequestBody();
         if (null != uploadListener) {
-//            requestBody = OkHttpRequestBody.create(requestBody, listener);
             requestBody = new ProgressRequestBody(XHttp.getDelivery(), requestBody, uploadListener, http.refreshTime());
         }
         okhttp3.Request request = new okhttp3.Request.Builder()

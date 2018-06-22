@@ -1,4 +1,4 @@
-    package me.ibore.http.demo;
+package me.ibore.http.demo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,15 +9,12 @@ import java.util.logging.Level;
 import me.ibore.http.XHttp;
 import me.ibore.http.exception.HttpException;
 import me.ibore.http.interceptor.HttpLogInterceptor;
-import me.ibore.http.listener.JsonListener;
 import me.ibore.http.listener.StringListener;
 import me.ibore.http.progress.Progress;
 import me.ibore.http.progress.ProgressListener;
-import me.ibore.http.progress.ProgressManager;
-import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
-    public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +25,6 @@ import okhttp3.OkHttpClient;
         HttpLogInterceptor logInterceptor = new HttpLogInterceptor("OkHttp");
         logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
         logInterceptor.setColorLevel(Level.WARNING);
-
-        OkHttpClient okHttpClient = ProgressManager.getInstance().with(new OkHttpClient.Builder()).build();
 
         XHttp xHttp = new XHttp.Builder()
                 .header("ce", "ddd")
@@ -46,13 +41,9 @@ import okhttp3.OkHttpClient;
                 .upload(new ProgressListener() {
                     @Override
                     public void onProgress(Progress progress) {
-                        Log.d("----", "progress");
+                        Log.d("----", "progress:" + progress.getPercent());
                     }
 
-                    @Override
-                    public void onError(HttpException e) {
-                        Log.d("----", "ProgressListener_onError");
-                    }
                 })
                 .progress(true)
                 .enqueue(new StringListener() {
@@ -63,7 +54,7 @@ import okhttp3.OkHttpClient;
 
                     @Override
                     public void onProgress(Progress progress) {
-                        Log.d("----", "progress" + "++");
+                        Log.d("----", "progress:" + progress.getPercent());
                     }
 
                     @Override
@@ -73,16 +64,5 @@ import okhttp3.OkHttpClient;
                     }
                 });
 
-        ProgressManager.getInstance().addRequestListener("http://www.so.com/", new ProgressListener() {
-            @Override
-            public void onProgress(Progress progress) {
-                Log.d("----", "onProgress:" + progress.getPercent() + "");
-            }
-
-            @Override
-            public void onError(HttpException e) {
-
-            }
-        });
     }
 }

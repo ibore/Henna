@@ -13,6 +13,4 @@ public interface ProgressListener {
 
     void onProgress(Progress progress);
 
-    void onError(HttpException e);
-
 }

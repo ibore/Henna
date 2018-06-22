@@ -28,17 +28,14 @@ import android.os.Parcelable;
  * ================================================
  */
 public class Progress implements Parcelable {
+
     private long currentBytes; //当前已上传或下载的总长度
     private long contentLength; //数据总长度
     private long intervalTime; //本次调用距离上一次被调用所间隔的时间(毫秒)
     private long eachBytes; //本次调用距离上一次被调用的间隔时间内上传或下载的byte长度
-    private long id; //如果同一个 Url 地址,上一次的上传或下载操作都还没结束,
-    //又开始了新的上传或下载操作(比如用户多次点击上传或下载同一个 Url 地址,当然你也可以在上层屏蔽掉用户的重复点击),
-    //此 id (请求开始时的时间)就变得尤为重要,用来区分正在执行的进度信息,因为是以请求开始时的时间作为 id ,所以值越大,说明该请求越新
     private boolean finish; //进度是否完成
 
-    public Progress(long id) {
-        this.id = id;
+    public Progress() {
     }
 
     void setCurrentBytes(long currentBytes) {
@@ -77,10 +74,6 @@ public class Progress implements Parcelable {
         return eachBytes;
     }
 
-    public long getId() {
-        return id;
-    }
-
     public boolean isFinish() {
         return finish;
     }
@@ -108,7 +101,6 @@ public class Progress implements Parcelable {
     @Override
     public String toString() {
         return "Progress{" +
-                "id=" + id +
                 ", currentBytes=" + currentBytes +
                 ", contentLength=" + contentLength +
                 ", eachBytes=" + eachBytes +
@@ -128,7 +120,6 @@ public class Progress implements Parcelable {
         dest.writeLong(this.contentLength);
         dest.writeLong(this.intervalTime);
         dest.writeLong(this.eachBytes);
-        dest.writeLong(this.id);
         dest.writeByte(this.finish ? (byte) 1 : (byte) 0);
     }
 
@@ -137,7 +128,6 @@ public class Progress implements Parcelable {
         this.contentLength = in.readLong();
         this.intervalTime = in.readLong();
         this.eachBytes = in.readLong();
-            this.id = in.readLong();
         this.finish = in.readByte() != 0;
     }
 
