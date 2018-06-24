@@ -9,24 +9,30 @@ package me.ibore.http.exception;
 
 public class HttpException extends Exception {
 
-    private long id;
+    private long code;
 
     public HttpException(String detailMessage) {
         super(detailMessage);
-        this.id = -1;
+        this.code = -1;
     }
 
-    public HttpException(long id, Throwable cause) {
+    public HttpException(int code, String detailMessage) {
+        super(detailMessage);
+        this.code = code;
+    }
+
+    public HttpException(int code, Throwable cause) {
         super(cause);
-        this.id = id;
+        this.code = code;
     }
 
     public HttpException(Throwable cause) {
         super(cause);
+        this.code = -1;
     }
 
-    public long getId() {
-        return id;
+    public long getCode() {
+        return code;
     }
 
 }

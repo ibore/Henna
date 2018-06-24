@@ -99,11 +99,11 @@ public class XHttp {
     }
 
     public GetRequest get(String url) {
-        return new GetRequest(url, this);
+        return new GetRequest(this).url(url).method("GET");
     }
 
     public PostRequest post(String url) {
-        return new PostRequest(url, this);
+        return new PostRequest(this).url(url).method("POST");
     }
 
     public static Handler getDelivery() {
@@ -148,8 +148,6 @@ public class XHttp {
         private SSLSocketFactory sslSocketFactory;
         private LinkedHashMap<String, String> headers;
         private LinkedHashMap<String, String> params;
-        private OkHttpClient client;
-        private OkHttpClient.Builder builder;
 
         public Builder() {
             this.timeout = 60000;
@@ -173,14 +171,6 @@ public class XHttp {
             this.params = http.params();
         }
 
-        public Builder client(OkHttpClient client) {
-            this.client = client;
-            return this;
-        }
-        public Builder clientBuilder(OkHttpClient.Builder builder) {
-            this.builder = builder;
-            return this;
-        }
         public Builder timeout(int timeout) {
             this.timeout = timeout;
             return this;

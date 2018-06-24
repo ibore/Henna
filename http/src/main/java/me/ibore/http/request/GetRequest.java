@@ -13,20 +13,23 @@ public class GetRequest extends Request<GetRequest> {
 
     private String appendUrl = "";
 
-    public GetRequest(String url, XHttp xHttp) {
-        super(url, xHttp);
+    public GetRequest(XHttp xHttp) {
+        super(xHttp);
+    }
+
+    public GetRequest appendUrl(String appendUrl) {
+        this.appendUrl = appendUrl;
+        return this;
     }
 
     @Override
-    protected okhttp3.Request generateRequest(AbsHttpListener listener) {
-        okhttp3.Request request = new okhttp3.Request.Builder()
-                .get()
+    protected okhttp3.Request.Builder generateRequest(AbsHttpListener listener) {
+        return new okhttp3.Request.Builder()
+                .method(method, null)
                 .url(generateUrlParams())
                 .tag(tag)
                 .cacheControl(null == cacheControl ? new CacheControl.Builder().noCache().build() : cacheControl)
-                .headers(generateHeaders())
-                .build();
-        return request;
+                .headers(generateHeaders());
     }
 
     protected String generateUrlParams() {
@@ -50,10 +53,5 @@ public class GetRequest extends Request<GetRequest> {
 
         }
         return url;
-    }
-
-    public GetRequest url(String appendUrl) {
-        this.appendUrl = appendUrl;
-        return this;
     }
 }

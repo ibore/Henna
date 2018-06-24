@@ -23,8 +23,8 @@ public final class PostRequest extends Request<PostRequest> {
     private boolean isMultipart;
     private ProgressListener uploadListener;
 
-    public PostRequest(String url, XHttp http) {
-        super(url, http);
+    public PostRequest(XHttp http) {
+        super(http);
     }
 
     public PostRequest isMultipart(boolean multipart) {
@@ -115,21 +115,18 @@ public final class PostRequest extends Request<PostRequest> {
         return this;
     }
 
-
     @Override
-    protected okhttp3.Request generateRequest(AbsHttpListener listener) {
+    protected okhttp3.Request.Builder generateRequest(AbsHttpListener listener) {
         if (null == requestBody) requestBody = generateRequestBody();
         if (null != uploadListener) {
             requestBody = new ProgressRequestBody(XHttp.getDelivery(), requestBody, uploadListener, http.refreshTime());
         }
-        okhttp3.Request request = new okhttp3.Request.Builder()
-                .post(requestBody)
+        return new okhttp3.Request.Builder()
+                .method(method, requestBody)
                 .url(url)
                 .tag(tag)
                 .cacheControl(null == cacheControl ? new CacheControl.Builder().noCache().build() : cacheControl)
-                .headers(generateHeaders())
-                .build();
-        return request;
+                .headers(generateHeaders());
     }
 
     private RequestBody generateRequestBody() {

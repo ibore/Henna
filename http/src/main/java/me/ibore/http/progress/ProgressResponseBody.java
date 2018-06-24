@@ -6,7 +6,6 @@ import android.os.SystemClock;
 import java.io.IOException;
 
 import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
@@ -94,7 +93,6 @@ public class ProgressResponseBody extends ResponseBody {
                 tempSize = 0;
             }
             return bytesRead;
-
         }
     }
  }

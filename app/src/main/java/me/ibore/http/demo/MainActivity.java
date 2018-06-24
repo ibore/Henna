@@ -16,6 +16,8 @@ import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
 
+    private XHttp xHttp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,25 +28,26 @@ public class MainActivity extends AppCompatActivity {
         logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
         logInterceptor.setColorLevel(Level.WARNING);
 
-        XHttp xHttp = new XHttp.Builder()
+        xHttp = new XHttp.Builder()
                 .header("ce", "ddd")
                 .header("dddd", "dddddd")
                 .param("ddd", "ddss")
                 .addInterceptor(logInterceptor)
                 .builder();
 
-//        xHttp.get("http://hot.m.shouji.360tpcdn.com/170710/e00dec2d22177d1bd36260e9dbbff9d0/com.qihoo.appstore_300070091.apk")
-        xHttp.post("http://www.so.com/")
+        xHttp.get("http://hot.m.shouji.360tpcdn.com/170710/e00dec2d22177d1bd36260e9dbbff9d0/com.qihoo.appstore_300070091.apk")
+//        xHttp.post("http://www.so.com/")
+                .tag(this)
                 .header("test1", "test")
                 .param("test", "test")
                 .param("test", "fddsfdsfsf")
-                .upload(new ProgressListener() {
+                /*.upload(new ProgressListener() {
                     @Override
                     public void onProgress(Progress progress) {
                         Log.d("----", "progress:" + progress.getPercent());
                     }
 
-                })
+                })*/
                 .progress(true)
                 .enqueue(new StringListener() {
                     @Override
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onProgress(Progress progress) {
-                        Log.d("----", "progress:" + progress.getPercent());
+                        Log.d("----", "--progress:" + progress.getPercent());
                     }
 
                     @Override
@@ -65,4 +68,12 @@ public class MainActivity extends AppCompatActivity {
                 });
 
     }
+
+    @Override
+    protected void onDestroy() {
+        xHttp.cancelTag(this);
+        super.onDestroy();
+    }
+
+
 }

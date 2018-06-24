@@ -25,6 +25,7 @@ public abstract class Request<R extends Request> {
 
     protected XHttp http;
     protected String url;
+    protected String method;
     protected OkHttpClient client;
     protected LinkedHashMap<String, List<String>> urlParams;
     protected LinkedHashMap<String, List<FileWrapper>> fileParams;
@@ -33,8 +34,7 @@ public abstract class Request<R extends Request> {
     protected CacheControl cacheControl;
     private boolean isProgress;
 
-    public Request(String url, XHttp http) {
-        this.url = url;
+    public Request(XHttp http) {
         this.http = http;
         headersBuilder = new Headers.Builder();
         urlParams = new LinkedHashMap<>();
@@ -47,6 +47,16 @@ public abstract class Request<R extends Request> {
             values.add(entry.getValue());
             urlParams.put(entry.getKey(), values);
         }
+    }
+
+    public R method(String method) {
+        this.method = method;
+        return (R) this;
+    }
+
+    public R url(String url) {
+        this.url = url;
+        return (R) this;
     }
 
     public R tag(Object tag) {
@@ -106,29 +116,32 @@ public abstract class Request<R extends Request> {
     }
 
     public Response execute() throws IOException {
-        okhttp3.Request request = generateRequest(null);
-        return http.okHttpClient().newCall(request).execute();
+        okhttp3.Request.Builder builder = generateRequest(null);
+        return http.okHttpClient().newCall(builder.build()).execute();
     }
 
     public void enqueue(AbsHttpListener listener) {
-        okhttp3.Request request = generateRequest(listener);
-        http.okHttpClient().newCall(request).enqueue(new okhttp3.Callback() {
+        okhttp3.Request.Builder builder = generateRequest(listener);
+        http.okHttpClient().newCall(builder.build()).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                XHttp.runOnUiThread(() -> listener.onError(new HttpException(e)));
+                XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e)));
             }
-
             @Override
             public void onResponse(Call call, Response response) {
-                try {
-                    if (isProgress) {
-                        response = response.newBuilder().body(new ProgressResponseBody(XHttp.getDelivery(), response.body(), listener, http.refreshTime())).build();
+                if (response.isSuccessful()) {
+                    try {
+                        if (isProgress) response = response.newBuilder().body(new ProgressResponseBody(XHttp.getDelivery(), response.body(), listener, http.refreshTime())).build();
+                        Object object = listener.convert(response.body());
+                        XHttp.runOnUiThread(() -> listener.onSuccess(object));
+                    } catch (Exception e)  {
+                        XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e)));
                     }
-                    Object object = listener.convert(response.body());
-                    XHttp.runOnUiThread(() -> listener.onSuccess(object));
-                } catch (Exception e)  {
-                    XHttp.runOnUiThread(() -> listener.onError(new HttpException(e)));
+                } else {
+                    Response finalResponse = response;
+                    XHttp.runOnUiThread(() -> listener.onError(new HttpException(finalResponse.code(), finalResponse.message())));
                 }
+
             }
         });
     }
@@ -137,6 +150,7 @@ public abstract class Request<R extends Request> {
         return headersBuilder.build();
     }
 
-    protected abstract okhttp3.Request generateRequest(AbsHttpListener listener);
+    protected abstract okhttp3.Request.Builder generateRequest(AbsHttpListener listener);
+
 
 }
