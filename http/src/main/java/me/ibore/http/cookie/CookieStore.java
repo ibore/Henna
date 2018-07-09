@@ -4,7 +4,7 @@ package me.ibore.http.cookie;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.ibore.http.cookie.store.CookieStore;
+import me.ibore.http.cookie.store.ICookieStore;
 import me.ibore.http.cookie.store.MemoryCookieStore;
 import okhttp3.Cookie;
 import okhttp3.HttpUrl;
@@ -13,26 +13,26 @@ import okhttp3.HttpUrl;
  * Created by Administrator on 2017/6/8.
  */
 
-public final class XCookieStore implements okhttp3.CookieJar {
+public final class CookieStore implements okhttp3.CookieJar {
 
-    private CookieStore memory;
+    private ICookieStore memory;
 
-    private CookieStore presistent;
+    private ICookieStore persistent;
 
-    public XCookieStore() {
+    public CookieStore() {
         memory = new MemoryCookieStore();
     }
 
-    public XCookieStore(CookieStore cookieStore) {
+    public CookieStore(ICookieStore cookieStore) {
         memory = new MemoryCookieStore();
-        this.presistent = cookieStore;
-        memory.saveAll(presistent.loadAll());
+        this.persistent = cookieStore;
+        memory.saveAll(persistent.loadAll());
     }
 
     @Override
     synchronized public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
         memory.saveAll(cookies);
-        if (null != presistent) presistent.saveAll(filterPersistentCookies(cookies));
+        if (null != persistent) persistent.saveAll(filterPersistentCookies(cookies));
     }
 
     private List<Cookie> filterPersistentCookies(List<Cookie> cookies) {
@@ -57,17 +57,17 @@ public final class XCookieStore implements okhttp3.CookieJar {
                 validCookies.add(cookie);
             }
         }
-        if (null != presistent) presistent.removeAll(cookiesToRemove);
+        if (null != persistent) persistent.removeAll(cookiesToRemove);
         return validCookies;
     }
 
     synchronized public void clearSession() {
         memory.clear();
-        if (null != presistent) memory.saveAll(presistent.loadAll());
+        if (null != persistent) memory.saveAll(persistent.loadAll());
     }
 
     synchronized public void clear() {
         memory.clear();
-        if (null != presistent) presistent.clear();
+        if (null != persistent) persistent.clear();
     }
 }

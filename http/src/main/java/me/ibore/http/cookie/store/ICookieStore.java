@@ -9,7 +9,7 @@ import okhttp3.Cookie;
  * Created by Administrator on 2017/6/9.
  */
 
-public interface CookieStore {
+public interface ICookieStore {
 
     List<Cookie> loadAll();
 

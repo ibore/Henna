@@ -1,5 +1,7 @@
 package me.ibore.http.request;
 
+import android.os.Handler;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -8,11 +10,13 @@ import java.util.Map;
 
 import me.ibore.http.XHttp;
 import me.ibore.http.exception.HttpException;
+import me.ibore.http.interceptor.RetryInterceptor;
 import me.ibore.http.listener.AbsHttpListener;
 import me.ibore.http.progress.ProgressResponseBody;
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Headers;
+import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
@@ -27,6 +31,9 @@ public abstract class Request<R extends Request> {
     protected String url;
     protected String method;
     protected OkHttpClient client;
+    protected Handler handler;
+    protected int maxRetry;
+    protected int refreshTime;
     protected LinkedHashMap<String, List<String>> urlParams;
     protected LinkedHashMap<String, List<FileWrapper>> fileParams;
     protected Headers.Builder headersBuilder;
@@ -36,6 +43,10 @@ public abstract class Request<R extends Request> {
 
     public Request(XHttp http) {
         this.http = http;
+        this.client = http.okHttpClient();
+        this.handler = XHttp.getDelivery();
+        this.maxRetry = http.maxRetry();
+        this.refreshTime = http.refreshTime();
         headersBuilder = new Headers.Builder();
         urlParams = new LinkedHashMap<>();
         fileParams = new LinkedHashMap<>();
@@ -62,6 +73,19 @@ public abstract class Request<R extends Request> {
     public R tag(Object tag) {
         this.tag = tag;
         return (R) this;
+    }
+
+
+    public void handler(Handler handler) {
+        this.handler = handler;
+    }
+
+    public void maxRetry(int maxRetry) {
+        this.maxRetry = maxRetry;
+    }
+
+    public void refreshTime(int refreshTime) {
+        this.refreshTime = refreshTime;
     }
 
     public R cacheControl(CacheControl cacheControl) {
@@ -117,12 +141,22 @@ public abstract class Request<R extends Request> {
 
     public Response execute() throws IOException {
         okhttp3.Request.Builder builder = generateRequest(null);
-        return http.okHttpClient().newCall(builder.build()).execute();
+        for (Interceptor interceptor : client.interceptors()) {
+            if (interceptor instanceof RetryInterceptor) {
+                ((RetryInterceptor) interceptor).setMaxRetry(maxRetry);
+            }
+        }
+        return client.newCall(builder.build()).execute();
     }
 
     public void enqueue(AbsHttpListener listener) {
         okhttp3.Request.Builder builder = generateRequest(listener);
-        http.okHttpClient().newCall(builder.build()).enqueue(new okhttp3.Callback() {
+        for (Interceptor interceptor : client.interceptors()) {
+            if (interceptor instanceof RetryInterceptor) {
+                ((RetryInterceptor) interceptor).setMaxRetry(maxRetry);
+            }
+        }
+        client.newCall(builder.build()).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e)));
@@ -131,7 +165,7 @@ public abstract class Request<R extends Request> {
             public void onResponse(Call call, Response response) {
                 if (response.isSuccessful()) {
                     try {
-                        if (isProgress) response = response.newBuilder().body(new ProgressResponseBody(XHttp.getDelivery(), response.body(), listener, http.refreshTime())).build();
+                        if (isProgress) response = response.newBuilder().body(new ProgressResponseBody(handler, response.body(), listener, refreshTime)).build();
                         Object object = listener.convert(response.body());
                         XHttp.runOnUiThread(() -> listener.onSuccess(object));
                     } catch (Exception e)  {

@@ -10,7 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import me.ibore.http.cookie.XCookieStore;
+import me.ibore.http.cookie.CookieStore;
+import me.ibore.http.interceptor.RetryInterceptor;
 import me.ibore.http.request.GetRequest;
 import me.ibore.http.request.PostRequest;
 import okhttp3.Cache;
@@ -30,9 +31,9 @@ public class XHttp {
     private OkHttpClient okHttpClient;
     private int timeout;
     private int refreshTime;
-    private int retryCount;
+    private int maxRetry;
     private Cache cache;
-    private XCookieStore cookieStore;
+    private CookieStore cookieStore;
     private List<Interceptor> interceptors;
     private List<Interceptor> networkInterceptors;
     private SSLSocketFactory sslSocketFactory;
@@ -51,15 +52,15 @@ public class XHttp {
         return refreshTime;
     }
 
-    public int retryCount() {
-        return retryCount;
+    public int maxRetry() {
+        return maxRetry;
     }
 
     public Cache cache() {
         return cache;
     }
 
-    public XCookieStore cookieStore() {
+    public CookieStore cookieStore() {
         return cookieStore;
     }
 
@@ -81,14 +82,14 @@ public class XHttp {
 
     public final static Handler mDelivery = new Handler(Looper.getMainLooper());
 
-    private XHttp(OkHttpClient okHttpClient, int timeout, int refreshTime, int retryCount, Cache cache, XCookieStore cookieStore,
+    private XHttp(OkHttpClient okHttpClient, int timeout, int refreshTime, int maxRetry, Cache cache, CookieStore cookieStore,
                    List<Interceptor> interceptors, List<Interceptor> networkInterceptors,
                    SSLSocketFactory sslSocketFactory, LinkedHashMap<String, String> headers,
                    LinkedHashMap<String, String> params) {
         this.okHttpClient = okHttpClient;
         this.timeout = timeout;
         this.refreshTime = refreshTime;
-        this.retryCount = retryCount;
+        this.maxRetry = maxRetry;
         this.cache = cache;
         this.cookieStore = cookieStore;
         this.interceptors = interceptors;
@@ -140,9 +141,9 @@ public class XHttp {
 
         private int timeout;
         private int refreshTime;
-        private int retryCount;
+        private int maxRetry;
         private Cache cache;
-        private XCookieStore cookieStore;
+        private CookieStore cookieStore;
         private List<Interceptor> interceptors;
         private List<Interceptor> networkInterceptors;
         private SSLSocketFactory sslSocketFactory;
@@ -152,7 +153,7 @@ public class XHttp {
         public Builder() {
             this.timeout = 60000;
             this.refreshTime = 300;
-            this.retryCount = 1;
+            this.maxRetry = 1;
             interceptors = new ArrayList<>();
             networkInterceptors = new ArrayList<>();
             headers = new LinkedHashMap<>();
@@ -162,7 +163,7 @@ public class XHttp {
         public Builder(XHttp http) {
             this.timeout = http.timeout();
             this.refreshTime = http.refreshTime();
-            this.retryCount = http.retryCount();
+            this.maxRetry = http.maxRetry();
             this.cache = http.cache();
             this.cookieStore = http.cookieStore();
             this.interceptors = http.interceptors();
@@ -179,7 +180,7 @@ public class XHttp {
             this.refreshTime = refreshTime;
             return this;
         }
-        public Builder cookieJar(XCookieStore cookieStore) {
+        public Builder cookieJar(CookieStore cookieStore) {
             this.cookieStore = cookieStore;
             return this;
         }
@@ -214,13 +215,16 @@ public class XHttp {
                     .writeTimeout(timeout, TimeUnit.MILLISECONDS);
             if (null != cache) builder.cache(cache);
             if (null != sslSocketFactory) builder.sslSocketFactory(sslSocketFactory);
+            if (maxRetry > 0) {
+                builder.addInterceptor(new RetryInterceptor(maxRetry));
+            }
             for (Interceptor interceptor : interceptors) {
                 builder.addInterceptor(interceptor);
             }
             for (Interceptor networkInterceptor : networkInterceptors) {
                 builder.addNetworkInterceptor(networkInterceptor);
             }
-            return new XHttp(builder.build(), timeout, refreshTime, retryCount, cache, cookieStore,
+            return new XHttp(builder.build(), timeout, refreshTime, maxRetry, cache, cookieStore,
                     interceptors, networkInterceptors, sslSocketFactory, headers, params);
         }
     }

@@ -10,7 +10,7 @@ import okhttp3.Cookie;
  * Created by Administrator on 2017/6/9.
  */
 
-public class MemoryCookieStore implements CookieStore {
+public class MemoryCookieStore implements ICookieStore {
 
     private final List<Cookie> cookies = new ArrayList<>();
 

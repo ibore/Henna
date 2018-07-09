@@ -15,7 +15,7 @@ import okhttp3.Cookie;
  * Created by Administrator on 2017/6/9.
  */
 
-public class SharedPrefsCookieStore implements CookieStore {
+public class SharedPrefsCookieStore implements ICookieStore {
 
     private static final String COOKIE_PREFS = "OkHttp_Cookies_Prefs";
 
