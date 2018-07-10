@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
 import me.ibore.http.cookie.CookieStore;
-import me.ibore.http.interceptor.RetryInterceptor;
 import me.ibore.http.request.GetRequest;
 import me.ibore.http.request.PostRequest;
 import okhttp3.Cache;
@@ -180,6 +179,10 @@ public class XHttp {
             this.refreshTime = refreshTime;
             return this;
         }
+        public Builder maxRetry(int maxRetry) {
+            this.maxRetry = maxRetry;
+            return this;
+        }
         public Builder cookieJar(CookieStore cookieStore) {
             this.cookieStore = cookieStore;
             return this;
@@ -215,9 +218,6 @@ public class XHttp {
                     .writeTimeout(timeout, TimeUnit.MILLISECONDS);
             if (null != cache) builder.cache(cache);
             if (null != sslSocketFactory) builder.sslSocketFactory(sslSocketFactory);
-            if (maxRetry > 0) {
-                builder.addInterceptor(new RetryInterceptor(maxRetry));
-            }
             for (Interceptor interceptor : interceptors) {
                 builder.addInterceptor(interceptor);
             }

@@ -10,13 +10,11 @@ import java.util.Map;
 
 import me.ibore.http.XHttp;
 import me.ibore.http.exception.HttpException;
-import me.ibore.http.interceptor.RetryInterceptor;
 import me.ibore.http.listener.AbsHttpListener;
 import me.ibore.http.progress.ProgressResponseBody;
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Headers;
-import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
@@ -141,35 +139,33 @@ public abstract class Request<R extends Request> {
 
     public Response execute() throws IOException {
         okhttp3.Request.Builder builder = generateRequest(null);
-        for (Interceptor interceptor : client.interceptors()) {
-            if (interceptor instanceof RetryInterceptor) {
-                ((RetryInterceptor) interceptor).setMaxRetry(maxRetry);
-            }
-        }
         return client.newCall(builder.build()).execute();
     }
 
     public void enqueue(AbsHttpListener listener) {
         okhttp3.Request.Builder builder = generateRequest(listener);
-        for (Interceptor interceptor : client.interceptors()) {
-            if (interceptor instanceof RetryInterceptor) {
-                ((RetryInterceptor) interceptor).setMaxRetry(maxRetry);
-            }
-        }
         client.newCall(builder.build()).enqueue(new okhttp3.Callback() {
+
+            int retryCount = 0;
+
             @Override
             public void onFailure(Call call, IOException e) {
-                XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e)));
+                if (retryCount < maxRetry) {
+                    client.newCall(builder.build()).enqueue(this);
+                    retryCount++;
+                } else {
+                    XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
+                }
             }
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         if (isProgress) response = response.newBuilder().body(new ProgressResponseBody(handler, response.body(), listener, refreshTime)).build();
                         Object object = listener.convert(response.body());
                         XHttp.runOnUiThread(() -> listener.onSuccess(object));
                     } catch (Exception e)  {
-                        XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e)));
+                        XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
                     }
                 } else {
                     Response finalResponse = response;
