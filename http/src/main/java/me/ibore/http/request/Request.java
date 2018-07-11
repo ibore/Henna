@@ -158,7 +158,7 @@ public abstract class Request<R extends Request> {
                 }
             }
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
                 if (response.isSuccessful()) {
                     try {
                         if (isProgress) response = response.newBuilder().body(new ProgressResponseBody(handler, response.body(), listener, refreshTime)).build();
