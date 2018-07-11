@@ -150,7 +150,7 @@ public class XHttp {
         private LinkedHashMap<String, String> params;
 
         public Builder() {
-            this.timeout = 60000;
+            this.timeout = 10000;
             this.refreshTime = 300;
             this.maxRetry = 0;
             interceptors = new ArrayList<>();
