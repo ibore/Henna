@@ -152,7 +152,7 @@ public class XHttp {
         public Builder() {
             this.timeout = 60000;
             this.refreshTime = 300;
-            this.maxRetry = 1;
+            this.maxRetry = 0;
             interceptors = new ArrayList<>();
             networkInterceptors = new ArrayList<>();
             headers = new LinkedHashMap<>();
