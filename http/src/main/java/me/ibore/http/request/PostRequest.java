@@ -1,5 +1,9 @@
 package me.ibore.http.request;
 
+import com.google.gson.Gson;
+
+import org.json.JSONTokener;
+
 import java.io.File;
 import java.net.FileNameMap;
 import java.net.URLConnection;
@@ -51,8 +55,8 @@ public final class PostRequest extends Request<PostRequest> {
         return this;
     }
 
-    public PostRequest upJson(String json) {
-        return upString(MEDIA_TYPE_JSON, json);
+    public PostRequest upJson(Object json) {
+        return upString(MEDIA_TYPE_JSON, XHttp.jsonParser().toJson(json));
     }
 
     public PostRequest upBytes(byte[] bytes) {
@@ -119,7 +123,7 @@ public final class PostRequest extends Request<PostRequest> {
     protected okhttp3.Request.Builder generateRequest(AbsHttpListener listener) {
         if (null == requestBody) requestBody = generateRequestBody();
         if (null != uploadListener) {
-            requestBody = new ProgressRequestBody(handler, requestBody, uploadListener, refreshTime);
+            requestBody = new ProgressRequestBody(http.getDelivery(), requestBody, uploadListener, refreshTime);
         }
         return new okhttp3.Request.Builder()
                 .method(method, requestBody)

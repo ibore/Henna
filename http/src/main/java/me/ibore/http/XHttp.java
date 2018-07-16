@@ -38,6 +38,7 @@ public class XHttp {
     private SSLSocketFactory sslSocketFactory;
     private LinkedHashMap<String, String> headers;
     private LinkedHashMap<String, String> params;
+    private static JsonParser jsonParser;
 
     public OkHttpClient okHttpClient() {
         return okHttpClient;
@@ -79,12 +80,12 @@ public class XHttp {
         return params;
     }
 
-    public final static Handler mDelivery = new Handler(Looper.getMainLooper());
+    private final Handler mDelivery = new Handler(Looper.getMainLooper());
 
     private XHttp(OkHttpClient okHttpClient, int timeout, int refreshTime, int maxRetry, Cache cache, CookieStore cookieStore,
                    List<Interceptor> interceptors, List<Interceptor> networkInterceptors,
                    SSLSocketFactory sslSocketFactory, LinkedHashMap<String, String> headers,
-                   LinkedHashMap<String, String> params) {
+                   LinkedHashMap<String, String> params, JsonParser jsonParser) {
         this.okHttpClient = okHttpClient;
         this.timeout = timeout;
         this.refreshTime = refreshTime;
@@ -96,6 +97,7 @@ public class XHttp {
         this.sslSocketFactory = sslSocketFactory;
         this.headers = headers;
         this.params = params;
+        this.jsonParser = jsonParser;
     }
 
     public GetRequest get(String url) {
@@ -106,11 +108,7 @@ public class XHttp {
         return new PostRequest(this).url(url).method("POST");
     }
 
-    public static Handler getDelivery() {
-        return mDelivery;
-    }
-
-    public static void runOnUiThread(Runnable runnable) {
+    public void runOnUiThread(Runnable runnable) {
         mDelivery.post(runnable);
     }
 
@@ -136,6 +134,14 @@ public class XHttp {
         }
     }
 
+    public static JsonParser jsonParser() {
+        return jsonParser;
+    }
+
+    public Handler getDelivery() {
+        return mDelivery;
+    }
+
     public static class Builder {
 
         private int timeout;
@@ -148,6 +154,7 @@ public class XHttp {
         private SSLSocketFactory sslSocketFactory;
         private LinkedHashMap<String, String> headers;
         private LinkedHashMap<String, String> params;
+        private JsonParser jsonParser;
 
         public Builder() {
             this.timeout = 60000;
@@ -211,6 +218,10 @@ public class XHttp {
             params.put(key, value);
             return this;
         }
+        public Builder jsonParser(JsonParser jsonParser) {
+            this.jsonParser = jsonParser;
+            return this;
+        }
         public XHttp builder() {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.connectTimeout(timeout, TimeUnit.MILLISECONDS)
@@ -225,7 +236,7 @@ public class XHttp {
                 builder.addNetworkInterceptor(networkInterceptor);
             }
             return new XHttp(builder.build(), timeout, refreshTime, maxRetry, cache, cookieStore,
-                    interceptors, networkInterceptors, sslSocketFactory, headers, params);
+                    interceptors, networkInterceptors, sslSocketFactory, headers, params, jsonParser);
         }
     }
 

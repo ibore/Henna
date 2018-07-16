@@ -29,7 +29,6 @@ public abstract class Request<R extends Request> {
     protected String url;
     protected String method;
     protected OkHttpClient client;
-    protected Handler handler;
     protected int maxRetry;
     protected int refreshTime;
     protected LinkedHashMap<String, List<String>> urlParams;
@@ -42,7 +41,6 @@ public abstract class Request<R extends Request> {
     public Request(XHttp http) {
         this.http = http;
         this.client = http.okHttpClient();
-        this.handler = XHttp.getDelivery();
         this.maxRetry = http.maxRetry();
         this.refreshTime = http.refreshTime();
         headersBuilder = new Headers.Builder();
@@ -71,11 +69,6 @@ public abstract class Request<R extends Request> {
     public R tag(Object tag) {
         this.tag = tag;
         return (R) this;
-    }
-
-
-    public void handler(Handler handler) {
-        this.handler = handler;
     }
 
     public void maxRetry(int maxRetry) {
@@ -154,22 +147,22 @@ public abstract class Request<R extends Request> {
                     client.newCall(builder.build()).enqueue(this);
                     retryCount++;
                 } else {
-                    XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
+                    http.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
                 }
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        if (isProgress) response = response.newBuilder().body(new ProgressResponseBody(handler, response.body(), listener, refreshTime)).build();
+                        if (isProgress) response = response.newBuilder().body(new ProgressResponseBody(http.getDelivery(), response.body(), listener, refreshTime)).build();
                         Object object = listener.convert(response.body());
-                        XHttp.runOnUiThread(() -> listener.onSuccess(object));
+                        http.runOnUiThread(() -> listener.onSuccess(object));
                     } catch (Exception e)  {
-                        XHttp.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
+                        http.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
                     }
                 } else {
                     Response finalResponse = response;
-                    XHttp.runOnUiThread(() -> listener.onError(new HttpException(finalResponse.code(), finalResponse.message())));
+                    http.runOnUiThread(() -> listener.onError(new HttpException(finalResponse.code(), finalResponse.message())));
                 }
 
             }

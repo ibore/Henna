@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import me.ibore.http.XHttp;
@@ -36,19 +38,25 @@ public class MainActivity extends AppCompatActivity {
                 .addInterceptor(logInterceptor)
                 .builder();
 
-        xHttp.get("http://hot.m.shouji.360tpcdn.com/170710//com.qihoo.appstore_300070091.apk")
-//        xHttp.post("http://www.so.com/")
+        List<String > strings = new ArrayList<>();
+        strings.add("111111111111");
+        strings.add("222222222222");
+        strings.add("333333333333");
+
+//        xHttp.get("http://hot.m.shouji.360tpcdn.com/170710//com.qihoo.appstore_300070091.apk")
+        xHttp.post("http://www.so.com/")
                 .tag(this)
                 .header("test1", "test")
                 .param("test", "test")
                 .param("test", "fddsfdsfsf")
-                /*.upload(new ProgressListener() {
+                .upJson(222)
+                .upload(new ProgressListener() {
                     @Override
                     public void onProgress(Progress progress) {
                         Log.d("----", "progress:" + progress.getPercent());
                     }
 
-                })*/
+                })
                 .progress(true)
                 .enqueue(new StringListener() {
                     @Override
@@ -63,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(HttpException e) {
-                        e.printStackTrace();
+                        /*e.printStackTrace();*/
                         Log.d("----", "StringListener_onError");
 
                         if (b) {
