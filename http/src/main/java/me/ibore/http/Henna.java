@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
 import me.ibore.http.cookie.CookieStore;
-import me.ibore.http.request.GetRequest;
-import me.ibore.http.request.PostRequest;
+import me.ibore.http.request.NoBodyRequest;
+import me.ibore.http.request.BodyRequest;
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Interceptor;
@@ -25,7 +25,7 @@ import okhttp3.OkHttpClient;
  * website: ibore.me
  */
 
-public class XHttp {
+public class Henna {
 
     private OkHttpClient okHttpClient;
     private int timeout;
@@ -79,12 +79,12 @@ public class XHttp {
         return params;
     }
 
-    public final static Handler mDelivery = new Handler(Looper.getMainLooper());
+    private final Handler mDelivery = new Handler(Looper.getMainLooper());
 
-    private XHttp(OkHttpClient okHttpClient, int timeout, int refreshTime, int maxRetry, Cache cache, CookieStore cookieStore,
-                   List<Interceptor> interceptors, List<Interceptor> networkInterceptors,
-                   SSLSocketFactory sslSocketFactory, LinkedHashMap<String, String> headers,
-                   LinkedHashMap<String, String> params) {
+    private Henna(OkHttpClient okHttpClient, int timeout, int refreshTime, int maxRetry, Cache cache, CookieStore cookieStore,
+                  List<Interceptor> interceptors, List<Interceptor> networkInterceptors,
+                  SSLSocketFactory sslSocketFactory, LinkedHashMap<String, String> headers,
+                  LinkedHashMap<String, String> params) {
         this.okHttpClient = okHttpClient;
         this.timeout = timeout;
         this.refreshTime = refreshTime;
@@ -98,19 +98,39 @@ public class XHttp {
         this.params = params;
     }
 
-    public GetRequest get(String url) {
-        return new GetRequest(this).url(url).method("GET");
+    public NoBodyRequest get(String url) {
+        return new NoBodyRequest(this).url(url).method(HttpMethod.GET);
     }
 
-    public PostRequest post(String url) {
-        return new PostRequest(this).url(url).method("POST");
+    public BodyRequest post(String url) {
+        return new BodyRequest(this).url(url).method(HttpMethod.POST);
     }
 
-    public static Handler getDelivery() {
-        return mDelivery;
+    public BodyRequest put(String url) {
+        return new BodyRequest(this).url(url).method(HttpMethod.PUT);
     }
 
-    public static void runOnUiThread(Runnable runnable) {
+    public NoBodyRequest head(String url) {
+        return new NoBodyRequest(this).url(url).method(HttpMethod.HEAD);
+    }
+
+    public BodyRequest delete(String url) {
+        return new BodyRequest(this).url(url).method(HttpMethod.DELETE);
+    }
+
+    public BodyRequest options(String url) {
+        return new BodyRequest(this).url(url).method(HttpMethod.OPTIONS);
+    }
+
+    public BodyRequest patch(String url) {
+        return new BodyRequest(this).url(url).method(HttpMethod.PATCH);
+    }
+
+    public NoBodyRequest trace(String url) {
+        return new NoBodyRequest(this).url(url).method(HttpMethod.TRACE);
+    }
+
+    public void runOnUiThread(Runnable runnable) {
         mDelivery.post(runnable);
     }
 
@@ -136,6 +156,10 @@ public class XHttp {
         }
     }
 
+    public Handler getDelivery() {
+        return mDelivery;
+    }
+
     public static class Builder {
 
         private int timeout;
@@ -159,7 +183,7 @@ public class XHttp {
             params = new LinkedHashMap<>();
         }
 
-        public Builder(XHttp http) {
+        public Builder(Henna http) {
             this.timeout = http.timeout();
             this.refreshTime = http.refreshTime();
             this.maxRetry = http.maxRetry();
@@ -211,7 +235,7 @@ public class XHttp {
             params.put(key, value);
             return this;
         }
-        public XHttp builder() {
+        public Henna builder() {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.connectTimeout(timeout, TimeUnit.MILLISECONDS)
                     .readTimeout(timeout, TimeUnit.MILLISECONDS)
@@ -224,7 +248,7 @@ public class XHttp {
             for (Interceptor networkInterceptor : networkInterceptors) {
                 builder.addNetworkInterceptor(networkInterceptor);
             }
-            return new XHttp(builder.build(), timeout, refreshTime, maxRetry, cache, cookieStore,
+            return new Henna(builder.build(), timeout, refreshTime, maxRetry, cache, cookieStore,
                     interceptors, networkInterceptors, sslSocketFactory, headers, params);
         }
     }

@@ -13,7 +13,7 @@ import okio.ForwardingSource;
 import okio.Okio;
 import okio.Source;
 
-public class ProgressResponseBody extends ResponseBody {
+public final class ProgressResponseBody extends ResponseBody {
 
     private Handler mHandler;
     private int mRefreshTime;

@@ -27,7 +27,7 @@ import android.os.Parcelable;
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * ================================================
  */
-public class Progress implements Parcelable {
+public final class Progress implements Parcelable {
 
     private long currentBytes; //当前已上传或下载的总长度
     private long contentLength; //数据总长度

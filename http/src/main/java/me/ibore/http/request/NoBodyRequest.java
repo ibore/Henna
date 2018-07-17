@@ -5,25 +5,25 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
-import me.ibore.http.XHttp;
-import me.ibore.http.listener.AbsHttpListener;
+import me.ibore.http.Henna;
+import me.ibore.http.listener.HennaListener;
 import okhttp3.CacheControl;
 
-public class GetRequest extends Request<GetRequest> {
+public class NoBodyRequest extends Request<NoBodyRequest> {
 
     private String appendUrl = "";
 
-    public GetRequest(XHttp xHttp) {
-        super(xHttp);
+    public NoBodyRequest(Henna henna) {
+        super(henna);
     }
 
-    public GetRequest appendUrl(String appendUrl) {
+    public NoBodyRequest appendUrl(String appendUrl) {
         this.appendUrl = appendUrl;
         return this;
     }
 
     @Override
-    protected okhttp3.Request.Builder generateRequest(AbsHttpListener listener) {
+    protected okhttp3.Request.Builder generateRequest(HennaListener listener) {
         return new okhttp3.Request.Builder()
                 .method(method, null)
                 .url(generateUrlParams())
