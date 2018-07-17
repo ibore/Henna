@@ -9,7 +9,7 @@ import me.ibore.http.Henna;
 import me.ibore.http.listener.HennaListener;
 import okhttp3.CacheControl;
 
-public class NoBodyRequest extends Request<NoBodyRequest> {
+public class NoBodyRequest<T> extends Request<T, NoBodyRequest> {
 
     private String appendUrl = "";
 

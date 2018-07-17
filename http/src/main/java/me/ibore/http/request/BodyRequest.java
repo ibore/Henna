@@ -19,7 +19,7 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
-public final class BodyRequest extends Request<BodyRequest> {
+public final class BodyRequest<T> extends Request<T, BodyRequest> {
 
     private RequestBody requestBody;
     private MultipartBody multipartBody;

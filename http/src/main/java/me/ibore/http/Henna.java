@@ -110,8 +110,8 @@ public class Henna {
         return new BodyRequest(this).url(url).method(HttpMethod.PUT);
     }
 
-    public NoBodyRequest head(String url) {
-        return new NoBodyRequest(this).url(url).method(HttpMethod.HEAD);
+    public <T> NoBodyRequest<T> head(String url) {
+        return new NoBodyRequest<>(this).url(url).method(HttpMethod.HEAD);
     }
 
     public BodyRequest delete(String url) {

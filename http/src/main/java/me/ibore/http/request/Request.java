@@ -6,6 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Function;
 import me.ibore.http.Henna;
 import me.ibore.http.converter.Converter;
 import me.ibore.http.exception.HttpException;
@@ -17,8 +22,9 @@ import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
-public abstract class Request<R extends Request> {
+public abstract class Request<T, R extends Request> {
 
     public static final MediaType MEDIA_TYPE_PLAIN = MediaType.parse("text/plain;charset=utf-8");
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json;charset=utf-8");
@@ -35,7 +41,7 @@ public abstract class Request<R extends Request> {
     protected LinkedHashMap<String, List<String>> urlParams;
     protected Object tag;
     protected CacheControl cacheControl;
-    protected Converter converter;
+    protected Converter<T> converter;
     private boolean isProgress;
 
 
@@ -271,7 +277,7 @@ public abstract class Request<R extends Request> {
         return client.newCall(builder.build()).execute();
     }
 
-    public void enqueue(HennaListener listener) {
+    public void enqueue(HennaListener<T> listener) {
         okhttp3.Request.Builder builder = generateRequest(listener);
         client.newCall(builder.build()).enqueue(new okhttp3.Callback() {
             int retryCount = 0;
@@ -292,13 +298,8 @@ public abstract class Request<R extends Request> {
                             response = response.newBuilder().body(new ProgressResponseBody(
                                     henna.getDelivery(), response.body(), listener, refreshTime)).build();
                         }
-                        if (null != converter) {
-                            Object object = converter.convert(response.body());
-                            henna.runOnUiThread(() -> listener.onSuccess(object));
-                        } else {
-                            Response finalResponse = response;
-                            henna.runOnUiThread(() -> listener.onSuccess(finalResponse.body()));
-                        }
+                        T object = converter.convert(response.body());
+                        henna.runOnUiThread(() -> listener.onSuccess(object));
                     } catch (Exception e)  {
                         henna.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
                     }
@@ -323,5 +324,36 @@ public abstract class Request<R extends Request> {
 
     protected abstract okhttp3.Request.Builder generateRequest(HennaListener listener);
 
+
+    public void observable() {
+
+
+        Observable.create(new ObservableOnSubscribe<ResponseBody>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter< ResponseBody > emitter) throws Exception {
+                try {
+                    okhttp3.Request.Builder builder = generateRequest(null);
+                    //execute
+                    Response response = client.newCall(builder.build()).execute();
+
+                    if (response.isSuccessful()) {
+                        emitter.onNext(response.body());
+                    } else {
+                        emitter.onError(HttpException.newInstance(response.code()));
+                    }
+                } catch (Exception e) {
+                    emitter.onError(new HttpException(-1, e.getMessage()));
+                } finally {
+                    emitter.onComplete();
+                }
+            }
+        }).map(new Function<ResponseBody, Object>() {
+            @Override
+            public Object apply(ResponseBody responseBody) throws Exception {
+                return converter.convert(responseBody);
+            }
+        });
+
+    }
 
 }
