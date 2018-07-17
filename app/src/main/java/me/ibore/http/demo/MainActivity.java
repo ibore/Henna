@@ -8,17 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import me.ibore.http.XHttp;
+import me.ibore.http.Henna;
 import me.ibore.http.exception.HttpException;
 import me.ibore.http.interceptor.HttpLogInterceptor;
-import me.ibore.http.listener.StringListener;
 import me.ibore.http.progress.Progress;
 import me.ibore.http.progress.ProgressListener;
-import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
 
-    private XHttp xHttp;
+    private Henna xHttp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
         logInterceptor.setColorLevel(Level.WARNING);
 
-        xHttp = new XHttp.Builder()
+        xHttp = new Henna.Builder()
                 .header("ce", "ddd")
                 .header("dddd", "dddddd")
                 .param("ddd", "ddss")

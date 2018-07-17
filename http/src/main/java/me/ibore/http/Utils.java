@@ -1,4 +1,6 @@
 package me.ibore.http;
 
-public class HttpProxy {
+public class Utils {
+
+
 }

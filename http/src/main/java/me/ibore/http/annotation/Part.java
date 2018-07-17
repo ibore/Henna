@@ -8,8 +8,11 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Documented
-@Retention(RUNTIME)
 @Target(PARAMETER)
-public @interface Header {
-    String value();
+@Retention(RUNTIME)
+public @interface Part {
+
+    String value() default "";
+
+    String encoding() default "binary";
 }
