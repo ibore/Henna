@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
         xHttp = new Henna.Builder()
                 .header("ce", "ddd")
                 .header("dddd", "dddddd")
-                .param("ddd", "ddss")
                 .maxRetry(3)
                 .addInterceptor(logInterceptor)
                 .converter(StringConverter.create())
@@ -56,7 +55,33 @@ public class MainActivity extends AppCompatActivity {
 
 
         HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
+        ApiService apiService = proxy.create(ApiService.class);
+        apiService.getSo("test")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<String>() {
 
+                    @Override
+                    protected void onStart() {
+                        super.onStart();
+                        Log.d("----", "onStart");
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                        Log.d("----", s);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("----", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("----", "onComplete");
+                    }
+                });
         /*new Thread(new Runnable() {
             @Override
             public void run() {

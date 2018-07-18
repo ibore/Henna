@@ -103,7 +103,7 @@ public class HennaProxy {
                 throw new RuntimeException("");
             }
         }
-        return null;
+        return request.enqueue();
     }
 
     private Object invokeBody(String httpMethod, String url, Method method, Object[] args) {
