@@ -19,7 +19,7 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
-public final class BodyRequest<T> extends Request<T, BodyRequest> {
+public final class BodyRequest<T> extends Request<T, BodyRequest<T>> {
 
     private RequestBody requestBody;
     private MultipartBody multipartBody;
@@ -31,46 +31,46 @@ public final class BodyRequest<T> extends Request<T, BodyRequest> {
         fileParams = new LinkedHashMap<>();
     }
 
-    public BodyRequest requestBody(RequestBody requestBody) {
+    public BodyRequest<T> requestBody(RequestBody requestBody) {
         this.requestBody = requestBody;
         return this;
     }
 
-    public BodyRequest multipartBody(MultipartBody multipartBody) {
+    public BodyRequest<T> multipartBody(MultipartBody multipartBody) {
         this.multipartBody = multipartBody;
         return this;
     }
 
-    public BodyRequest upFile(File file) {
+    public BodyRequest<T> upFile(File file) {
         this.requestBody = RequestBody.create(MEDIA_TYPE_STREAM, file);
         return this;
     }
 
-    public BodyRequest upString(String content) {
+    public BodyRequest<T> upString(String content) {
         this.requestBody = RequestBody.create(MEDIA_TYPE_PLAIN, content);
         return this;
     }
 
-    public BodyRequest upString(MediaType mediaType, String content) {
+    public BodyRequest<T> upString(MediaType mediaType, String content) {
         this.requestBody = RequestBody.create(mediaType, content);
         return this;
     }
 
-    public BodyRequest upJson(Object json) {
+    public BodyRequest<T> upJson(Object json) {
         this.requestBody = RequestBody.create(MEDIA_TYPE_JSON, new Gson().toJson(json));
         return this;
     }
 
-    public BodyRequest upBytes(byte[] bytes) {
+    public BodyRequest<T> upBytes(byte[] bytes) {
         this.requestBody = RequestBody.create(MEDIA_TYPE_STREAM, bytes);
         return this;
     }
 
-    public BodyRequest param(String key, File file) {
+    public BodyRequest<T> param(String key, File file) {
         return param(key, file, file.getName());
     }
 
-    private BodyRequest param(String key, File file, String fileName) {
+    private BodyRequest<T> param(String key, File file, String fileName) {
         MediaType mediaType;
         String contentType = URLConnection.getFileNameMap().getContentTypeFor(fileName);
         if (contentType == null) {
@@ -81,13 +81,13 @@ public final class BodyRequest<T> extends Request<T, BodyRequest> {
         return param(key, file, fileName, mediaType);
     }
 
-    private BodyRequest param(String key, File file, String fileName, MediaType mediaType) {
+    private BodyRequest<T> param(String key, File file, String fileName, MediaType mediaType) {
         //解决文件名中含有#号异常的问题
         return param(key, new FileWrapper(file, fileName.replace("#", ""),
                 mediaType == null ? MEDIA_TYPE_STREAM : mediaType));
     }
 
-    public BodyRequest param(String key, FileWrapper fileWrapper) {
+    public BodyRequest<T> param(String key, FileWrapper fileWrapper) {
         if (key != null) {
             List<FileWrapper> fileWrappers = fileParams.get(key);
             if (null == fileWrappers) {
@@ -107,7 +107,7 @@ public final class BodyRequest<T> extends Request<T, BodyRequest> {
         return fileParams;
     }
 
-    public BodyRequest params(String key, List<FileWrapper> values) {
+    public BodyRequest<T> params(String key, List<FileWrapper> values) {
         if (key != null && values != null && !values.isEmpty()) {
             for (FileWrapper value : values) {
                 param(key, value.getFile(), value.getFileName(), value.getContentType());
@@ -116,7 +116,7 @@ public final class BodyRequest<T> extends Request<T, BodyRequest> {
         return this;
     }
 
-    public BodyRequest listener(ProgressListener uploadListener) {
+    public BodyRequest<T> uploadListener(ProgressListener uploadListener) {
         this.uploadListener = uploadListener;
         return this;
     }

@@ -9,12 +9,19 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Cancellable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 import me.ibore.http.Henna;
 import me.ibore.http.converter.Converter;
 import me.ibore.http.exception.HttpException;
 import me.ibore.http.listener.HennaListener;
+import me.ibore.http.progress.ProgressListener;
 import me.ibore.http.progress.ProgressResponseBody;
 import okhttp3.CacheControl;
 import okhttp3.Call;
@@ -42,7 +49,7 @@ public abstract class Request<T, R extends Request> {
     protected Object tag;
     protected CacheControl cacheControl;
     protected Converter<T> converter;
-    private boolean isProgress;
+    protected boolean isProgress;
 
 
     public Request(Henna henna) {
@@ -52,16 +59,17 @@ public abstract class Request<T, R extends Request> {
         this.refreshTime = henna.refreshTime();
         headers = new LinkedHashMap<>();
         urlParams = new LinkedHashMap<>();
-        for (String key: henna.headers().keySet()) {
+        for (String key : henna.headers().keySet()) {
             List<String> values = new ArrayList<>();
             values.add(henna.headers().get(key));
             headers.put(key, values);
         }
-        for (String key: henna.params().keySet()) {
+        for (String key : henna.params().keySet()) {
             List<String> values = new ArrayList<>();
             values.add(henna.params().get(key));
             urlParams.put(key, values);
         }
+        this.converter = henna.converter();
     }
 
     public R method(String method) {
@@ -272,15 +280,43 @@ public abstract class Request<T, R extends Request> {
         return (R) this;
     }
 
-    public Response execute() throws IOException {
-        okhttp3.Request.Builder builder = generateRequest(null);
-        return client.newCall(builder.build()).execute();
+    public R converter(Converter<T> converter) {
+        this.converter = converter;
+        return (R) this;
+    }
+
+    public T execute() throws HttpException {
+        return execute(null);
+    }
+
+    public T execute(ProgressListener listener) throws HttpException {
+        try {
+            okhttp3.Request.Builder builder = generateRequest(null);
+            Response response = client.newCall(builder.build()).execute();
+            if (response.isSuccessful()) {
+                if (isProgress) {
+                    if (null == listener)
+                        throw new NullPointerException("ProgressListener can not be null");
+                    response = response.newBuilder().body(ProgressResponseBody.create(response.body(), listener, refreshTime)).build();
+                }
+                if (null == converter) throw new NullPointerException("converter can not be null");
+                return converter.convert(response.body());
+            } else {
+                throw new HttpException(response.code(), response.message());
+            }
+        } catch (Exception e) {
+            throw new HttpException(-1, e.getMessage());
+        }
     }
 
     public void enqueue(HennaListener<T> listener) {
+        if (null == listener) throw new NullPointerException("HennaListener can not be null");
         okhttp3.Request.Builder builder = generateRequest(listener);
+        henna.runOnUiThread(listener::onStart);
         client.newCall(builder.build()).enqueue(new okhttp3.Callback() {
+
             int retryCount = 0;
+
             @Override
             public void onFailure(Call call, IOException e) {
                 if (retryCount < maxRetry) {
@@ -288,26 +324,30 @@ public abstract class Request<T, R extends Request> {
                     retryCount++;
                 } else {
                     henna.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
+                    henna.runOnUiThread(listener::onFinish);
                 }
             }
+
             @Override
             public void onResponse(Call call, Response response) {
                 if (response.isSuccessful()) {
                     try {
                         if (isProgress) {
-                            response = response.newBuilder().body(new ProgressResponseBody(
+                            response = response.newBuilder().body(ProgressResponseBody.create(
                                     henna.getDelivery(), response.body(), listener, refreshTime)).build();
                         }
+                        if (null == converter)
+                            throw new NullPointerException("converter can not be null");
                         T object = converter.convert(response.body());
                         henna.runOnUiThread(() -> listener.onSuccess(object));
-                    } catch (Exception e)  {
+                    } catch (Exception e) {
                         henna.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
                     }
                 } else {
                     Response finalResponse = response;
                     henna.runOnUiThread(() -> listener.onError(new HttpException(finalResponse.code(), finalResponse.message())));
                 }
-
+                henna.runOnUiThread(listener::onFinish);
             }
         });
     }
@@ -315,7 +355,7 @@ public abstract class Request<T, R extends Request> {
     Headers generateHeaders() {
         Headers.Builder builder = new Headers.Builder();
         for (String key : headers.keySet()) {
-            for (String value : headers.get(key)){
+            for (String value : headers.get(key)) {
                 builder.add(key, value);
             }
         }
@@ -324,36 +364,42 @@ public abstract class Request<T, R extends Request> {
 
     protected abstract okhttp3.Request.Builder generateRequest(HennaListener listener);
 
+    public Observable<T> observable() {
+        return observable(null);
+    }
 
-    public void observable() {
-
-
-        Observable.create(new ObservableOnSubscribe<ResponseBody>() {
-            @Override
-            public void subscribe(@NonNull ObservableEmitter< ResponseBody > emitter) throws Exception {
-                try {
-                    okhttp3.Request.Builder builder = generateRequest(null);
-                    //execute
-                    Response response = client.newCall(builder.build()).execute();
-
-                    if (response.isSuccessful()) {
-                        emitter.onNext(response.body());
-                    } else {
-                        emitter.onError(HttpException.newInstance(response.code()));
+    public Observable<T> observable(ProgressListener listener) {
+        return Observable.create((ObservableOnSubscribe<ResponseBody>) emitter -> {
+            try {
+                okhttp3.Request.Builder builder = generateRequest(null);
+                Response response = client.newCall(builder.build()).execute();
+                if (response.isSuccessful()) {
+                    if (isProgress) {
+                        if (null == listener)
+                            throw new NullPointerException("ProgressListener can not be null");
+                        response = response.newBuilder().body(ProgressResponseBody.create(
+                                henna.getDelivery(), response.body(), listener, refreshTime)).build();
                     }
-                } catch (Exception e) {
-                    emitter.onError(new HttpException(-1, e.getMessage()));
-                } finally {
-                    emitter.onComplete();
+                    emitter.onNext(response.body());
+                } else {
+                    emitter.onError(HttpException.newInstance(response.code()));
                 }
+            } catch (Exception e) {
+                emitter.onError(e);
+            } finally {
+                emitter.onComplete();
             }
-        }).map(new Function<ResponseBody, Object>() {
-            @Override
-            public Object apply(ResponseBody responseBody) throws Exception {
-                return converter.convert(responseBody);
-            }
+            emitter.setCancellable(new Cancellable() {
+                @Override
+                public void cancel() throws Exception {
+                    henna.cancelTag(tag);
+                }
+            });
+        }).map(responseBody -> {
+            if (null == converter)
+                throw new NullPointerException("converter can not be null");
+            return converter.convert(responseBody);
         });
-
     }
 
 }

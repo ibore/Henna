@@ -8,4 +8,6 @@ public interface Converter<T> {
 
     T convert(ResponseBody value) throws IOException;
 
+    Converter<ResponseBody> DEFAULT = value -> value;
+
 }

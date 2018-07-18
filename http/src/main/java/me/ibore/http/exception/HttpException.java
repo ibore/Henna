@@ -72,6 +72,8 @@ public class HttpException extends Exception {
         sErrorArray.put(503, "Service Unavailable");
         sErrorArray.put(504, "Gateway Time-out");
         sErrorArray.put(505, "HTTP Version not supported");
+
+
     }
 
     int code;

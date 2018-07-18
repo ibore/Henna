@@ -22,19 +22,25 @@ public final class ProgressRequestBody extends RequestBody {
     private Progress mProgress;
     private Sink mSink;
 
+    public static ProgressRequestBody create(RequestBody requestBody, ProgressListener listener) {
+        return new ProgressRequestBody(null, requestBody, listener, 300);
+    }
+
+    public static ProgressRequestBody create(RequestBody requestBody, ProgressListener listener, int refreshTime) {
+        return new ProgressRequestBody(null, requestBody, listener, refreshTime);
+    }
+
     public static ProgressRequestBody create(Handler handler, RequestBody requestBody, ProgressListener listener) {
-        return new ProgressRequestBody(handler, requestBody, listener);
+        return new ProgressRequestBody(handler, requestBody, listener, 300);
     }
 
     public static ProgressRequestBody create(Handler handler, RequestBody requestBody, ProgressListener listener, int refreshTime) {
         return new ProgressRequestBody(handler, requestBody, listener, refreshTime);
     }
 
-    public ProgressRequestBody(Handler handler, RequestBody requestBody, ProgressListener listener) {
-        this(handler, requestBody, listener, 0);
-    }
-
     public ProgressRequestBody(Handler handler, RequestBody requestBody, ProgressListener listener, int refreshTime) {
+        if (null == requestBody) throw new NullPointerException("requestBody can not null");
+        if (null == listener) throw new NullPointerException("ProgressListener can not null");
         this.mHandler = handler;
         this.mRequestBody = requestBody;
         this.mListener = listener;
@@ -89,7 +95,11 @@ public final class ProgressRequestBody extends RequestBody {
                 mProgress.setCurrentBytes(finalTotalBytesRead);
                 mProgress.setIntervalTime(finalIntervalTime);
                 mProgress.setFinish(finalTotalBytesRead == mProgress.getContentLength());
-                mHandler.post(() -> mListener.onProgress(mProgress));
+                if (null == mHandler) {
+                    mListener.onProgress(mProgress);
+                } else {
+                    mHandler.post(() -> mListener.onProgress(mProgress));
+                }
                 lastRefreshTime = curTime;
                 tempSize = 0;
             }

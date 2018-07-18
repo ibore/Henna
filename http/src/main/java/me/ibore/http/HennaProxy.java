@@ -32,6 +32,11 @@ public class HennaProxy {
     private String baseUrl;
     private Henna henna;
 
+    public HennaProxy(Henna henna, String baseUrl) {
+        this.henna = henna;
+        this.baseUrl = baseUrl;
+    }
+
     public <T> T create(final Class<T> service) {
         return (T) Proxy.newProxyInstance(service.getClassLoader()
                 , new Class[]{service}
@@ -86,23 +91,23 @@ public class HennaProxy {
     }
 
     private Object invokeNoBody(String httpMethod, String url, Method method, Object[] args) {
-        NoBodyRequest request = new NoBodyRequest(henna).method(httpMethod).url(url);
+        NoBodyRequest request = new NoBodyRequest<>(henna).method(httpMethod).url(url);
         Annotation[] annotations = checkoutParameter(method);
         for (int i = 0; i < annotations.length; i++) {
             Annotation annotation = annotations[i];
             if (annotation instanceof Param) {
                 request.param(((Param) annotation).value(), (String) args[i]);
             } else if (annotation instanceof ParamMap) {
-                request.params((Map<String, List<String>>) args[i], false);
+                request.param((Map<String, String>) args[i], false);
             } else {
-                throw new RuntimeException("@MultiPart just can be annotation at MultipartBody parameter");
+                throw new RuntimeException("");
             }
         }
         return null;
     }
 
     private Object invokeBody(String httpMethod, String url, Method method, Object[] args) {
-        BodyRequest request = new BodyRequest(henna).method(httpMethod).url(url);
+        BodyRequest request = new BodyRequest<>(henna).method(httpMethod).url(url);
         Annotation[] annotations = checkoutParameter(method);
         request.header(getHeaders(annotations, args));
         for (int i = 0; i < annotations.length; i++) {
@@ -132,7 +137,7 @@ public class HennaProxy {
             }  else if (annotation instanceof ParamMap) {
 
             }  else if (annotation instanceof Listener) {
-                request.listener((ProgressListener) args[i]);
+                request.uploadListener((ProgressListener) args[i]);
             } else {
                 throw new RuntimeException("@MultiPart just can be annotation at MultipartBody parameter");
             }

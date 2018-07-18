@@ -21,19 +21,25 @@ public final class ProgressResponseBody extends ResponseBody {
     private ProgressListener mListener;
     private Progress mProgress;
 
+    public static ProgressResponseBody create(ResponseBody responseBody, ProgressListener listener) {
+        return new ProgressResponseBody(null, responseBody, listener, 300);
+    }
+
+    public static ProgressResponseBody create(ResponseBody responseBody, ProgressListener listener, int refreshTime) {
+        return new ProgressResponseBody(null, responseBody, listener, refreshTime);
+    }
+
     public static ProgressResponseBody create(Handler handler, ResponseBody responseBody, ProgressListener listener) {
-        return new ProgressResponseBody(handler, responseBody, listener);
+        return new ProgressResponseBody(handler, responseBody, listener, 300);
     }
 
     public static ProgressResponseBody create(Handler handler, ResponseBody responseBody, ProgressListener listener, int refreshTime) {
         return new ProgressResponseBody(handler, responseBody, listener, refreshTime);
     }
 
-    public ProgressResponseBody(Handler handler, ResponseBody responseBody, ProgressListener listener) {
-        this(handler, responseBody, listener, 0);
-    }
-
-    public ProgressResponseBody(Handler handler, ResponseBody responseBody, ProgressListener listener, int refreshTime) {
+    private ProgressResponseBody(Handler handler, ResponseBody responseBody, ProgressListener listener, int refreshTime) {
+        if (null == responseBody) throw new NullPointerException("responseBody can not null");
+        if (null == listener) throw new NullPointerException("ProgressListener can not null");
         this.mHandler = handler;
         this.mResponseBody = responseBody;
         this.mListener = listener;
@@ -88,7 +94,11 @@ public final class ProgressResponseBody extends ResponseBody {
                 mProgress.setCurrentBytes(finalTotalBytesRead);
                 mProgress.setIntervalTime(finalIntervalTime);
                 mProgress.setFinish(finalBytesRead == -1 && finalTotalBytesRead == mProgress.getContentLength());
-                mHandler.post(() -> mListener.onProgress(mProgress));
+                if (null == mHandler) {
+                    mListener.onProgress(mProgress);
+                } else {
+                    mHandler.post(() -> mListener.onProgress(mProgress));
+                }
                 lastRefreshTime = curTime;
                 tempSize = 0;
             }

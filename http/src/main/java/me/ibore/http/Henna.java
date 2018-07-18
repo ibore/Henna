@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import me.ibore.http.converter.Converter;
 import me.ibore.http.cookie.CookieStore;
 import me.ibore.http.request.NoBodyRequest;
 import me.ibore.http.request.BodyRequest;
@@ -38,6 +39,7 @@ public class Henna {
     private SSLSocketFactory sslSocketFactory;
     private LinkedHashMap<String, String> headers;
     private LinkedHashMap<String, String> params;
+    private Converter converter;
 
     public OkHttpClient okHttpClient() {
         return okHttpClient;
@@ -79,12 +81,16 @@ public class Henna {
         return params;
     }
 
+    public Converter converter() {
+        return converter;
+    }
+
     private final Handler mDelivery = new Handler(Looper.getMainLooper());
 
     private Henna(OkHttpClient okHttpClient, int timeout, int refreshTime, int maxRetry, Cache cache, CookieStore cookieStore,
                   List<Interceptor> interceptors, List<Interceptor> networkInterceptors,
                   SSLSocketFactory sslSocketFactory, LinkedHashMap<String, String> headers,
-                  LinkedHashMap<String, String> params) {
+                  LinkedHashMap<String, String> params, Converter converter) {
         this.okHttpClient = okHttpClient;
         this.timeout = timeout;
         this.refreshTime = refreshTime;
@@ -96,38 +102,39 @@ public class Henna {
         this.sslSocketFactory = sslSocketFactory;
         this.headers = headers;
         this.params = params;
+        this.converter = converter;
     }
 
-    public NoBodyRequest get(String url) {
-        return new NoBodyRequest(this).url(url).method(HttpMethod.GET);
+    public <T> NoBodyRequest<T> get(String url) {
+        return new NoBodyRequest<T>(this).url(url).method(HttpMethod.GET);
     }
 
-    public BodyRequest post(String url) {
-        return new BodyRequest(this).url(url).method(HttpMethod.POST);
+    public <T> BodyRequest<T> post(String url) {
+        return new BodyRequest<T>(this).url(url).method(HttpMethod.POST);
     }
 
-    public BodyRequest put(String url) {
-        return new BodyRequest(this).url(url).method(HttpMethod.PUT);
+    public <T>BodyRequest<T> put(String url) {
+        return new BodyRequest<T>(this).url(url).method(HttpMethod.PUT);
     }
 
     public <T> NoBodyRequest<T> head(String url) {
-        return new NoBodyRequest<>(this).url(url).method(HttpMethod.HEAD);
+        return new NoBodyRequest<T>(this).url(url).method(HttpMethod.HEAD);
     }
 
-    public BodyRequest delete(String url) {
-        return new BodyRequest(this).url(url).method(HttpMethod.DELETE);
+    public <T> BodyRequest<T> delete(String url) {
+        return new BodyRequest<T>(this).url(url).method(HttpMethod.DELETE);
     }
 
-    public BodyRequest options(String url) {
-        return new BodyRequest(this).url(url).method(HttpMethod.OPTIONS);
+    public <T> BodyRequest<T> options(String url) {
+        return new BodyRequest<T>(this).url(url).method(HttpMethod.OPTIONS);
     }
 
-    public BodyRequest patch(String url) {
-        return new BodyRequest(this).url(url).method(HttpMethod.PATCH);
+    public <T> BodyRequest<T> patch(String url) {
+        return new BodyRequest<T>(this).url(url).method(HttpMethod.PATCH);
     }
 
-    public NoBodyRequest trace(String url) {
-        return new NoBodyRequest(this).url(url).method(HttpMethod.TRACE);
+    public <T> NoBodyRequest<T> trace(String url) {
+        return new NoBodyRequest<T>(this).url(url).method(HttpMethod.TRACE);
     }
 
     public void runOnUiThread(Runnable runnable) {
@@ -172,6 +179,7 @@ public class Henna {
         private SSLSocketFactory sslSocketFactory;
         private LinkedHashMap<String, String> headers;
         private LinkedHashMap<String, String> params;
+        private Converter converter;
 
         public Builder() {
             this.timeout = 10000;
@@ -183,16 +191,17 @@ public class Henna {
             params = new LinkedHashMap<>();
         }
 
-        public Builder(Henna http) {
-            this.timeout = http.timeout();
-            this.refreshTime = http.refreshTime();
-            this.maxRetry = http.maxRetry();
-            this.cache = http.cache();
-            this.cookieStore = http.cookieStore();
-            this.interceptors = http.interceptors();
-            this.networkInterceptors = http.networkInterceptors();
-            this.headers = http.headers();
-            this.params = http.params();
+        public Builder(Henna henna) {
+            this.timeout = henna.timeout();
+            this.refreshTime = henna.refreshTime();
+            this.maxRetry = henna.maxRetry();
+            this.cache = henna.cache();
+            this.cookieStore = henna.cookieStore();
+            this.interceptors = henna.interceptors();
+            this.networkInterceptors = henna.networkInterceptors();
+            this.headers = henna.headers();
+            this.params = henna.params();
+            this.converter = henna.converter();
         }
 
         public Builder timeout(int timeout) {
@@ -235,6 +244,10 @@ public class Henna {
             params.put(key, value);
             return this;
         }
+        public Builder converter(Converter converter) {
+            this.converter = converter;
+            return this;
+        }
         public Henna builder() {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.connectTimeout(timeout, TimeUnit.MILLISECONDS)
@@ -248,8 +261,11 @@ public class Henna {
             for (Interceptor networkInterceptor : networkInterceptors) {
                 builder.addNetworkInterceptor(networkInterceptor);
             }
+            if (null == converter) {
+                converter = Converter.DEFAULT;
+            }
             return new Henna(builder.build(), timeout, refreshTime, maxRetry, cache, cookieStore,
-                    interceptors, networkInterceptors, sslSocketFactory, headers, params);
+                    interceptors, networkInterceptors, sslSocketFactory, headers, params, converter);
         }
     }
 
