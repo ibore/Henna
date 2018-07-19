@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.functions.Cancellable;
 import me.ibore.http.Henna;
 import me.ibore.http.converter.Converter;
 import me.ibore.http.exception.HttpException;
@@ -18,6 +21,7 @@ import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public abstract class Request<T, R extends Request> {
 
@@ -352,7 +356,7 @@ public abstract class Request<T, R extends Request> {
 
     protected abstract okhttp3.Request.Builder generateRequest(HennaListener listener);
 
-    /*public Observable<T> observable() {
+    public Observable<T> observable() {
         return observable(null);
     }
 
@@ -388,6 +392,6 @@ public abstract class Request<T, R extends Request> {
                 throw new NullPointerException("converter can not be null");
             return converter.convert(responseBody);
         });
-    }*/
+    }
 
 }
