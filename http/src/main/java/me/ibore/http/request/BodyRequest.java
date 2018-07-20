@@ -122,7 +122,7 @@ public final class BodyRequest<T> extends Request<T, BodyRequest<T>> {
     }
 
     @Override
-    protected okhttp3.Request.Builder generateRequest(HennaListener listener) {
+    protected okhttp3.Request.Builder generateRequest() {
         if (null == requestBody) requestBody = generateRequestBody();
         if (null != uploadListener) {
             requestBody = new ProgressRequestBody(henna.getDelivery(), requestBody, uploadListener, refreshTime);

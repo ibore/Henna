@@ -1,14 +1,18 @@
 package me.ibore.http.listener;
 
+
+import me.ibore.http.Response;
+import me.ibore.http.call.Call;
 import me.ibore.http.progress.ProgressListener;
 
-public abstract class HennaListener<T> implements HttpListener<T>, ProgressListener {
+public interface HennaListener<T> extends ProgressListener {
 
-    public void onStart() {
+    void onStart();
 
-    }
+    void onResponse(Call<T> call, Response<T> response);
 
-    public void onFinish() {
+    void onFailure(Call<T> call, Throwable e);
 
-    }
+    void onFinish();
+
 }

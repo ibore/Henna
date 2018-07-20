@@ -22,6 +22,8 @@ import me.ibore.http.listener.HennaListener;
 import me.ibore.http.progress.Progress;
 import me.ibore.http.progress.ProgressListener;
 import me.ibore.http.request.BodyRequest;
+import me.ibore.http.request.NoBodyBuilder;
+import me.ibore.http.request.Request;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         strings.add("111111111111");
         strings.add("222222222222");
         strings.add("333333333333");
+
 
 
         HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");

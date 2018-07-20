@@ -1,30 +1,23 @@
 package me.ibore.http.call;
 
-import java.io.IOException;
-
+import me.ibore.http.Response;
 import me.ibore.http.listener.HennaListener;
 import me.ibore.http.request.Request;
-import okhttp3.Response;
 
-public interface Call<T> {
+public interface Call<T> extends Cloneable {
 
-    Request<T, ? extends Request> request();
-
-    Response execute() throws IOException;
+    Response<T> execute() throws Exception;
 
     void enqueue(HennaListener<T> listener);
 
-    void cancel();
-
     boolean isExecuted();
+
+    void cancel();
 
     boolean isCanceled();
 
-    okhttp3.Call clone();
+    Call<T> clone();
 
-    interface Factory<T> {
+    Request<T> request();
 
-        okhttp3.Call newCall(Request<T, ? extends Request> request);
-
-    }
 }

@@ -37,6 +37,7 @@ public class HennaProxy {
         this.baseUrl = baseUrl;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T create(final Class<T> service) {
         return (T) Proxy.newProxyInstance(service.getClassLoader()
                 , new Class[]{service}

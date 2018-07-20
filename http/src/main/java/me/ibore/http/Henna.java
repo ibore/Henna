@@ -18,6 +18,7 @@ import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.internal.http.HttpMethod;
 
 /**
  * description:
@@ -84,8 +85,6 @@ public class Henna {
     public Converter converter() {
         return converter;
     }
-
-    private final Handler mDelivery = new Handler(Looper.getMainLooper());
 
     private Henna(OkHttpClient okHttpClient, int timeout, int refreshTime, int maxRetry, Cache cache, CookieStore cookieStore,
                   List<Interceptor> interceptors, List<Interceptor> networkInterceptors,
