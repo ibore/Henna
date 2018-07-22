@@ -9,14 +9,9 @@ import me.ibore.http.HttpParams;
 import me.ibore.http.Response;
 import me.ibore.http.call.Call;
 import me.ibore.http.call.OkHttpCall;
-import me.ibore.http.converter.Converter;
 import me.ibore.http.listener.HennaListener;
 import me.ibore.http.progress.ProgressListener;
-import me.ibore.http.progress.ProgressRequestBody;
-import me.ibore.http.utils.HttpUtils;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
 
 public abstract class Request<T, R extends Request> {
 
@@ -31,11 +26,11 @@ public abstract class Request<T, R extends Request> {
     protected HttpParams params;
 
     protected Call<T> call;
-    protected Converter<T> converter;
-    protected ProgressListener uploadListener;
+    protected Call.Adapter callAdapter;
+    protected Call.Converter<T> converter;
     protected ProgressListener downloadListener;
-    protected boolean thread;
-    private okhttp3.Request rawRequest;
+    protected boolean isUIThread = true;
+    protected okhttp3.Request rawRequest;
 
     @SuppressWarnings("unchecked")
     public R client(OkHttpClient client) {
@@ -170,20 +165,8 @@ public abstract class Request<T, R extends Request> {
     }
 
     @SuppressWarnings("unchecked")
-    public R call(Call<T> call) {
-        this.call = call;
-        return (R) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public R converter(Converter<T> converter) {
+    public R converter(Call.Converter<T> converter) {
         this.converter = converter;
-        return (R) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public R upload(ProgressListener uploadListener) {
-        this.uploadListener = uploadListener;
         return (R) this;
     }
 
@@ -225,36 +208,24 @@ public abstract class Request<T, R extends Request> {
         return params;
     }
 
-    public Converter<T> getConverter() {
+    public Call.Converter<T> getConverter() {
         return converter;
-    }
-
-    public ProgressListener getUploadListener() {
-        return uploadListener;
     }
 
     public ProgressListener getDownloadListener() {
         return downloadListener;
     }
 
-    public boolean isThread() {
-        return thread;
+    public boolean isUIThread() {
+        return isUIThread;
     }
 
     public Response<T> execute() throws Exception {
-        if (null == call) {
-            return new OkHttpCall<T>(this).execute();
-        } else {
-            return call.execute();
-        }
+        return new OkHttpCall<>(this).execute();
     }
 
     public void enqueue(HennaListener<T> listener) {
-        if (null == call) {
-            new OkHttpCall<T>(this).enqueue(listener);
-        } else {
-            call.enqueue(listener);
-        }
+        new OkHttpCall<>(this).enqueue(listener);
     }
 
     public okhttp3.Call getRawCall() {
@@ -264,12 +235,21 @@ public abstract class Request<T, R extends Request> {
 
     protected abstract okhttp3.Request generateRequest();
 
+    /*public Call<T> adapter() {
+        if (call == null) {
+            return new OkHttpCall<>(this);
+        } else {
+            return call;
+        }
+    }*/
 
-/*   public Response<T> execute() throws Exception {
-        return new OkHttpCall<T>(this).execute();
+    public <E> E adapter() {
+        if (null == callAdapter) throw new NullPointerException("Call.Adapter can not be null");
+        return (E) callAdapter.adapter(adapter());
     }
 
-    public void enqueue(HennaListener<T> listener) {
+
+    /*public void enqueue(HennaListener<T> listener) {
         if (null == listener) throw new NullPointerException("HennaListener can not be null");
         henna.runOnUiThread(listener::onStart);
         okhttp3.Request.Builder builder = generateRequest(listener);

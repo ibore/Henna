@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import me.ibore.http.Henna;
-import me.ibore.http.R;
-import me.ibore.http.converter.Converter;
 import me.ibore.http.listener.HennaListener;
 import me.ibore.http.progress.ProgressListener;
 import okhttp3.CacheControl;

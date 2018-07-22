@@ -1,173 +1,159 @@
 package me.ibore.http.request;
 
-import com.google.gson.Gson;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import me.ibore.http.Henna;
-import me.ibore.http.listener.HennaListener;
+import me.ibore.http.HttpParams;
 import me.ibore.http.progress.ProgressListener;
 import me.ibore.http.progress.ProgressRequestBody;
-import okhttp3.CacheControl;
-import okhttp3.FormBody;
+import me.ibore.http.utils.HttpUtils;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
-public final class BodyRequest<T> extends Request<T, BodyRequest<T>> {
+import static me.ibore.http.HttpParams.MEDIA_TYPE_JSON;
+import static me.ibore.http.HttpParams.MEDIA_TYPE_PLAIN;
+import static me.ibore.http.HttpParams.MEDIA_TYPE_STREAM;
+
+public class BodyRequest<T> extends Request<T, BodyRequest<T>> {
 
     private RequestBody requestBody;
-    private MultipartBody multipartBody;
-    private ProgressListener uploadListener;
-    private LinkedHashMap<String, List<FileWrapper>> fileParams;
+    protected ProgressListener uploadListener;
+    private boolean isMultipart;
 
-    public BodyRequest(Henna henna) {
-        super(henna);
-        fileParams = new LinkedHashMap<>();
-    }
-
-    public BodyRequest<T> requestBody(RequestBody requestBody) {
+    @SuppressWarnings("unchecked")
+    public BodyRequest upRequestBody(RequestBody requestBody) {
         this.requestBody = requestBody;
         return this;
     }
 
-    public BodyRequest<T> multipartBody(MultipartBody multipartBody) {
-        this.multipartBody = multipartBody;
+    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upString(String string) {
+        requestBody = RequestBody.create(MEDIA_TYPE_PLAIN, string);
+        return this;
+    }
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     * 该方法用于定制请求content-type
+     */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upString(String string, MediaType mediaType) {
+        requestBody = RequestBody.create(mediaType, string);
         return this;
     }
 
-    public BodyRequest<T> upFile(File file) {
-        this.requestBody = RequestBody.create(MEDIA_TYPE_STREAM, file);
+    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upJson(String json) {
+        requestBody = RequestBody.create(MEDIA_TYPE_JSON, json);
         return this;
     }
 
-    public BodyRequest<T> upString(String content) {
-        this.requestBody = RequestBody.create(MEDIA_TYPE_PLAIN, content);
+    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upJson(JSONObject jsonObject) {
+        requestBody = RequestBody.create(MEDIA_TYPE_JSON, jsonObject.toString());
         return this;
     }
 
-    public BodyRequest<T> upString(MediaType mediaType, String content) {
-        this.requestBody = RequestBody.create(mediaType, content);
+    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upJson(JSONArray jsonArray) {
+        requestBody = RequestBody.create(MEDIA_TYPE_JSON, jsonArray.toString());
         return this;
     }
 
-    public BodyRequest<T> upJson(Object json) {
-        this.requestBody = RequestBody.create(MEDIA_TYPE_JSON, new Gson().toJson(json));
+    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upBytes(byte[] bs) {
+        requestBody = RequestBody.create(MEDIA_TYPE_STREAM, bs);
         return this;
     }
 
-    public BodyRequest<T> upBytes(byte[] bytes) {
-        this.requestBody = RequestBody.create(MEDIA_TYPE_STREAM, bytes);
+    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upBytes(byte[] bs, MediaType mediaType) {
+        requestBody = RequestBody.create(mediaType, bs);
         return this;
     }
 
-    public BodyRequest<T> param(String key, File file) {
-        return param(key, file, file.getName());
-    }
-
-    private BodyRequest<T> param(String key, File file, String fileName) {
-        MediaType mediaType;
-        String contentType = URLConnection.getFileNameMap().getContentTypeFor(fileName);
-        if (contentType == null) {
-            mediaType = MEDIA_TYPE_STREAM;
-        } else {
-            mediaType =  MediaType.parse(contentType);
-        }
-        return param(key, file, fileName, mediaType);
-    }
-
-    private BodyRequest<T> param(String key, File file, String fileName, MediaType mediaType) {
-        //解决文件名中含有#号异常的问题
-        return param(key, new FileWrapper(file, fileName.replace("#", ""),
-                mediaType == null ? MEDIA_TYPE_STREAM : mediaType));
-    }
-
-    public BodyRequest<T> param(String key, FileWrapper fileWrapper) {
-        if (key != null) {
-            List<FileWrapper> fileWrappers = fileParams.get(key);
-            if (null == fileWrappers) {
-                fileWrappers = new ArrayList<>();
-                fileParams.put(key, fileWrappers);
-            }
-            fileWrappers.add(fileWrapper);
-        }
+    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upFile(File file) {
+        requestBody = RequestBody.create(HttpUtils.guessMimeType(file.getName()), file);
         return this;
     }
 
-    public void removeFileParams(String key) {
-        fileParams.remove(key);
-    }
-
-    public LinkedHashMap<String, List<FileWrapper>> fileParams() {
-        return fileParams;
-    }
-
-    public BodyRequest<T> params(String key, List<FileWrapper> values) {
-        if (key != null && values != null && !values.isEmpty()) {
-            for (FileWrapper value : values) {
-                param(key, value.getFile(), value.getFileName(), value.getContentType());
-            }
-        }
+    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    @SuppressWarnings("unchecked")
+    public BodyRequest upFile(File file, MediaType mediaType) {
+        requestBody = RequestBody.create(mediaType, file);
         return this;
     }
 
-    public BodyRequest<T> uploadListener(ProgressListener uploadListener) {
+    @SuppressWarnings("unchecked")
+    public BodyRequest isMultipart(boolean isMultipart) {
+        this.isMultipart = isMultipart;
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public BodyRequest params(String key, File file) {
+        params.put(key, file);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public BodyRequest addFileParams(String key, List<File> files) {
+        params.putFileParams(key, files);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public BodyRequest addFileWrapperParams(String key, List<HttpParams.FileWrapper> fileWrappers) {
+        params.putFileWrapperParams(key, fileWrappers);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public BodyRequest params(String key, File file, String fileName) {
+        params.put(key, file, fileName);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public BodyRequest params(String key, File file, String fileName, MediaType contentType) {
+        params.put(key, file, fileName, contentType);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public BodyRequest upload(ProgressListener uploadListener) {
         this.uploadListener = uploadListener;
         return this;
     }
 
     @Override
-    protected okhttp3.Request.Builder generateRequest() {
-        if (null == requestBody) requestBody = generateRequestBody();
-        if (null != uploadListener) {
-            requestBody = new ProgressRequestBody(henna.getDelivery(), requestBody, uploadListener, refreshTime);
-        }
-        return new okhttp3.Request.Builder()
-                .method(method, requestBody)
-                .url(url)
+    protected okhttp3.Request generateRequest() {
+        okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
+        builder.method(method, generateRequestBody())
+                .url(HttpUtils.createUrlFromParams(url, params.urlParamsMap))
                 .tag(tag)
-                .cacheControl(null == cacheControl ? new CacheControl.Builder().noCache().build() : cacheControl)
-                .headers(generateHeaders());
+                .headers(HttpUtils.appendHeaders(headers));
+        return builder.build();
     }
 
     private RequestBody generateRequestBody() {
-        if (fileParams.isEmpty() && null == multipartBody) {
-            //表单提交，没有文件
-            FormBody.Builder bodyBuilder = new FormBody.Builder();
-            for (String key : urlParams.keySet()) {
-                List<String> urlValues = urlParams.get(key);
-                for (String value : urlValues) {
-                    bodyBuilder.add(key, value);
-                }
-            }
-            return bodyBuilder.build();
-        } else {
-            MultipartBody.Builder builder = new MultipartBody.Builder().setType(MEDIA_TYPE_FORM);
-            for (MultipartBody.Part part : multipartBody.parts()) {
-                builder.addPart(part);
-            }
-            if (!urlParams.isEmpty()) {
-                for (Map.Entry<String, List<String>> entry : urlParams.entrySet()) {
-                    List<String> urlValues = entry.getValue();
-                    for (String value : urlValues) {
-                        builder.addFormDataPart(entry.getKey(), value);
-                    }
-                }
-            }
-            for (Map.Entry<String, List<FileWrapper>> entry : fileParams.entrySet()) {
-                List<FileWrapper> fileValues = entry.getValue();
-                for (FileWrapper fileWrapper : fileValues) {
-                    RequestBody fileBody = RequestBody.create(fileWrapper.getContentType(), fileWrapper.getFile());
-                    builder.addFormDataPart(entry.getKey(), fileWrapper.getFileName(), fileBody);
-                }
-            }
-            return builder.build();
+        if (null == requestBody) {
+            requestBody = HttpUtils.generateMultipartRequestBody(params, isMultipart);
         }
+        if (null != uploadListener) {
+            requestBody = ProgressRequestBody.create(isUIThread ? HttpUtils.mDelivery : null, requestBody, uploadListener, refreshTime);
+        }
+        return requestBody;
     }
 
 }

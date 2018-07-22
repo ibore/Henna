@@ -1,7 +1,6 @@
 package me.ibore.http;
 
 import android.os.Handler;
-import android.os.Looper;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import me.ibore.http.converter.Converter;
 import me.ibore.http.cookie.CookieStore;
 import me.ibore.http.request.NoBodyRequest;
 import me.ibore.http.request.BodyRequest;

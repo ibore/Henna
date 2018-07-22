@@ -1,15 +1,6 @@
 package me.ibore.http.request;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-
-import me.ibore.http.Henna;
-import me.ibore.http.listener.HennaListener;
 import me.ibore.http.utils.HttpUtils;
-import okhttp3.CacheControl;
-import okhttp3.RequestBody;
 
 public class NoBodyRequest<T> extends Request<T, NoBodyRequest<T>> {
 
@@ -24,7 +15,7 @@ public class NoBodyRequest<T> extends Request<T, NoBodyRequest<T>> {
     protected okhttp3.Request generateRequest() {
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
         builder.method(method, null)
-                .url(HttpUtils.createUrlFromParams(url, params.urlParamsMap))
+                .url(HttpUtils.createUrlFromParams(url = url + appendUrl, params.urlParamsMap))
                 .tag(tag)
                 .headers(HttpUtils.appendHeaders(headers));
         return builder.build();
