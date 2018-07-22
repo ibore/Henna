@@ -11,6 +11,7 @@ import okhttp3.ResponseBody;
 
 public class RxJavaCallAdapter<T> implements ObservableOnSubscribe<ResponseBody>, Call.Adapter<T, Observable<Response<T>>> {
 
+
     @Override
     public void subscribe(ObservableEmitter<ResponseBody> emitter) throws Exception {
         try {
@@ -38,7 +39,7 @@ public class RxJavaCallAdapter<T> implements ObservableOnSubscribe<ResponseBody>
             }
         });
     }
-    
+
     @Override
     public Observable<Response<T>> adapter(Call<T> call) {
         return null;
