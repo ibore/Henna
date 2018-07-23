@@ -14,16 +14,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import me.ibore.http.Henna;
-import me.ibore.http.HennaProxy;
+import me.ibore.http.Response;
+import me.ibore.http.adapter.rxjava2.RxJava2CallAdapter;
 import me.ibore.http.converter.StringConverter;
-import me.ibore.http.exception.HttpException;
 import me.ibore.http.interceptor.HttpLogInterceptor;
-import me.ibore.http.listener.HennaListener;
 import me.ibore.http.progress.Progress;
 import me.ibore.http.progress.ProgressListener;
-import me.ibore.http.request.BodyRequest;
-import me.ibore.http.request.NoBodyBuilder;
-import me.ibore.http.request.Request;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
+        /*HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
         ApiService apiService = proxy.create(ApiService.class);
         apiService.getSo("test")
                 .subscribeOn(Schedulers.io())
@@ -84,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete() {
                         Log.d("----", "onComplete");
                     }
-                });
+                });*/
         /*new Thread(new Runnable() {
             @Override
             public void run() {
@@ -114,27 +110,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();*/
-        /*compositeDisposable.add(xHttp.<String>get("http://101.199.121.249/softdl.360tpcdn.com/auto/20180309/102615199_2f0a7c0426fa87ac8112aff10789ed08.exe")
+        compositeDisposable.add(xHttp.<String>get("http://101.199.121.249/softdl.360tpcdn.com/auto/20180309/102615199_2f0a7c0426fa87ac8112aff10789ed08.exe")
                 .tag(this)
-                .header("test1", "test")
-                .param("test", "test")
-                .param("test", "fddsfdsfsf")
-                *//*.uploadListener(new ProgressListener() {
+                .headers("test1", "test")
+                .params("test", "test")
+                .params("test", "fddsfdsfsf")
+                /*.uploadListener(new ProgressListener() {
                     @Override
                     public void onProgress(Progress progress) {
                         Log.d("----", "uploadListener:" + progress.getPercent());
                     }
-                })*//*
-                .progress(true)
-                .observable(new ProgressListener() {
+                })*/
+                .download(new ProgressListener() {
                     @Override
                     public void onProgress(Progress progress) {
                         Log.d("----", "downloadListener:" + progress.getPercent());
                     }
                 })
+                .adapter(new RxJava2CallAdapter<>())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<String>() {
+                .subscribeWith(new DisposableObserver<Response<String>>() {
 
                     @Override
                     protected void onStart() {
@@ -143,8 +139,8 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onNext(String s) {
-                        Log.d("----", s);
+                    public void onNext(Response<String> stringResponse) {
+                        Log.d("----", stringResponse.body());
                     }
 
                     @Override
@@ -156,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete() {
                         Log.d("----", "onComplete");
                     }
-                }));*/
+                }));
         /*xHttp.<String>get("http://101.199.121.249/softdl.360tpcdn.com/auto/20180309/102615199_2f0a7c0426fa87ac8112aff10789ed08.exe")
                 .tag(this)
                 .header("test1", "test")

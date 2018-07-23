@@ -1,15 +1,10 @@
-package me.ibore.http.call;
+package me.ibore.http;
 
 import android.support.annotation.NonNull;
 
 import java.io.IOException;
 
-import me.ibore.http.Response;
-import me.ibore.http.exception.HttpException;
-import me.ibore.http.listener.HennaListener;
 import me.ibore.http.progress.ProgressResponseBody;
-import me.ibore.http.request.Request;
-import me.ibore.http.utils.HttpUtils;
 
 public class OkHttpCall<T> implements Call<T> {
 
@@ -29,7 +24,7 @@ public class OkHttpCall<T> implements Call<T> {
                 rawResponse = rawResponse.newBuilder().body(ProgressResponseBody.create(rawResponse.body(), request.getDownloadListener(), request.getRefreshTime())).build();
             }
             if (null == request.getConverter()) throw new NullPointerException("converter can not be null");
-            return Response.success(rawResponse, request.getConverter().convert(rawResponse.body()));
+            return Response.success(rawResponse, request.getConverter().convert(rawResponse));
         } else {
             throw new HttpException(rawResponse.code(), rawResponse.message());
         }
@@ -79,7 +74,7 @@ public class OkHttpCall<T> implements Call<T> {
                         }
                         if (null == request.getConverter())
                             throw new NullPointerException("converter can not be null");
-                        T object = request.getConverter().convert(rawResponse.body());
+                        T object = request.getConverter().convert(rawResponse);
                         if (request.isUIThread()) {
                             okhttp3.Response finalRawResponse = rawResponse;
                             HttpUtils.runOnUiThread(() -> {

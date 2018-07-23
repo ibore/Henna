@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.ibore.http.adapter.rxjava2.RxJava2CallAdapter;
 import me.ibore.http.annotation.DELETE;
 import me.ibore.http.annotation.GET;
 import me.ibore.http.annotation.HEAD;
@@ -24,8 +25,7 @@ import me.ibore.http.annotation.ParamMap;
 import me.ibore.http.annotation.TRACE;
 import me.ibore.http.annotation.Listener;
 import me.ibore.http.progress.ProgressListener;
-import me.ibore.http.request.BodyRequest;
-import me.ibore.http.request.NoBodyRequest;
+import okhttp3.internal.http.HttpMethod;
 
 public class HennaProxy {
 
@@ -55,35 +55,35 @@ public class HennaProxy {
         String httpMethod = "";
         String url = "";
         if (method.isAnnotationPresent(GET.class)) {
-            httpMethod = HttpMethod.GET;
+            httpMethod = "GET";
             url = method.getAnnotation(GET.class).value();
         } else if (method.isAnnotationPresent(HEAD.class)) {
-            httpMethod = HttpMethod.HEAD;
+            httpMethod = "HEAD";
             url = method.getAnnotation(HEAD.class).value();
         } else if (method.isAnnotationPresent(TRACE.class)) {
-            httpMethod = HttpMethod.TRACE;
+            httpMethod = "TRACE";
             url = method.getAnnotation(TRACE.class).value();
         } else if (method.isAnnotationPresent(POST.class)) {
-            httpMethod = HttpMethod.POST;
+            httpMethod = "POST";
             url = method.getAnnotation(POST.class).value();
         } else if (method.isAnnotationPresent(PUT.class)) {
-            httpMethod = HttpMethod.PUT;
+            httpMethod = "PUT";
             url = method.getAnnotation(PUT.class).value();
         } else if (method.isAnnotationPresent(DELETE.class)) {
-            httpMethod = HttpMethod.DELETE;
+            httpMethod = "DELETE";
             url = method.getAnnotation(DELETE.class).value();
         } else if (method.isAnnotationPresent(OPTIONS.class)) {
-            httpMethod = HttpMethod.OPTIONS;
+            httpMethod = "OPTIONS";
             url = method.getAnnotation(OPTIONS.class).value();
         } else if (method.isAnnotationPresent(PATCH.class)) {
-            httpMethod = HttpMethod.PATCH;
+            httpMethod = "PATCH";
             url = method.getAnnotation(PATCH.class).value();
         } else {
             throw new RuntimeException("you need to add annotation ( @Query || @Form || @Multipart ) to declare the quest Type");
         }
         if (TextUtils.isEmpty(url)) throw new RuntimeException("url is null");
         if (!url.startsWith("http")) url = baseUrl + url;
-        if (HttpMethod.hasRequestBody(httpMethod)) {
+        if (HttpUtils.hasBody(httpMethod)) {
             return invokeBody(httpMethod, url, method, args);
         } else {
             return invokeNoBody(httpMethod, url, method, args);
@@ -92,43 +92,46 @@ public class HennaProxy {
     }
 
     private Object invokeNoBody(String httpMethod, String url, Method method, Object[] args) {
-        NoBodyRequest request = new NoBodyRequest<>(henna).method(httpMethod).url(url);
+        RequestNoBody request = new RequestNoBody<>(henna)
+                .method(httpMethod)
+                .url(url);
         Annotation[] annotations = checkoutParameter(method);
+        request.headers(getHeaders(annotations, args));
         for (int i = 0; i < annotations.length; i++) {
             Annotation annotation = annotations[i];
-            if (annotation instanceof Param) {
-                request.param(((Param) annotation).value(), (String) args[i]);
+            if (annotation instanceof Header) {
+
+            } else if (annotation instanceof Param) {
+                request.params(((Param) annotation).value(), (String) args[i]);
             } else if (annotation instanceof ParamMap) {
-                request.param((Map<String, String>) args[i], false);
+                request.params((Map<String, String>) args[i], false);
             } else {
                 throw new RuntimeException("");
             }
         }
-        return request.enqueue();
+        return request.adapter(new RxJava2CallAdapter());
     }
 
     private Object invokeBody(String httpMethod, String url, Method method, Object[] args) {
-        BodyRequest request = new BodyRequest<>(henna).method(httpMethod).url(url);
+        RequestHasBody request = new RequestHasBody<>(henna)
+                .method(httpMethod)
+                .url(url);
         Annotation[] annotations = checkoutParameter(method);
-        request.header(getHeaders(annotations, args));
+        request.headers(getHeaders(annotations, args));
+
         for (int i = 0; i < annotations.length; i++) {
             Annotation annotation = annotations[i];
-            if (annotation instanceof Param) {
-                if (args[i] instanceof String) {
-                    request.param(((Header) annotation).value(), (String) args[i]);
-                } else if (args[i] instanceof Double){
-                    request.param(((Header) annotation).value(), Double.toString((Double) args[i]));
-                } else if (args[i] instanceof Integer){
-                    request.param(((Header) annotation).value(), Integer.toString((Integer) args[i]));
-                } else if (args[i] instanceof Float){
-                    request.param(((Header) annotation).value(), Float.toString((Float) args[i]));
-                } else if (args[i] instanceof Long){
-                    request.param(((Header) annotation).value(), Long.toString((Long) args[i]));
+            if (annotation instanceof Header) {
+                request.headers(((Header) annotation).value(), (String) args[i]);
+            } else if (annotation instanceof HeaderMap) {
+                Map<? extends String, ? extends String> map = (Map<? extends String, ? extends String>) args[i];
+                for (String key : map.keySet()) {
+                    request.headers(key, map.get(key));
                 }
+            }  else if (annotation instanceof Param) {
+                request.params((String) args[i], false);
             } else if (annotation instanceof ParamMap) {
                 request.params((Map<String, List<String>>) args[i], false);
-            } else if (annotation instanceof ParamMap) {
-
             }  else if (annotation instanceof ParamMap) {
 
             }  else if (annotation instanceof ParamMap) {
@@ -162,8 +165,8 @@ public class HennaProxy {
         return annotations;
     }
 
-    protected Map<String, String> getHeaders(Annotation[] annotations, Object[] args) {
-        Map<String, String> headers = new LinkedHashMap<>();
+    protected HttpHeaders getHeaders(Annotation[] annotations, Object[] args) {
+        HttpHeaders headers = new HttpHeaders();
         int len = annotations.length;
         for (int i = 0; i < len; i++) {
             Annotation annotation = annotations[0];

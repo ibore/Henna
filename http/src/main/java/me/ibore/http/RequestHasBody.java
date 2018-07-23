@@ -1,4 +1,4 @@
-package me.ibore.http.request;
+package me.ibore.http;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -6,32 +6,32 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.List;
 
-import me.ibore.http.HttpParams;
 import me.ibore.http.progress.ProgressListener;
 import me.ibore.http.progress.ProgressRequestBody;
-import me.ibore.http.utils.HttpUtils;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
-import static me.ibore.http.HttpParams.MEDIA_TYPE_JSON;
-import static me.ibore.http.HttpParams.MEDIA_TYPE_PLAIN;
-import static me.ibore.http.HttpParams.MEDIA_TYPE_STREAM;
+import static me.ibore.http.HttpParams.*;
 
-public class BodyRequest<T> extends Request<T, BodyRequest<T>> {
+public class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
 
     private RequestBody requestBody;
-    protected ProgressListener uploadListener;
+    private ProgressListener uploadListener;
     private boolean isMultipart;
 
+    public RequestHasBody(Henna henna) {
+        super(henna);
+    }
+
     @SuppressWarnings("unchecked")
-    public BodyRequest upRequestBody(RequestBody requestBody) {
+    public RequestHasBody upRequestBody(RequestBody requestBody) {
         this.requestBody = requestBody;
         return this;
     }
 
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
-    public BodyRequest upString(String string) {
+    public RequestHasBody upString(String string) {
         requestBody = RequestBody.create(MEDIA_TYPE_PLAIN, string);
         return this;
     }
@@ -40,98 +40,98 @@ public class BodyRequest<T> extends Request<T, BodyRequest<T>> {
      * 该方法用于定制请求content-type
      */
     @SuppressWarnings("unchecked")
-    public BodyRequest upString(String string, MediaType mediaType) {
+    public RequestHasBody upString(String string, MediaType mediaType) {
         requestBody = RequestBody.create(mediaType, string);
         return this;
     }
 
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
-    public BodyRequest upJson(String json) {
+    public RequestHasBody upJson(String json) {
         requestBody = RequestBody.create(MEDIA_TYPE_JSON, json);
         return this;
     }
 
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
-    public BodyRequest upJson(JSONObject jsonObject) {
+    public RequestHasBody upJson(JSONObject jsonObject) {
         requestBody = RequestBody.create(MEDIA_TYPE_JSON, jsonObject.toString());
         return this;
     }
 
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
-    public BodyRequest upJson(JSONArray jsonArray) {
+    public RequestHasBody upJson(JSONArray jsonArray) {
         requestBody = RequestBody.create(MEDIA_TYPE_JSON, jsonArray.toString());
         return this;
     }
 
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
-    public BodyRequest upBytes(byte[] bs) {
+    public RequestHasBody upBytes(byte[] bs) {
         requestBody = RequestBody.create(MEDIA_TYPE_STREAM, bs);
         return this;
     }
 
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
-    public BodyRequest upBytes(byte[] bs, MediaType mediaType) {
+    public RequestHasBody upBytes(byte[] bs, MediaType mediaType) {
         requestBody = RequestBody.create(mediaType, bs);
         return this;
     }
 
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
-    public BodyRequest upFile(File file) {
+    public RequestHasBody upFile(File file) {
         requestBody = RequestBody.create(HttpUtils.guessMimeType(file.getName()), file);
         return this;
     }
 
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
-    public BodyRequest upFile(File file, MediaType mediaType) {
+    public RequestHasBody upFile(File file, MediaType mediaType) {
         requestBody = RequestBody.create(mediaType, file);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public BodyRequest isMultipart(boolean isMultipart) {
+    public RequestHasBody isMultipart(boolean isMultipart) {
         this.isMultipart = isMultipart;
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public BodyRequest params(String key, File file) {
+    public RequestHasBody params(String key, File file) {
         params.put(key, file);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public BodyRequest addFileParams(String key, List<File> files) {
+    public RequestHasBody addFileParams(String key, List<File> files) {
         params.putFileParams(key, files);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public BodyRequest addFileWrapperParams(String key, List<HttpParams.FileWrapper> fileWrappers) {
+    public RequestHasBody addFileWrapperParams(String key, List<HttpParams.FileWrapper> fileWrappers) {
         params.putFileWrapperParams(key, fileWrappers);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public BodyRequest params(String key, File file, String fileName) {
+    public RequestHasBody params(String key, File file, String fileName) {
         params.put(key, file, fileName);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public BodyRequest params(String key, File file, String fileName, MediaType contentType) {
+    public RequestHasBody params(String key, File file, String fileName, MediaType contentType) {
         params.put(key, file, fileName, contentType);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public BodyRequest upload(ProgressListener uploadListener) {
+    public RequestHasBody upload(ProgressListener uploadListener) {
         this.uploadListener = uploadListener;
         return this;
     }

@@ -1,22 +1,16 @@
 package me.ibore.http;
 
-import android.os.Handler;
-
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSocketFactory;
 
 import me.ibore.http.cookie.CookieStore;
-import me.ibore.http.request.NoBodyRequest;
-import me.ibore.http.request.BodyRequest;
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.internal.http.HttpMethod;
 
 /**
  * description:
@@ -36,11 +30,11 @@ public class Henna {
     private List<Interceptor> interceptors;
     private List<Interceptor> networkInterceptors;
     private SSLSocketFactory sslSocketFactory;
-    private LinkedHashMap<String, String> headers;
-    private LinkedHashMap<String, String> params;
+    private HttpHeaders headers;
+    private HttpParams params;
     private Converter converter;
 
-    public OkHttpClient okHttpClient() {
+    public OkHttpClient client() {
         return okHttpClient;
     }
 
@@ -72,11 +66,11 @@ public class Henna {
         return interceptors;
     }
 
-    public LinkedHashMap<String, String> headers() {
+    public HttpHeaders headers() {
         return headers;
     }
 
-    public LinkedHashMap<String, String> params() {
+    public HttpParams params() {
         return params;
     }
 
@@ -86,8 +80,8 @@ public class Henna {
 
     private Henna(OkHttpClient okHttpClient, int timeout, int refreshTime, int maxRetry, Cache cache, CookieStore cookieStore,
                   List<Interceptor> interceptors, List<Interceptor> networkInterceptors,
-                  SSLSocketFactory sslSocketFactory, LinkedHashMap<String, String> headers,
-                  LinkedHashMap<String, String> params, Converter converter) {
+                  SSLSocketFactory sslSocketFactory, HttpHeaders headers,
+                  HttpParams params, Converter converter) {
         this.okHttpClient = okHttpClient;
         this.timeout = timeout;
         this.refreshTime = refreshTime;
@@ -102,49 +96,47 @@ public class Henna {
         this.converter = converter;
     }
 
-    public <T> NoBodyRequest<T> get(String url) {
-        return new NoBodyRequest<T>(this).url(url).method(HttpMethod.GET);
+    public <T> RequestNoBody<T> get(String url) {
+        return new RequestNoBody<T>(this)
+                .url(url)
+                .method("GET");
     }
 
-    public <T> BodyRequest<T> post(String url) {
-        return new BodyRequest<T>(this).url(url).method(HttpMethod.POST);
+    public <T> RequestHasBody<T> post(String url) {
+        return new RequestHasBody<T>(this).url(url).method("POST");
     }
 
-    public <T>BodyRequest<T> put(String url) {
-        return new BodyRequest<T>(this).url(url).method(HttpMethod.PUT);
+    public <T>RequestHasBody<T> put(String url) {
+        return new RequestHasBody<T>(this).url(url).method("PUT");
     }
 
-    public <T> NoBodyRequest<T> head(String url) {
-        return new NoBodyRequest<T>(this).url(url).method(HttpMethod.HEAD);
+    public <T> RequestNoBody<T> head(String url) {
+        return new RequestNoBody<T>(this).url(url).method("HEAD");
     }
 
-    public <T> BodyRequest<T> delete(String url) {
-        return new BodyRequest<T>(this).url(url).method(HttpMethod.DELETE);
+    public <T> RequestHasBody<T> delete(String url) {
+        return new RequestHasBody<T>(this).url(url).method("DELETE");
     }
 
-    public <T> BodyRequest<T> options(String url) {
-        return new BodyRequest<T>(this).url(url).method(HttpMethod.OPTIONS);
+    public <T> RequestHasBody<T> options(String url) {
+        return new RequestHasBody<T>(this).url(url).method("OPTIONS");
     }
 
-    public <T> BodyRequest<T> patch(String url) {
-        return new BodyRequest<T>(this).url(url).method(HttpMethod.PATCH);
+    public <T> RequestHasBody<T> patch(String url) {
+        return new RequestHasBody<T>(this).url(url).method("PATCH");
     }
 
-    public <T> NoBodyRequest<T> trace(String url) {
-        return new NoBodyRequest<T>(this).url(url).method(HttpMethod.TRACE);
-    }
-
-    public void runOnUiThread(Runnable runnable) {
-        mDelivery.post(runnable);
+    public <T> RequestNoBody<T> trace(String url) {
+        return new RequestNoBody<T>(this).url(url).method("TRACE");
     }
 
     public void cancelTag(Object tag) {
-        for (Call call : okHttpClient().dispatcher().queuedCalls()) {
+        for (Call call : client().dispatcher().queuedCalls()) {
             if (tag.equals(call.request().tag())) {
                 call.cancel();
             }
         }
-        for (Call call : okHttpClient().dispatcher().runningCalls()) {
+        for (Call call : client().dispatcher().runningCalls()) {
             if (tag.equals(call.request().tag())) {
                 call.cancel();
             }
@@ -152,16 +144,12 @@ public class Henna {
     }
 
     public void cancelAll() {
-        for (Call call : okHttpClient().dispatcher().queuedCalls()) {
+        for (Call call : client().dispatcher().queuedCalls()) {
             call.cancel();
         }
-        for (Call call : okHttpClient().dispatcher().runningCalls()) {
+        for (Call call : client().dispatcher().runningCalls()) {
             call.cancel();
         }
-    }
-
-    public Handler getDelivery() {
-        return mDelivery;
     }
 
     public static class Builder {
@@ -174,8 +162,8 @@ public class Henna {
         private List<Interceptor> interceptors;
         private List<Interceptor> networkInterceptors;
         private SSLSocketFactory sslSocketFactory;
-        private LinkedHashMap<String, String> headers;
-        private LinkedHashMap<String, String> params;
+        private HttpHeaders headers;
+        private HttpParams params;
         private Converter converter;
 
         public Builder() {
@@ -184,8 +172,8 @@ public class Henna {
             this.maxRetry = 0;
             interceptors = new ArrayList<>();
             networkInterceptors = new ArrayList<>();
-            headers = new LinkedHashMap<>();
-            params = new LinkedHashMap<>();
+            headers = new HttpHeaders();
+            params = new HttpParams();
         }
 
         public Builder(Henna henna) {

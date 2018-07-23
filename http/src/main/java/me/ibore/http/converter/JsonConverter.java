@@ -1,15 +1,14 @@
 package me.ibore.http.converter;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
 import java.io.IOException;
 
-import okhttp3.ResponseBody;
+import me.ibore.http.Converter;
+import okhttp3.Response;
 
 public class JsonConverter<T> implements Converter<T> {
 
     private JsonConverter() {
+
     }
 
     public static JsonConverter create() {
@@ -17,8 +16,7 @@ public class JsonConverter<T> implements Converter<T> {
     }
 
     @Override
-    public T convert(ResponseBody value) throws IOException {
+    public T convert(Response value) throws IOException {
         return null;
     }
-
 }

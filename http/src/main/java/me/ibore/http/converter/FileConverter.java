@@ -3,7 +3,9 @@ package me.ibore.http.converter;
 import java.io.File;
 import java.io.IOException;
 
-import okhttp3.ResponseBody;
+import me.ibore.http.Converter;
+import me.ibore.http.HttpUtils;
+import okhttp3.Response;
 import okio.Okio;
 
 public class FileConverter implements Converter<File> {
@@ -23,9 +25,10 @@ public class FileConverter implements Converter<File> {
     }
 
     @Override
-    public File convert(ResponseBody value) throws IOException {
+    public File convert(Response value) throws IOException {
+        /*HttpUtils.getNetFileName(value, value.header())*/
         File tempFile = new File(filePath, File.separator + System.currentTimeMillis());
-        Okio.buffer(Okio.sink(tempFile)).writeAll(Okio.buffer(Okio.source(value.byteStream())));
+        Okio.buffer(Okio.sink(tempFile)).writeAll(Okio.buffer(Okio.source(value.body().byteStream())));
         return tempFile;
     }
 }

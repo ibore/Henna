@@ -1,11 +1,14 @@
-package me.ibore.http.utils;
+package me.ibore.http;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.FileNameMap;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -98,22 +101,17 @@ public class HttpUtils {
         }
     }
 
-    private static String getUrlFileName(String url) {
-        String filename = null;
-        String[] strings = url.split("/");
-        for (String string : strings) {
-            if (string.contains("?")) {
-                int endIndex = string.indexOf("?");
-                if (endIndex != -1) {
-                    filename = string.substring(0, endIndex);
-                    return filename;
-                }
-            }
+    /** 根据响应头或者url获取文件名 */
+    public static String getNetFileName(Response response, String url) {
+        String fileName = getHeaderFileName(response);
+        if (TextUtils.isEmpty(fileName)) fileName = getUrlFileName(url);
+        if (TextUtils.isEmpty(fileName)) fileName = "temp_" + System.currentTimeMillis();
+        try {
+            fileName = URLDecoder.decode(fileName, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-        if (strings.length > 0) {
-            filename = strings[strings.length - 1];
-        }
-        return filename;
+        return fileName;
     }
 
     /**
@@ -145,6 +143,39 @@ public class HttpUtils {
         return null;
     }
 
+    /**
+     * 通过 ‘？’ 和 ‘/’ 判断文件名
+     * http://mavin-manzhan.oss-cn-hangzhou.aliyuncs.com/1486631099150286149.jpg?x-oss-process=image/watermark,image_d2F0ZXJtYXJrXzIwMF81MC5wbmc
+     */
+    private static String getUrlFileName(String url) {
+        String filename = null;
+        String[] strings = url.split("/");
+        for (String string : strings) {
+            if (string.contains("?")) {
+                int endIndex = string.indexOf("?");
+                if (endIndex != -1) {
+                    filename = string.substring(0, endIndex);
+                    return filename;
+                }
+            }
+        }
+        if (strings.length > 0) {
+            filename = strings[strings.length - 1];
+        }
+        return filename;
+    }
+
+    /** 根据路径删除文件 */
+    public static boolean deleteFile(String path) {
+        if (TextUtils.isEmpty(path)) return true;
+        File file = new File(path);
+        if (!file.exists()) return true;
+        if (file.isFile()) {
+            return file.delete();
+        }
+        return false;
+    }
+
     /** 根据文件名获取MIME类型 */
     public static MediaType guessMimeType(String fileName) {
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
@@ -156,9 +187,29 @@ public class HttpUtils {
         return MediaType.parse(contentType);
     }
 
+    public static <T> T checkNotNull(T object, String message) {
+        if (object == null) {
+            throw new NullPointerException(message);
+        }
+        return object;
+    }
+
     public static final Handler mDelivery = new Handler(Looper.getMainLooper());
 
     public static void runOnUiThread(Runnable runnable) {
         mDelivery.post(runnable);
+    }
+
+    public static boolean hasBody(String method) {
+        switch (method) {
+            case "POST":
+            case "PUT":
+            case "PATCH":
+            case "DELETE":
+            case "OPTIONS":
+                return true;
+            default:
+                return false;
+        }
     }
 }

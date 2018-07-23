@@ -1,15 +1,8 @@
-package me.ibore.http.request;
+package me.ibore.http;
 
 import java.util.List;
 import java.util.Map;
 
-import me.ibore.http.Henna;
-import me.ibore.http.HttpHeaders;
-import me.ibore.http.HttpParams;
-import me.ibore.http.Response;
-import me.ibore.http.call.Call;
-import me.ibore.http.call.OkHttpCall;
-import me.ibore.http.listener.HennaListener;
 import me.ibore.http.progress.ProgressListener;
 import okhttp3.OkHttpClient;
 
@@ -25,12 +18,21 @@ public abstract class Request<T, R extends Request> {
     protected HttpHeaders headers;
     protected HttpParams params;
 
-    protected Call<T> call;
-    protected Call.Adapter callAdapter;
-    protected Call.Converter<T> converter;
+    protected Converter<T> converter;
     protected ProgressListener downloadListener;
     protected boolean isUIThread = true;
-    protected okhttp3.Request rawRequest;
+
+    public Request(Henna henna) {
+        this.henna = henna;
+        client = henna.client();
+        maxRetry = henna.maxRetry();
+        refreshTime = henna.refreshTime();
+        headers = henna.headers();
+        if (null == headers) headers = new HttpHeaders();
+        params = henna.params();
+        if (null == params) params = new HttpParams();
+        converter = henna.converter();
+    }
 
     @SuppressWarnings("unchecked")
     public R client(OkHttpClient client) {
@@ -40,7 +42,12 @@ public abstract class Request<T, R extends Request> {
 
     @SuppressWarnings("unchecked")
     public R method(String method) {
-        this.method = method;
+        if ((this instanceof RequestHasBody && HttpUtils.hasBody(method)) ||
+                (this instanceof RequestNoBody && !HttpUtils.hasBody(method))) {
+            this.method = method;
+        } else {
+            throw new RuntimeException("Wrong request method");
+        }
         return (R) this;
     }
 
@@ -165,7 +172,7 @@ public abstract class Request<T, R extends Request> {
     }
 
     @SuppressWarnings("unchecked")
-    public R converter(Call.Converter<T> converter) {
+    public R converter(Converter<T> converter) {
         this.converter = converter;
         return (R) this;
     }
@@ -208,7 +215,7 @@ public abstract class Request<T, R extends Request> {
         return params;
     }
 
-    public Call.Converter<T> getConverter() {
+    public Converter<T> getConverter() {
         return converter;
     }
 
@@ -229,107 +236,17 @@ public abstract class Request<T, R extends Request> {
     }
 
     public okhttp3.Call getRawCall() {
-        rawRequest = generateRequest();
-        return client.newCall(rawRequest);
+        return client.newCall(generateRequest());
+    }
+
+    public Call<T> getCall() {
+        return new OkHttpCall<>(this);
     }
 
     protected abstract okhttp3.Request generateRequest();
 
-    /*public Call<T> adapter() {
-        if (call == null) {
-            return new OkHttpCall<>(this);
-        } else {
-            return call;
-        }
-    }*/
-
-    public <E> E adapter() {
-        if (null == callAdapter) throw new NullPointerException("Call.Adapter can not be null");
-        return (E) callAdapter.adapter(adapter());
+    public <E> E adapter(CallAdapter<T, E> callAdapter) {
+        return callAdapter.adapter(getCall(), false);
     }
-
-
-    /*public void enqueue(HennaListener<T> listener) {
-        if (null == listener) throw new NullPointerException("HennaListener can not be null");
-        henna.runOnUiThread(listener::onStart);
-        okhttp3.Request.Builder builder = generateRequest(listener);
-        client.newCall(builder.build()).enqueue(new okhttp3.Callback() {
-
-            int retryCount = 0;
-
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (retryCount < maxRetry) {
-                    client.newCall(builder.build()).enqueue(this);
-                    retryCount++;
-                } else {
-                    henna.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
-                    henna.runOnUiThread(listener::onFinish);
-                }
-            }
-
-            @Override
-            public void onResponse(Call call, okhttp3.Response rawResponse) throws IOException {
-                if (rawResponse.isSuccessful()) {
-                    try {
-                        if (null != downloadListener) {
-                            rawResponse = rawResponse.newBuilder().body(ProgressResponseBody.create(rawResponse.body(), downloadListener, refreshTime)).build();
-                        }
-                        if (null == converter)
-                            throw new NullPointerException("converter can not be null");
-                        T object = converter.convert(rawResponse.body());
-                        henna.runOnUiThread(() -> listener.onResponse(call, object));
-                    } catch (Exception e) {
-                        henna.runOnUiThread(() -> listener.onError(new HttpException(-1, e.getMessage())));
-                    }
-                } else {
-                    Response finalResponse = response;
-                    henna.runOnUiThread(() -> listener.onError(new HttpException(finalResponse.code(), finalResponse.message())));
-                }
-                henna.runOnUiThread(listener::onFinish);
-            }
-
-        });
-    }
-
-    protected abstract okhttp3.Request.Builder generateRequest(HennaListener listener);
-
-    public Observable<T> observable() {
-        return observable(null);
-    }
-
-    public Observable<T> observable(ProgressListener listener) {
-        return Observable.create((ObservableOnSubscribe<ResponseBody>) emitter -> {
-            try {
-                okhttp3.Request.Builder builder = generateRequest(null);
-                Response response = client.newCall(builder.build()).execute();
-                if (response.isSuccessful()) {
-                    if (isProgress) {
-                        if (null == listener)
-                            throw new NullPointerException("ProgressListener can not be null");
-                        response = response.newBuilder().body(ProgressResponseBody.create(
-                                henna.getDelivery(), response.body(), listener, refreshTime)).build();
-                    }
-                    emitter.onNext(response.body());
-                } else {
-                    emitter.onError(HttpException.newInstance(response.code()));
-                }
-            } catch (Exception e) {
-                emitter.onError(e);
-            } finally {
-                emitter.onComplete();
-            }
-            emitter.setCancellable(new Cancellable() {
-                @Override
-                public void cancel() throws Exception {
-                    henna.cancelTag(tag);
-                }
-            });
-        }).map(responseBody -> {
-            if (null == converter)
-                throw new NullPointerException("converter can not be null");
-            return converter.convert(responseBody);
-        });
-    }*/
 
 }
