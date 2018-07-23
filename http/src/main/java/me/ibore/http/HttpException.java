@@ -1,4 +1,4 @@
-package me.ibore.http.exception;
+package me.ibore.http;
 
 import android.util.SparseArray;
 

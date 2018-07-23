@@ -2,7 +2,8 @@ package me.ibore.http.converter;
 
 import java.io.IOException;
 
-import okhttp3.ResponseBody;
+import me.ibore.http.Converter;
+import okhttp3.Response;
 
 public class StringConverter implements Converter<String> {
 
@@ -15,7 +16,7 @@ public class StringConverter implements Converter<String> {
     }
 
     @Override
-    public String convert(ResponseBody value) throws IOException {
-        return value.string();
+    public String convert(Response value) throws IOException {
+        return value.body().string();
     }
 }

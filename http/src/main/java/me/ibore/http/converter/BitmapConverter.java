@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory;
 
 import java.io.IOException;
 
+import me.ibore.http.Converter;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class BitmapConverter implements Converter<Bitmap> {
@@ -17,7 +19,8 @@ public class BitmapConverter implements Converter<Bitmap> {
     }
 
     @Override
-    public Bitmap convert(ResponseBody value) throws IOException {
-        return BitmapFactory.decodeByteArray(value.bytes(), 0, value.bytes().length);
+    public Bitmap convert(Response value) throws IOException {
+        ResponseBody body = value.body();
+        return BitmapFactory.decodeByteArray(body.bytes(), 0, body.bytes().length);
     }
 }

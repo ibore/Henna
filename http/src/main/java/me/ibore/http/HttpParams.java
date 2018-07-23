@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import me.ibore.http.utils.HttpUtils;
 import okhttp3.MediaType;
 
 public class HttpParams implements Serializable {

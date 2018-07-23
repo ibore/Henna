@@ -1,12 +1,14 @@
-package me.ibore.http.request;
+package me.ibore.http;
 
-import me.ibore.http.utils.HttpUtils;
-
-public class NoBodyRequest<T> extends Request<T, NoBodyRequest<T>> {
+public class RequestNoBody<T> extends Request<T, RequestNoBody<T>> {
 
     private String appendUrl = "";
 
-    public NoBodyRequest appendUrl(String appendUrl) {
+    public RequestNoBody(Henna henna) {
+        super(henna);
+    }
+
+    public RequestNoBody appendUrl(String appendUrl) {
         this.appendUrl = appendUrl;
         return this;
     }
