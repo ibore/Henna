@@ -9,17 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
-import me.ibore.http.Henna;
-import me.ibore.http.Response;
-import me.ibore.http.adapter.rxjava2.RxJava2CallAdapter;
-import me.ibore.http.converter.StringConverter;
-import me.ibore.http.interceptor.HttpLogInterceptor;
-import me.ibore.http.progress.Progress;
-import me.ibore.http.progress.ProgressListener;
+import me.ibore.henna.Henna;
+import me.ibore.henna.HennaProxy;
+import me.ibore.henna.Response;
+import me.ibore.henna.converter.StringConverter;
+import me.ibore.henna.interceptor.HttpLogInterceptor;
+import me.ibore.henna.progress.Progress;
+import me.ibore.henna.progress.ProgressListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        HttpLogInterceptor logInterceptor = new HttpLogInterceptor("OkHttp");
+        HttpLogInterceptor logInterceptor = new HttpLogInterceptor();
         logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
         logInterceptor.setColorLevel(Level.WARNING);
 
@@ -52,35 +53,28 @@ public class MainActivity extends AppCompatActivity {
         strings.add("333333333333");
 
 
-
-        /*HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
+        HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
         ApiService apiService = proxy.create(ApiService.class);
-        apiService.getSo("test")
+        apiService.getSo("so.com")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<String>() {
+                .subscribeWith(new DisposableObserver<Response<String>>() {
 
                     @Override
-                    protected void onStart() {
-                        super.onStart();
-                        Log.d("----", "onStart");
-                    }
-
-                    @Override
-                    public void onNext(String s) {
-                        Log.d("----", s);
+                    public void onNext(Response<String> stringResponse) {
+                        Log.d("----", stringResponse.body());
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.d("----", e.getMessage());
+
                     }
 
                     @Override
                     public void onComplete() {
-                        Log.d("----", "onComplete");
+
                     }
-                });*/
+                });
         /*new Thread(new Runnable() {
             @Override
             public void run() {
@@ -110,49 +104,62 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();*/
-        compositeDisposable.add(xHttp.<String>get("http://101.199.121.249/softdl.360tpcdn.com/auto/20180309/102615199_2f0a7c0426fa87ac8112aff10789ed08.exe")
-                .tag(this)
-                .headers("test1", "test")
-                .params("test", "test")
-                .params("test", "fddsfdsfsf")
-                /*.uploadListener(new ProgressListener() {
-                    @Override
-                    public void onProgress(Progress progress) {
-                        Log.d("----", "uploadListener:" + progress.getPercent());
-                    }
-                })*/
-                .download(new ProgressListener() {
-                    @Override
-                    public void onProgress(Progress progress) {
-                        Log.d("----", "downloadListener:" + progress.getPercent());
-                    }
-                })
-                .adapter(new RxJava2CallAdapter<>())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<Response<String>>() {
-
-                    @Override
-                    protected void onStart() {
-                        super.onStart();
-                        Log.d("----", "onStart");
-                    }
-
-                    @Override
-                    public void onNext(Response<String> stringResponse) {
-                        Log.d("----", stringResponse.body());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d("----", e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.d("----", "onComplete");
-                    }
-                }));
+//        Observable<String> observable = xHttp.<String>get("http://101.199.121.249/softdl.360tpcdn.com/auto/20180309/102615199_2f0a7c0426fa87ac8112aff10789ed08.exe")
+//                .tag(this)
+//                .headers("test1", "test")
+//                .params("test", "test")
+//                .params("test", "fddsfdsfsf")
+//                /*.uploadListener(new ProgressListener() {
+//                    @Override
+//                    public void onProgress(Progress progress) {
+//                        Log.d("----", "uploadListener:" + progress.getPercent());
+//                    }
+//                })*/
+//                .download(new ProgressListener() {
+//                    @Override
+//                    public void onProgress(Progress progress) {
+//                        Log.d("----", "downloadListener:" + progress.getPercent());
+//                    }
+//                })
+//                .adapter();
+//
+//        ((Observable<String>)
+//                xHttp.<String>get("http://101.199.121.249/softdl.360tpcdn.com/auto/20180309/102615199_2f0a7c0426fa87ac8112aff10789ed08.exe")
+//                        .tag(this)
+//                        .headers("test1", "test")
+//                        .params("test", "test")
+//                        .params("test", "fddsfdsfsf")
+//                        /*.uploadListener(new ProgressListener() {
+//                            @Override
+//                            public void onProgress(Progress progress) {
+//                                Log.d("----", "uploadListener:" + progress.getPercent());
+//                            }
+//                        })*/
+//                        .download(new ProgressListener() {
+//                            @Override
+//                            public void onProgress(Progress progress) {
+//                                Log.d("----", "downloadListener:" + progress.getPercent());
+//                            }
+//                        })
+//                        .adapter())
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeWith(new DisposableObserver<String>() {
+//                    @Override
+//                    public void onNext(String s) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
         /*xHttp.<String>get("http://101.199.121.249/softdl.360tpcdn.com/auto/20180309/102615199_2f0a7c0426fa87ac8112aff10789ed08.exe")
                 .tag(this)
                 .header("test1", "test")
