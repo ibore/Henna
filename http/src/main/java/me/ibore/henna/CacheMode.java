@@ -1,4 +1,4 @@
-package me.ibore.henna.request;
+package me.ibore.henna;
 
 public enum CacheMode {
     /** 按照HTTP协议的默认缓存规则，例如有304响应头时缓存 */

@@ -1,4 +1,4 @@
-package me.ibore.henna.interceptor;
+package me.ibore.henna;
 
 import java.io.IOException;
 import java.util.Map;

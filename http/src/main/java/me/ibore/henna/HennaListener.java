@@ -2,7 +2,6 @@ package me.ibore.henna;
 
 
 import me.ibore.henna.progress.Progress;
-import me.ibore.henna.progress.ProgressListener;
 
 public abstract class HennaListener<T> implements ProgressListener {
 

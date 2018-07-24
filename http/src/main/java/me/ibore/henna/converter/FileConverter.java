@@ -10,11 +10,11 @@ import okio.Okio;
 
 public class FileConverter implements Converter<File> {
 
-    private File filePath;
+    private File fileDir;
 
-    private FileConverter(File filePath) {
-        if (filePath.isDirectory()) {
-            this.filePath = filePath;
+    private FileConverter(File fileDir) {
+        if (fileDir.isDirectory()) {
+            this.fileDir = fileDir;
         } else {
             throw new NullPointerException("this file not is directory");
         }
@@ -26,8 +26,7 @@ public class FileConverter implements Converter<File> {
 
     @Override
     public File convert(Response value) throws IOException {
-        /*HttpUtils.getNetFileName(value, value.header())*/
-        File tempFile = new File(filePath, File.separator + System.currentTimeMillis());
+        File tempFile = new File(fileDir, File.separator + HttpUtils.getNetFileName(value, value.request().url().toString()));
         Okio.buffer(Okio.sink(tempFile)).writeAll(Okio.buffer(Okio.source(value.body().byteStream())));
         return tempFile;
     }

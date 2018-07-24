@@ -1,7 +1,7 @@
-package me.ibore.henna.progress;
+package me.ibore.henna;
 
 /**
- * description: OKHttp进度回调类
+ * description: Http进度回调类
  * author: Ibore Xie
  * date: 2018-01-19 00:04
  * website: ibore.me

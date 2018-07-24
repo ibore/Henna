@@ -6,11 +6,10 @@ import me.ibore.henna.Call;
 import me.ibore.henna.Response;
 import me.ibore.henna.http.DownloadListener;
 import me.ibore.henna.http.GET;
-import me.ibore.henna.http.Header;
 import me.ibore.henna.http.POST;
 import me.ibore.henna.http.Param;
 import me.ibore.henna.http.UploadListener;
-import me.ibore.henna.progress.ProgressListener;
+import me.ibore.henna.ProgressListener;
 
 public interface ApiService {
 

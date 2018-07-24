@@ -3,7 +3,6 @@ package me.ibore.henna;
 import java.util.List;
 import java.util.Map;
 
-import me.ibore.henna.progress.ProgressListener;
 import okhttp3.OkHttpClient;
 
 public abstract class Request<T, R extends Request> {

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
@@ -18,9 +17,8 @@ import me.ibore.henna.Henna;
 import me.ibore.henna.HennaProxy;
 import me.ibore.henna.Response;
 import me.ibore.henna.converter.StringConverter;
-import me.ibore.henna.interceptor.HttpLogInterceptor;
+import me.ibore.henna.HttpLogInterceptor;
 import me.ibore.henna.progress.Progress;
-import me.ibore.henna.progress.ProgressListener;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -1,4 +1,4 @@
-package me.ibore.henna.interceptor;
+package me.ibore.henna;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

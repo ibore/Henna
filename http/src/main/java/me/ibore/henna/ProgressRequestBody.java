@@ -1,4 +1,4 @@
-package me.ibore.henna.progress;
+package me.ibore.henna;
 
 import android.os.Handler;
 import android.os.SystemClock;

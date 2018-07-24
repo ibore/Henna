@@ -4,8 +4,6 @@ import android.support.annotation.NonNull;
 
 import java.io.IOException;
 
-import me.ibore.henna.progress.ProgressResponseBody;
-
 public class OkHttpCall<T> implements Call<T> {
 
     private okhttp3.Call rawCall;

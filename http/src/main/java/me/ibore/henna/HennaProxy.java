@@ -1,7 +1,5 @@
 package me.ibore.henna;
 
-import android.text.TextUtils;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -31,7 +29,6 @@ import me.ibore.henna.http.ParamMap;
 import me.ibore.henna.http.StringBody;
 import me.ibore.henna.http.TRACE;
 import me.ibore.henna.http.UploadListener;
-import me.ibore.henna.progress.ProgressListener;
 import okhttp3.RequestBody;
 
 public class HennaProxy {

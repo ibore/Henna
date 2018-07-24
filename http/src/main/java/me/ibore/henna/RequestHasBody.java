@@ -6,8 +6,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.List;
 
-import me.ibore.henna.progress.ProgressListener;
-import me.ibore.henna.progress.ProgressRequestBody;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
