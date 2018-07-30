@@ -13,12 +13,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
-import me.ibore.henna.Henna;
-import me.ibore.henna.HennaProxy;
-import me.ibore.henna.Response;
-import me.ibore.henna.converter.StringConverter;
-import me.ibore.henna.HttpLogInterceptor;
-import me.ibore.henna.progress.Progress;
+import ibore.android.henna.Henna;
+import ibore.android.henna.HennaProxy;
+import ibore.android.henna.Response;
+import ibore.android.henna.StringConverter;
+import ibore.android.henna.interceptor.HttpLogInterceptor;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        String url = "test{path}";
+        String test = "{path}";
+        Log.d("----", url.replace(test, "test"));
 
         HttpLogInterceptor logInterceptor = new HttpLogInterceptor();
         logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
         ApiService apiService = proxy.create(ApiService.class);
-        apiService.getSo("so.com")
+        apiService.getSo("test","so.com")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableObserver<Response<String>>() {
