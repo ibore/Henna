@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
         ApiService apiService = proxy.create(ApiService.class);
-        apiService.getSo("test","so.com")
+        apiService.getSo("test","test","so.com")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableObserver<Response<String>>() {

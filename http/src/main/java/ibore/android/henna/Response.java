@@ -1,15 +1,15 @@
 package ibore.android.henna;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import okhttp3.Headers;
 
 public final class Response<T> {
 
     private final okhttp3.Response rawResponse;
-    private final @Nullable T body;
+    private final T body;
 
-    private Response(okhttp3.Response rawResponse, @Nullable T body) {
+    private Response(okhttp3.Response rawResponse, T body) {
         this.rawResponse = rawResponse;
         this.body = body;
     }
