@@ -1,4 +1,4 @@
-package ibore.android.henna.db;
+package me.ibore.henna.db;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;

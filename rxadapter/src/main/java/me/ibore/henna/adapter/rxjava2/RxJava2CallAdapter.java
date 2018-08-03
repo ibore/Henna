@@ -1,8 +1,8 @@
 package me.ibore.henna.adapter.rxjava2;
 
-import ibore.android.henna.Call;
-import ibore.android.henna.CallAdapter;
-import ibore.android.henna.Response;
+import me.ibore.henna.Call;
+import me.ibore.henna.CallAdapter;
+import me.ibore.henna.Response;
 import io.reactivex.Observable;
 
 

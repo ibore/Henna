@@ -9,12 +9,12 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 
-import ibore.android.henna.Henna;
-import ibore.android.henna.HttpParams;
-import ibore.android.henna.HttpUtils;
-import ibore.android.henna.ProgressListener;
-import ibore.android.henna.RequestHasBody;
-import ibore.android.henna.RequestNoBody;
+import me.ibore.henna.Henna;
+import me.ibore.henna.HttpParams;
+import me.ibore.henna.HttpUtils;
+import me.ibore.henna.ProgressListener;
+import me.ibore.henna.RequestHasBody;
+import me.ibore.henna.RequestNoBody;
 import me.ibore.henna.proxy.http.Body;
 import me.ibore.henna.proxy.http.BytesBody;
 import me.ibore.henna.proxy.http.DELETE;
