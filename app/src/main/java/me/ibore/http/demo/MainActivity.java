@@ -14,10 +14,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import ibore.android.henna.Henna;
-import ibore.android.henna.HennaProxy;
 import ibore.android.henna.Response;
 import ibore.android.henna.StringConverter;
 import ibore.android.henna.interceptor.HttpLogInterceptor;
+import me.ibore.henna.proxy.HennaProxy;
+import me.ibore.henna.adapter.rxjava2.RxJava2CallAdapter;
+import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,12 +41,16 @@ public class MainActivity extends AppCompatActivity {
         logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
         logInterceptor.setColorLevel(Level.WARNING);
 
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logInterceptor)
+                .build();
         xHttp = new Henna.Builder()
+                .client(client)
                 .header("ce", "ddd")
                 .header("dddd", "dddddd")
                 .maxRetry(3)
-                .addInterceptor(logInterceptor)
                 .converter(StringConverter.create())
+                .callAdapter(RxJava2CallAdapter.create())
                 .builder();
 
         List<String> strings = new ArrayList<>();
