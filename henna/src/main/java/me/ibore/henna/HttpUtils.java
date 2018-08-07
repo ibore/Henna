@@ -228,12 +228,12 @@ public class HttpUtils {
     }
 
     public static String getDefaultFilePath() {
-        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/okhttp/download/";
+        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/download/";
         File file = new File(filePath);
         if (!file.exists()) {
             boolean createDir = file.mkdirs();
             if (createDir) {
-                if (BuildConfig.DEBUG) Log.d("DownloadTask", "create file dir success");
+                if (BuildConfig.DEBUG) Log.d("Henna", "create file dir success");
             }
         }
         return filePath;
