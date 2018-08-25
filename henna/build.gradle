@@ -24,7 +24,7 @@ android {
     greendao{
         schemaVersion 1                    //数据库 版本号
         targetGenDir 'src/main/java'    //生成DaoMaster类文件夹
-        daoPackage   'ibore.android.henna.db'  //生成DaoMaster类包名
+        daoPackage   'me.ibore.henna.db'  //生成DaoMaster类包名
     }
 
 }

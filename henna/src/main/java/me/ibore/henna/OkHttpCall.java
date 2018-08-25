@@ -89,6 +89,9 @@ public class OkHttpCall<T> implements Call<T> {
                                     listener.onFinish();
                                 }
                             });
+                        } else {
+                            listener.onResponse(OkHttpCall.this, Response.success(rawResponse, object));
+                            listener.onFinish();
                         }
                     } catch (final Exception e) {
                         if (e instanceof IOException) {

@@ -125,20 +125,23 @@ public class HttpUtils {
         if (dispositionHeader != null) {
             //文件名可能包含双引号，需要去除
             dispositionHeader = dispositionHeader.replaceAll("\"", "");
-            String split = "filename=";
-            int indexOf = dispositionHeader.indexOf(split);
-            if (indexOf != -1) {
-                return dispositionHeader.substring(indexOf + split.length(), dispositionHeader.length());
-            }
-            split = "filename*=";
-            indexOf = dispositionHeader.indexOf(split);
-            if (indexOf != -1) {
-                String fileName = dispositionHeader.substring(indexOf + split.length(), dispositionHeader.length());
-                String encode = "UTF-8''";
-                if (fileName.startsWith(encode)) {
-                    fileName = fileName.substring(encode.length(), fileName.length());
+            String splits[] = dispositionHeader.split(";");
+            String split = null;
+            for (String s: splits) {
+                if (null == split && (s.contains("filename=") || s.contains("filename*="))) {
+                    split = s;
                 }
-                return fileName;
+            }
+            if (null == split) {
+                return null;
+            } else if (split.contains("filename=")){
+                return split.replace("filename=", "");
+            } else if (split.contains("filename*=")){
+                split = split.replace("filename*=", "");
+                String encode = "UTF-8''";
+                if (split.startsWith(encode)) {
+                    return split.substring(encode.length(), split.length());
+                }
             }
         }
         return null;
