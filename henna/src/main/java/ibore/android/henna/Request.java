@@ -49,8 +49,8 @@ public abstract class Request<T, R extends Request> {
 
     @SuppressWarnings("unchecked")
     public R method(String method) {
-        if ((this instanceof RequestHasBody && HttpUtils.hasBody(method)) ||
-                (this instanceof RequestNoBody && !HttpUtils.hasBody(method))) {
+        if ((this instanceof RequestHasBody && HennaUtils.hasBody(method)) ||
+                (this instanceof RequestNoBody && !HennaUtils.hasBody(method))) {
             this.method = method;
         } else {
             throw new RuntimeException("Wrong request method");
@@ -202,7 +202,7 @@ public abstract class Request<T, R extends Request> {
     }
 
     public OkHttpClient getClient() {
-        return HttpUtils.checkNotNull(client, "OkHttpClient can not be null");
+        return HennaUtils.checkNotNull(client, "OkHttpClient can not be null");
     }
 
     public String getMethod() {
@@ -234,7 +234,7 @@ public abstract class Request<T, R extends Request> {
     }
 
     public Converter<T> getConverter() {
-        return HttpUtils.checkNotNull(converter, "converter can not be null");
+        return HennaUtils.checkNotNull(converter, "converter can not be null");
     }
 
     public ProgressListener getDownloadListener() {

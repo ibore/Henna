@@ -11,7 +11,7 @@ import java.util.Map;
 
 import ibore.android.henna.Henna;
 import ibore.android.henna.HttpParams;
-import ibore.android.henna.HttpUtils;
+import ibore.android.henna.HennaUtils;
 import ibore.android.henna.ProgressListener;
 import ibore.android.henna.RequestHasBody;
 import ibore.android.henna.RequestNoBody;
@@ -94,7 +94,7 @@ public class HennaProxy {
             httpMethod = "PATCH";
             url = method.getAnnotation(PATCH.class).value();
         } else if (method.isAnnotationPresent(MultiPart.class)){
-            if (HttpUtils.hasBody(httpMethod)) {
+            if (HennaUtils.hasBody(httpMethod)) {
                 isMultiPart = true;
             } else {
                 throw new RuntimeException("this method can not be MultiPart");
@@ -105,7 +105,7 @@ public class HennaProxy {
         if (TextUtils.isEmpty(url)) throw new RuntimeException("url is null");
         if (!url.startsWith("http")) url = baseUrl + url;
         Annotation[] annotations = checkoutParameter(method);
-        if (HttpUtils.hasBody(httpMethod)) {
+        if (HennaUtils.hasBody(httpMethod)) {
             RequestHasBody request = new RequestHasBody<>(henna)
                     .method(httpMethod)
                     .isMultipart(isMultiPart)

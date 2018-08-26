@@ -22,9 +22,9 @@ public class RequestNoBody<T> extends Request<T, RequestNoBody<T>> {
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
         String url = getUrl() + appendUrl;
         builder.method(getMethod(), null)
-                .url(HttpUtils.createUrlFromParams(url, getParams().urlParamsMap))
+                .url(HennaUtils.createUrlFromParams(url, getParams().urlParamsMap))
                 .tag(getTag())
-                .headers(HttpUtils.appendHeaders(getHeaders()));
+                .headers(HennaUtils.appendHeaders(getHeaders()));
         return builder.build();
     }
 }

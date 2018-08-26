@@ -18,7 +18,7 @@ public class FileConverter implements Converter<File> {
     }
 
     public static FileConverter create() {
-        return new FileConverter(HttpUtils.getDefaultFilePath());
+        return new FileConverter(HennaUtils.getDefaultFilePath());
     }
 
     public static FileConverter create(String filePath) {
@@ -27,7 +27,7 @@ public class FileConverter implements Converter<File> {
 
     @Override
     public File convert(Response value) throws IOException {
-        File tempFile = new File(filePath, HttpUtils.getNetFileName(value, value.request().url().toString()));
+        File tempFile = new File(filePath, HennaUtils.getNetFileName(value, value.request().url().toString()));
         Okio.buffer(Okio.sink(tempFile)).writeAll(Okio.buffer(Okio.source(value.body().byteStream())));
         return tempFile;
     }

@@ -34,7 +34,7 @@ public class OkHttpCall<T> implements Call<T> {
     public void enqueue(final HennaListener<T> listener) {
         if (null == listener) throw new NullPointerException("HennaListener can not be null");
         if (request.isUIThread()) {
-            HttpUtils.runOnUiThread(new Runnable() {
+            HennaUtils.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     listener.onStart(request);
@@ -55,7 +55,7 @@ public class OkHttpCall<T> implements Call<T> {
                     retryCount++;
                 } else {
                     if (request.isUIThread()) {
-                        HttpUtils.runOnUiThread(new Runnable() {
+                        HennaUtils.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 listener.onFailure(OkHttpCall.this, e);
@@ -82,7 +82,7 @@ public class OkHttpCall<T> implements Call<T> {
                         final T object = request.getConverter().convert(rawResponse);
                         if (request.isUIThread()) {
                             final okhttp3.Response finalRawResponse = rawResponse;
-                            HttpUtils.runOnUiThread(new Runnable() {
+                            HennaUtils.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     listener.onResponse(OkHttpCall.this, Response.success(finalRawResponse, object));
@@ -95,7 +95,7 @@ public class OkHttpCall<T> implements Call<T> {
                             throw e;
                         } else {
                             if (request.isUIThread()) {
-                                HttpUtils.runOnUiThread(new Runnable() {
+                                HennaUtils.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         listener.onFailure(OkHttpCall.this, e);
@@ -111,7 +111,7 @@ public class OkHttpCall<T> implements Call<T> {
                 } else {
                     if (request.isUIThread()) {
                         final okhttp3.Response finalRawResponse1 = rawResponse;
-                        HttpUtils.runOnUiThread(new Runnable() {
+                        HennaUtils.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 listener.onFailure(OkHttpCall.this, new HttpException(finalRawResponse1.code(), finalRawResponse1.message()));

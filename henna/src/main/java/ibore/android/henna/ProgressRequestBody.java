@@ -30,8 +30,8 @@ public final class ProgressRequestBody extends RequestBody {
     }
 
     public ProgressRequestBody(RequestBody requestBody, ProgressListener listener, boolean isUIThread, int refreshTime) {
-        this.mRequestBody = HttpUtils.checkNotNull(requestBody, "requestBody can not null");
-        this.mListener = HttpUtils.checkNotNull(listener, "ProgressListener can not null");
+        this.mRequestBody = HennaUtils.checkNotNull(requestBody, "requestBody can not null");
+        this.mListener = HennaUtils.checkNotNull(listener, "ProgressListener can not null");
         this.mRefreshTime = refreshTime <= 0 ? 300 : refreshTime;
         this.isUIThread = isUIThread;
         this.mProgress = new Progress();
@@ -85,7 +85,7 @@ public final class ProgressRequestBody extends RequestBody {
                 mProgress.setIntervalTime(finalIntervalTime);
                 mProgress.setFinish(finalTotalBytesRead == mProgress.getContentLength());
                 if (isUIThread) {
-                    HttpUtils.runOnUiThread(new Runnable() {
+                    HennaUtils.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             mListener.onProgress(mProgress);

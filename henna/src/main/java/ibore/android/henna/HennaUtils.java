@@ -26,7 +26,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HttpUtils {
+public class HennaUtils {
 
     /** 将传递进来的参数拼接成 url */
     public static String createUrlFromParams(String url, Map<String, List<String>> params) {

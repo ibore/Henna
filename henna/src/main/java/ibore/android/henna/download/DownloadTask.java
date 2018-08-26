@@ -17,7 +17,7 @@ import java.net.SocketTimeoutException;
 
 import ibore.android.henna.FileConverter;
 import ibore.android.henna.Henna;
-import ibore.android.henna.HttpUtils;
+import ibore.android.henna.HennaUtils;
 import ibore.android.henna.Progress;
 import ibore.android.henna.ProgressListener;
 import okhttp3.OkHttpClient;
@@ -81,8 +81,8 @@ public class DownloadTask implements Runnable {
         RandomAccessFile tempFile = null;
 
         try {
-            String fileName = TextUtils.isEmpty(mDownload.getFileName()) ? HttpUtils.getFileNameFromUrl(mDownload.getUrl()) : mDownload.getFileName();
-            String filePath = TextUtils.isEmpty(mDownload.getFilePath()) ? HttpUtils.getDefaultFilePath() : mDownload.getFilePath();
+            String fileName = TextUtils.isEmpty(mDownload.getFileName()) ? HennaUtils.getFileNameFromUrl(mDownload.getUrl()) : mDownload.getFileName();
+            String filePath = TextUtils.isEmpty(mDownload.getFilePath()) ? HennaUtils.getDefaultFilePath() : mDownload.getFilePath();
             mDownload.setFileName(fileName);
             mDownload.setFilePath(filePath);
             tempFile = new RandomAccessFile(new File(filePath, fileName), "rwd");
@@ -176,7 +176,7 @@ public class DownloadTask implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            HttpUtils.close(bis, inputStream, tempFile);
+            HennaUtils.close(bis, inputStream, tempFile);
         }
     }
 

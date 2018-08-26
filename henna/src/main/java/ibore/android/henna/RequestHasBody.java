@@ -83,7 +83,7 @@ public class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
     /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upFile(File file) {
-        requestBody = RequestBody.create(HttpUtils.guessMimeType(file.getName()), file);
+        requestBody = RequestBody.create(HennaUtils.guessMimeType(file.getName()), file);
         return this;
     }
 
@@ -148,13 +148,13 @@ public class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
         builder.method(getMethod(), generateRequestBody())
                 .url(getUrl())
                 .tag(getTag())
-                .headers(HttpUtils.appendHeaders(getHeaders()));
+                .headers(HennaUtils.appendHeaders(getHeaders()));
         return builder.build();
     }
 
     private RequestBody generateRequestBody() {
         if (null == requestBody) {
-            requestBody = HttpUtils.generateMultipartRequestBody(getParams(), isMultipart);
+            requestBody = HennaUtils.generateMultipartRequestBody(getParams(), isMultipart);
         }
         if (null != uploadListener) {
             requestBody = ProgressRequestBody.create(requestBody, uploadListener, isUIThread(), getRefreshTime());

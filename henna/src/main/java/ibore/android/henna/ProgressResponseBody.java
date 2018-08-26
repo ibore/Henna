@@ -1,6 +1,5 @@
 package ibore.android.henna;
 
-import android.os.Handler;
 import android.os.SystemClock;
 
 import java.io.IOException;
@@ -30,8 +29,8 @@ public final class ProgressResponseBody extends ResponseBody {
     }
 
     private ProgressResponseBody(ResponseBody responseBody, ProgressListener listener, boolean isUIThread, int refreshTime) {
-        this.mResponseBody = HttpUtils.checkNotNull(responseBody, "responseBody can not null");
-        this.mListener = HttpUtils.checkNotNull(listener, "ProgressListener can not null");
+        this.mResponseBody = HennaUtils.checkNotNull(responseBody, "responseBody can not null");
+        this.mListener = HennaUtils.checkNotNull(listener, "ProgressListener can not null");
         this.isUIThread = isUIThread;
         this.mRefreshTime = refreshTime <= 0 ? 300 : refreshTime;
         this.mProgress = new Progress();
@@ -85,7 +84,7 @@ public final class ProgressResponseBody extends ResponseBody {
                 mProgress.setIntervalTime(finalIntervalTime);
                 mProgress.setFinish(finalBytesRead == -1 && finalTotalBytesRead == mProgress.getContentLength());
                 if (isUIThread) {
-                    HttpUtils.runOnUiThread(new Runnable() {
+                    HennaUtils.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             mListener.onProgress(mProgress);

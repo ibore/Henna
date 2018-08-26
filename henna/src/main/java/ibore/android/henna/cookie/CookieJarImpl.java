@@ -7,10 +7,6 @@ import java.util.List;
 import okhttp3.Cookie;
 import okhttp3.HttpUrl;
 
-/**
- * Created by Administrator on 2017/6/8.
- */
-
 public final class CookieJarImpl implements okhttp3.CookieJar {
 
     private CookieStore memory;
