@@ -7,7 +7,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -16,9 +15,8 @@ import io.reactivex.schedulers.Schedulers;
 import me.ibore.henna.Henna;
 import me.ibore.henna.Response;
 import me.ibore.henna.StringConverter;
-import me.ibore.henna.interceptor.HttpLogInterceptor;
-import me.ibore.henna.proxy.HennaProxy;
 import me.ibore.henna.adapter.rxjava2.RxJava2CallAdapter;
+import me.ibore.henna.proxy.HennaProxy;
 import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,12 +35,12 @@ public class MainActivity extends AppCompatActivity {
         String test = "{path}";
         Log.d("----", url.replace(test, "test"));
 
-        HttpLogInterceptor logInterceptor = new HttpLogInterceptor();
+       /* HttpLogInterceptor logInterceptor = new HttpLogInterceptor();
         logInterceptor.setPrintLevel(HttpLogInterceptor.Level.BODY);
-        logInterceptor.setColorLevel(Level.WARNING);
+        logInterceptor.setColorLevel(Level.WARNING);*/
 
         OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logInterceptor)
+//                .addInterceptor(logInterceptor)
                 .build();
         xHttp = new Henna.Builder()
                 .client(client)
@@ -61,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
         ApiService apiService = proxy.create(ApiService.class);
-        apiService.getSo("test","test","so.com")
+        apiService.getSo("test", "test", "so.com")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableObserver<Response<String>>() {

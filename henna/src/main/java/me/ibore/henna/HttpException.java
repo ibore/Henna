@@ -5,7 +5,7 @@ import android.util.SparseArray;
 /**
  * description:
  * author: Ibore Xie
- * date: 2018-01-19 00:00
+ * date: 2018-01-19
  * website: ibore.me
  */
 

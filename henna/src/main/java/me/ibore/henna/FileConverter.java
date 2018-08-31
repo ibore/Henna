@@ -1,14 +1,11 @@
 package me.ibore.henna;
 
-import android.util.Log;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import okhttp3.Response;
-import okio.Okio;
 
 public class FileConverter implements Converter<File> {
 
@@ -22,7 +19,7 @@ public class FileConverter implements Converter<File> {
     }
 
     public static FileConverter create() {
-        return new FileConverter(HttpUtils.getDefaultFilePath());
+        return new FileConverter(HennaUtils.getDefaultFilePath());
     }
 
     public static FileConverter create(String filePath) {
@@ -31,7 +28,7 @@ public class FileConverter implements Converter<File> {
 
     @Override
     public File convert(Response value) throws IOException {
-        File tempFile = new File(filePath, HttpUtils.getNetFileName(value, value.request().url().toString()));
+        File tempFile = new File(filePath, HennaUtils.getNetFileName(value, value.request().url().toString()));
         InputStream is = value.body().byteStream();
         byte[] buf = new byte[2048];
         int len = 0;

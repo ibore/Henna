@@ -28,7 +28,7 @@ import okio.Buffer;
  * website: ibore.me
  */
 
-public class HttpLogInterceptor implements Interceptor {
+public class HttpInterceptor implements Interceptor {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
     private volatile Level printLevel = Level.NONE;
@@ -41,11 +41,7 @@ public class HttpLogInterceptor implements Interceptor {
         BODY        //所有数据全部打印
     }
 
-    public HttpLogInterceptor() {
-        this("Henna");
-    }
-
-    public HttpLogInterceptor(String tag) {
+    public HttpInterceptor(String tag) {
         logger = Logger.getLogger(tag);
     }
 

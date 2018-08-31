@@ -142,7 +142,7 @@ public class HttpParams implements Serializable {
     }
 
     public void put(String key, File file, String fileName) {
-        put(key, file, fileName, HttpUtils.guessMimeType(fileName));
+        put(key, file, fileName, HennaUtils.guessMimeType(fileName));
     }
 
     public void put(String key, FileWrapper fileWrapper) {

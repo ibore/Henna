@@ -21,10 +21,10 @@ android {
         }
     }
 
-    greendao{
+    greendao {
         schemaVersion 1                    //数据库 版本号
         targetGenDir 'src/main/java'    //生成DaoMaster类文件夹
-        daoPackage   'me.ibore.henna.db'  //生成DaoMaster类包名
+        daoPackage 'me.ibore.henna.db'  //生成DaoMaster类包名
     }
 
 }
@@ -39,7 +39,6 @@ dependencies {
 
     api 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    implementation 'org.greenrobot:greendao:3.2.2'
 }
 
 apply from: "bintrayUpload.gradle"

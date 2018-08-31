@@ -141,7 +141,7 @@ public class Henna {
         }
 
         public Builder client(OkHttpClient client) {
-            this.client = HttpUtils.checkNotNull(client, "OkHttpClient can not be null");
+            this.client = HennaUtils.checkNotNull(client, "OkHttpClient can not be null");
             return this;
         }
 
@@ -176,7 +176,7 @@ public class Henna {
         }
 
         public Henna builder() {
-            HttpUtils.checkNotNull(client, "OkHttpClient can not be null");
+            HennaUtils.checkNotNull(client, "OkHttpClient can not be null");
             return new Henna(client, refreshTime, maxRetry, headers, params, converter, callAdapter);
         }
     }
