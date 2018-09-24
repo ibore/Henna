@@ -4,12 +4,15 @@ import android.support.annotation.NonNull;
 
 import java.io.IOException;
 
-public class OkHttpCall<T> implements Call<T> {
+import me.ibore.henna.exception.HttpException;
+import me.ibore.henna.progress.ProgressResponseBody;
+
+public class RealCall<T> implements Call<T> {
 
     private okhttp3.Call rawCall;
     private Request<T, ? extends Request> request;
 
-    public OkHttpCall(Request<T, ? extends Request> request) {
+    public RealCall(Request<T, ? extends Request> request) {
         this.request = request;
         rawCall = request.getClient().newCall(request.generateRequest());
     }
@@ -22,7 +25,6 @@ public class OkHttpCall<T> implements Call<T> {
                 rawResponse = rawResponse.newBuilder().body(ProgressResponseBody.create(rawResponse.body(),
                         request.getDownloadListener(), request.isUIThread(), request.getRefreshTime())).build();
             }
-            if (null == request.getConverter()) throw new NullPointerException("converter can not be null");
             return Response.success(rawResponse, request.getConverter().convert(rawResponse));
         } else {
             throw new HttpException(rawResponse.code(), rawResponse.message());
@@ -45,9 +47,7 @@ public class OkHttpCall<T> implements Call<T> {
         }
 
         rawCall.enqueue(new okhttp3.Callback() {
-
             int retryCount = 0;
-
             @Override
             public void onFailure(@NonNull okhttp3.Call call, @NonNull final IOException e) {
                 if (retryCount < request.getMaxRetry()) {
@@ -58,11 +58,11 @@ public class OkHttpCall<T> implements Call<T> {
                         HennaUtils.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                listener.onFailure(OkHttpCall.this, e);
+                                listener.onFailure(RealCall.this, e);
                             }
                         });
                     } else {
-                        listener.onFailure(OkHttpCall.this, e);
+                        listener.onFailure(RealCall.this, e);
                     }
                 }
             }
@@ -83,28 +83,25 @@ public class OkHttpCall<T> implements Call<T> {
                             HennaUtils.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    listener.onResponse(OkHttpCall.this, Response.success(finalRawResponse, object));
+                                    listener.onResponse(RealCall.this, Response.success(finalRawResponse, object));
                                     listener.onFinish();
                                 }
                             });
                         } else {
-                            listener.onResponse(OkHttpCall.this, Response.success(rawResponse, object));
+                            listener.onResponse(RealCall.this, Response.success(rawResponse, object));
                             listener.onFinish();
                         }
-                    } catch (final Exception e) {
-                        if (e instanceof IOException) {
-                            throw e;
+                    } catch (IOException e) {
+                        throw e;
+                    } catch (final ConvertException e) {
+                        if (request.isUIThread()) {
+                            HennaUtils.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() { listener.onFailure(RealCall.this, e);
+                                }
+                            });
                         } else {
-                            if (request.isUIThread()) {
-                                HennaUtils.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        listener.onFailure(OkHttpCall.this, e);
-                                    }
-                                });
-                            } else {
-                                listener.onFailure(OkHttpCall.this, e);
-                            }
+                            listener.onFailure(RealCall.this, e);
                         }
                     }
                 } else {
@@ -113,11 +110,11 @@ public class OkHttpCall<T> implements Call<T> {
                         HennaUtils.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                listener.onFailure(OkHttpCall.this, new HttpException(finalRawResponse1.code(), finalRawResponse1.message()));
+                                listener.onFailure(RealCall.this, new HttpException(finalRawResponse1.code(), finalRawResponse1.message()));
                             }
                         });
                     } else {
-                        listener.onFailure(OkHttpCall.this, new HttpException(rawResponse.code(), rawResponse.message()));
+                        listener.onFailure(RealCall.this, new HttpException(rawResponse.code(), rawResponse.message()));
                     }
                 }
             }
@@ -141,7 +138,7 @@ public class OkHttpCall<T> implements Call<T> {
 
     @Override
     public Call<T> clone() {
-        return new OkHttpCall<>(request);
+        return new RealCall<>(request);
     }
 
     @Override

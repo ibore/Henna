@@ -1,5 +1,10 @@
 package me.ibore.henna;
 
+import java.io.File;
+
+import me.ibore.henna.convert.FileConverter;
+import me.ibore.henna.download.DownloadListener;
+import me.ibore.henna.progress.ProgressListener;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
@@ -10,7 +15,7 @@ import okhttp3.OkHttpClient;
  * website: ibore.me
  */
 
-public class Henna {
+public final class Henna {
 
     private OkHttpClient client;
     private int refreshTime;
@@ -90,6 +95,21 @@ public class Henna {
 
     public <T> RequestNoBody<T> trace(String url) {
         return new RequestNoBody<T>(this).url(url).method("TRACE");
+    }
+
+    public void download(String fileDir, String url, DownloadListener downloadListener) {
+        String fileName = HennaUtils.getUrlFileName(url);
+        File file = new File(fileDir, fileName);
+        Long range = 0L;
+        if (file.exists()) {
+            range = file.length();
+        }
+        new RequestNoBody<File>(this).url(url)
+                .method("GET")
+                .headers("RANGE", "bytes=" + range + "-")
+                .converter(FileConverter.create(fileDir))
+                .download(downloadListener)
+                .enqueue(downloadListener);
     }
 
     public void cancelTag(Object tag) {

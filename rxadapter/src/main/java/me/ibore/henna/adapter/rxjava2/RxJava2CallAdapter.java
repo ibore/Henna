@@ -1,9 +1,9 @@
 package me.ibore.henna.adapter.rxjava2;
 
+import io.reactivex.Observable;
 import me.ibore.henna.Call;
 import me.ibore.henna.CallAdapter;
 import me.ibore.henna.Response;
-import io.reactivex.Observable;
 
 
 public class RxJava2CallAdapter<T> implements CallAdapter<T, Observable<Response<T>>> {

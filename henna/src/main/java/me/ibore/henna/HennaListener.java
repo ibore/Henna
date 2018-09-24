@@ -1,7 +1,7 @@
 package me.ibore.henna;
 
 
-public abstract class HennaListener<T> implements ProgressListener {
+public abstract class HennaListener<T> {
 
     public void onStart(Request<T, ? extends Request> request) {
 
@@ -12,11 +12,6 @@ public abstract class HennaListener<T> implements ProgressListener {
     public abstract void onFailure(Call<T> call, Throwable e);
 
     public void onFinish() {
-
-    }
-
-    @Override
-    public void onProgress(Progress progress) {
 
     }
 }

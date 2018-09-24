@@ -1,9 +1,10 @@
-package me.ibore.henna;
+package me.ibore.henna.progress;
 
 import android.os.SystemClock;
 
 import java.io.IOException;
 
+import me.ibore.henna.HennaUtils;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import okio.Buffer;

@@ -1,30 +1,30 @@
-/**
- * Copyright 2017 JessYan
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package me.ibore.henna;
+package me.ibore.henna.progress;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public final class Progress implements Parcelable {
 
-    private long currentBytes; //当前已上传或下载的总长度
-    private long contentLength; //数据总长度
-    private long intervalTime; //本次调用距离上一次被调用所间隔的时间(毫秒)
-    private long eachBytes; //本次调用距离上一次被调用的间隔时间内上传或下载的byte长度
-    private boolean finish; //进度是否完成
+    /**
+     * 当前已上传或下载的总长度
+     */
+    private long currentBytes;
+    /**
+     * 数据总长度
+     */
+    private long contentLength;
+    /**
+     * 本次调用距离上一次被调用所间隔的时间(毫秒)
+     */
+    private long intervalTime;
+    /**
+     * 本次调用距离上一次被调用的间隔时间内上传或下载的byte长度
+     */
+    private long eachBytes;
+    /**
+     * 进度是否完成
+     */
+    private boolean finish;
 
     public Progress() {
     }

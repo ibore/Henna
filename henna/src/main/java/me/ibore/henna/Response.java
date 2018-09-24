@@ -1,7 +1,5 @@
 package me.ibore.henna;
 
-import android.support.annotation.Nullable;
-
 import okhttp3.Headers;
 
 public final class Response<T> {
@@ -34,7 +32,7 @@ public final class Response<T> {
         return rawResponse.isSuccessful();
     }
 
-    public @Nullable T body() {
+    public T body() {
         return body;
     }
 

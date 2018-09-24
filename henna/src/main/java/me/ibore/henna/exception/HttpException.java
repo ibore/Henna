@@ -1,4 +1,4 @@
-package me.ibore.henna;
+package me.ibore.henna.exception;
 
 import android.util.SparseArray;
 

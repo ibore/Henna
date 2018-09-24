@@ -3,6 +3,7 @@ package me.ibore.henna;
 import java.util.List;
 import java.util.Map;
 
+import me.ibore.henna.progress.ProgressListener;
 import okhttp3.OkHttpClient;
 
 public abstract class Request<T, R extends Request> {
@@ -254,7 +255,7 @@ public abstract class Request<T, R extends Request> {
     }
 
     public Call<T> getCall() {
-        if (null == call) call = new OkHttpCall<>(this);
+        if (null == call) call = new RealCall<>(this);
         return call;
     }
 
@@ -266,6 +267,7 @@ public abstract class Request<T, R extends Request> {
 
     @SuppressWarnings("unchecked")
     public <E> E adapter(boolean isAsync) {
+        HennaUtils.checkNotNull(callAdapter, "CallAdapter cannot be null");
         return (E) callAdapter.adapter(getCall(), isAsync);
     }
 

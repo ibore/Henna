@@ -121,7 +121,7 @@ public class HennaUtils {
     }
 
     /** 根据响应头或者url获取文件名 */
-    public static String getNetFileName(Response response, String url) {
+    /*public static String getNetFileName(Response response, String url) {
         String fileName = getHeaderFileName(response);
         if (TextUtils.isEmpty(fileName)) fileName = getUrlFileName(url);
         if (TextUtils.isEmpty(fileName)) fileName = "temp_" + System.currentTimeMillis();
@@ -131,14 +131,14 @@ public class HennaUtils {
             e.printStackTrace();
         }
         return fileName;
-    }
+    }*/
 
     /**
      * 解析文件头
      * Content-Disposition:attachment;filename=FileName.txt
      * Content-Disposition: attachment; filename*="UTF-8''%E6%9B%BF%E6%8D%A2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A.pdf"
      */
-    private static String getHeaderFileName(Response response) {
+    public static String getHeaderFileName(Response response) {
         String dispositionHeader = response.header(HttpHeaders.HEAD_KEY_CONTENT_DISPOSITION);
         if (dispositionHeader != null) {
             //文件名可能包含双引号，需要去除
@@ -169,7 +169,7 @@ public class HennaUtils {
      * 通过 ‘？’ 和 ‘/’ 判断文件名
      * http://mavin-manzhan.oss-cn-hangzhou.aliyuncs.com/1486631099150286149.jpg?x-oss-process=image/watermark,image_d2F0ZXJtYXJrXzIwMF81MC5wbmc
      */
-    private static String getUrlFileName(String url) {
+    public static String getUrlFileName(String url) {
         String filename = null;
         String[] strings = url.split("/");
         for (String string : strings) {
@@ -216,7 +216,7 @@ public class HennaUtils {
         return object;
     }
 
-    public static final Handler mDelivery = new Handler(Looper.getMainLooper());
+    private static final Handler mDelivery = new Handler(Looper.getMainLooper());
 
     public static void runOnUiThread(Runnable runnable) {
         mDelivery.post(runnable);
@@ -235,29 +235,13 @@ public class HennaUtils {
         }
     }
 
-    /**
-     * 从url获取 如果url为空，则文件名为当前时间毫秒值
-     *
-     * @param url download file url
-     * @return file name
-     */
-    public static String getFileNameFromUrl(String url) {
-        if (!TextUtils.isEmpty(url)) {
-            return url.substring(url.lastIndexOf("/") + 1);
-        }
-        return System.currentTimeMillis() + "";
-    }
-
-    public static String getDefaultFilePath() {
-        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/download/";
-        File file = new File(filePath);
+    public static String getDefaultFileDir() {
+        String fileDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/download/";
+        File file = new File(fileDir);
         if (!file.exists()) {
-            boolean createDir = file.mkdirs();
-            if (createDir) {
-                if (BuildConfig.DEBUG) Log.d("Henna", "create file dir success");
-            }
+            file.mkdirs();
         }
-        return filePath;
+        return fileDir;
     }
 
 

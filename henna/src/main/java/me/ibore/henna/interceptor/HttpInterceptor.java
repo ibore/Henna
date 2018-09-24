@@ -41,6 +41,10 @@ public class HttpInterceptor implements Interceptor {
         BODY        //所有数据全部打印
     }
 
+    public HttpInterceptor() {
+        this("Henna");
+    }
+
     public HttpInterceptor(String tag) {
         logger = Logger.getLogger(tag);
     }
