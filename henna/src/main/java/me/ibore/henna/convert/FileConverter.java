@@ -45,7 +45,7 @@ public class FileConverter implements Converter<File> {
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
-            throw new ConvertException();
+            throw new ConvertException("Convert Error", e);
         }
     }
 }

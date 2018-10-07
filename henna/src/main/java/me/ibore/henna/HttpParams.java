@@ -20,29 +20,13 @@ public class HttpParams implements Serializable {
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json;charset=utf-8");
     public static final MediaType MEDIA_TYPE_STREAM = MediaType.parse("application/octet-stream");
 
-    public static final boolean IS_REPLACE = true;
-
     /** 普通的键值对参数 */
     public LinkedHashMap<String, List<String>> urlParamsMap;
 
     /** 文件的键值对参数 */
-    public LinkedHashMap<String, List<FileWrapper>> fileParamsMap;
+    public LinkedHashMap<String, List<FileItem>> fileParamsMap;
 
     public HttpParams() {
-        init();
-    }
-
-    public HttpParams(String key, String value) {
-        init();
-        put(key, value, IS_REPLACE);
-    }
-
-    public HttpParams(String key, File file) {
-        init();
-        put(key, file);
-    }
-
-    private void init() {
         urlParamsMap = new LinkedHashMap<>();
         fileParamsMap = new LinkedHashMap<>();
     }
@@ -62,118 +46,96 @@ public class HttpParams implements Serializable {
     }
 
     public void put(String key, String value, boolean... isReplace) {
-        if (isReplace != null && isReplace.length > 0) {
-            put(key, value, isReplace[0]);
-        } else {
-            put(key, value, IS_REPLACE);
-        }
-    }
-
-    public void put(String key, int value, boolean... isReplace) {
-        if (isReplace != null && isReplace.length > 0) {
-            put(key, String.valueOf(value), isReplace[0]);
-        } else {
-            put(key, String.valueOf(value), IS_REPLACE);
-        }
-    }
-
-    public void put(String key, long value, boolean... isReplace) {
-        if (isReplace != null && isReplace.length > 0) {
-            put(key, String.valueOf(value), isReplace[0]);
-        } else {
-            put(key, String.valueOf(value), IS_REPLACE);
-        }
-    }
-
-    public void put(String key, float value, boolean... isReplace) {
-        if (isReplace != null && isReplace.length > 0) {
-            put(key, String.valueOf(value), isReplace[0]);
-        } else {
-            put(key, String.valueOf(value), IS_REPLACE);
-        }
-    }
-
-    public void put(String key, double value, boolean... isReplace) {
-        if (isReplace != null && isReplace.length > 0) {
-            put(key, String.valueOf(value), isReplace[0]);
-        } else {
-            put(key, String.valueOf(value), IS_REPLACE);
-        }
-    }
-
-    public void put(String key, char value, boolean... isReplace) {
-        if (isReplace != null && isReplace.length > 0) {
-            put(key, String.valueOf(value), isReplace[0]);
-        } else {
-            put(key, String.valueOf(value), IS_REPLACE);
-        }
-    }
-
-    public void put(String key, boolean value, boolean... isReplace) {
-        if (isReplace != null && isReplace.length > 0) {
-            put(key, String.valueOf(value), isReplace[0]);
-        } else {
-            put(key, String.valueOf(value), IS_REPLACE);
-        }
-    }
-
-    private void put(String key, String value, boolean isReplace) {
         if (key != null && value != null) {
             List<String> urlValues = urlParamsMap.get(key);
             if (urlValues == null) {
                 urlValues = new ArrayList<>();
                 urlParamsMap.put(key, urlValues);
             }
-            if (isReplace) urlValues.clear();
+            if (isReplace != null && isReplace.length > 0) {
+                if (isReplace[0]) urlValues.clear();
+            } else {
+                urlValues.clear();
+            }
             urlValues.add(value);
         }
+
     }
 
-    public void putUrlParams(String key, List<String> values) {
+    public void put(String key, int value, boolean... isReplace) {
+        put(key, String.valueOf(value), isReplace);
+    }
+
+    public void put(String key, long value, boolean... isReplace) {
+        put(key, String.valueOf(value), isReplace);
+    }
+
+    public void put(String key, float value, boolean... isReplace) {
+        put(key, String.valueOf(value), isReplace);
+    }
+
+    public void put(String key, double value, boolean... isReplace) {
+        put(key, String.valueOf(value), isReplace);
+    }
+
+    public void put(String key, char value, boolean... isReplace) {
+        put(key, String.valueOf(value), isReplace);
+    }
+
+    public void put(String key, boolean value, boolean... isReplace) {
+        put(key, String.valueOf(value), isReplace);
+    }
+
+    public void put(String key, List<String> values, boolean... isReplace) {
         if (key != null && values != null && !values.isEmpty()) {
             for (String value : values) {
-                put(key, value, false);
+                put(key, value, isReplace);
             }
         }
     }
 
-    public void put(String key, File file) {
-        put(key, file, file.getName());
+    public void putFile(String key, File file, boolean... isReplace) {
+        putFile(key, file, file.getName(), isReplace);
     }
 
-    public void put(String key, File file, String fileName) {
-        put(key, file, fileName, HennaUtils.guessMimeType(fileName));
+    public void putFile(String key, File file, String fileName, boolean... isReplace) {
+        putFile(key, file, fileName, HennaUtils.guessMimeType(fileName), isReplace);
     }
 
-    public void put(String key, FileWrapper fileWrapper) {
-        if (key != null && fileWrapper != null) {
-            put(key, fileWrapper.file, fileWrapper.fileName, fileWrapper.contentType);
-        }
-    }
-
-    public void put(String key, File file, String fileName, MediaType contentType) {
-        if (key != null) {
-            List<FileWrapper> fileWrappers = fileParamsMap.get(key);
-            if (fileWrappers == null) {
-                fileWrappers = new ArrayList<>();
-                fileParamsMap.put(key, fileWrappers);
+    public void putFile(String key, File file, String fileName, MediaType contentType, boolean... isReplace) {
+        if (key != null && file != null && fileName != null && contentType != null) {
+            List<FileItem> fileItems = fileParamsMap.get(key);
+            if (fileItems == null) {
+                fileItems = new ArrayList<>();
+                fileParamsMap.put(key, fileItems);
             }
-            fileWrappers.add(new FileWrapper(file, fileName, contentType));
+            if (isReplace != null && isReplace.length > 0) {
+                if (isReplace[0]) fileItems.clear();
+            } else {
+                fileItems.clear();
+            }
+            fileItems.add(new FileItem(file, fileName, contentType));
         }
     }
 
-    public void putFileParams(String key, List<File> files) {
+    public void putFile(String key, FileItem fileItem, boolean... isReplace) {
+        if (key != null && fileItem != null) {
+            putFile(key, fileItem.file, fileItem.fileName, fileItem.contentType, isReplace);
+        }
+    }
+
+    public void putFiles(String key, List<File> files, boolean... isReplace) {
         if (key != null && files != null && !files.isEmpty()) {
             for (File file : files) {
-                put(key, file);
+                putFile(key, file, isReplace);
             }
         }
     }
 
-    public void putFileWrapperParams(String key, List<FileWrapper> fileWrappers) {
-        if (key != null && fileWrappers != null && !fileWrappers.isEmpty()) {
-            for (FileWrapper fileWrapper : fileWrappers) {
-                put(key, fileWrapper);
+    public void putFileItems(String key, List<FileItem> fileItems, boolean... isReplace) {
+        if (key != null && fileItems != null && !fileItems.isEmpty()) {
+            for (FileItem fileItem : fileItems) {
+                putFile(key, fileItem, isReplace);
             }
         }
     }
@@ -197,39 +159,28 @@ public class HttpParams implements Serializable {
     }
 
     /** 文件类型的包装类 */
-    public static class FileWrapper implements Serializable {
-        private static final long serialVersionUID = -2356139899636767776L;
+    public static class FileItem implements Serializable {
 
         public File file;
         public String fileName;
         public transient MediaType contentType;
         public long fileSize;
 
-        public FileWrapper(File file, String fileName, MediaType contentType) {
+        public FileItem(File file, String fileName, MediaType contentType) {
             this.file = file;
             this.fileName = fileName;
             this.contentType = contentType;
             this.fileSize = file.length();
         }
 
-        private void writeObject(ObjectOutputStream out) throws IOException {
-            out.defaultWriteObject();
-            out.writeObject(contentType.toString());
-        }
-
-        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-            in.defaultReadObject();
-            contentType = MediaType.parse((String) in.readObject());
-        }
-
         @Override
         public String toString() {
-            return "FileWrapper{" + //
-                    "file=" + file + //
-                    ", fileName=" + fileName + //
-                    ", contentType=" + contentType + //
-                    ", fileSize=" + fileSize +//
-                    "}";
+            return "FileItem{" +
+                    "file=" + file +
+                    ", fileName='" + fileName + '\'' +
+                    ", contentType=" + contentType +
+                    ", fileSize=" + fileSize +
+                    '}';
         }
     }
 
@@ -240,7 +191,7 @@ public class HttpParams implements Serializable {
             if (result.length() > 0) result.append("&");
             result.append(entry.getKey()).append("=").append(entry.getValue());
         }
-        for (ConcurrentHashMap.Entry<String, List<FileWrapper>> entry : fileParamsMap.entrySet()) {
+        for (ConcurrentHashMap.Entry<String, List<FileItem>> entry : fileParamsMap.entrySet()) {
             if (result.length() > 0) result.append("&");
             result.append(entry.getKey()).append("=").append(entry.getValue());
         }

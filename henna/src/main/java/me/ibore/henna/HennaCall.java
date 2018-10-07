@@ -4,15 +4,16 @@ import android.support.annotation.NonNull;
 
 import java.io.IOException;
 
+import me.ibore.henna.exception.ConvertException;
 import me.ibore.henna.exception.HttpException;
 import me.ibore.henna.progress.ProgressResponseBody;
 
-public class RealCall<T> implements Call<T> {
+public class HennaCall<T> implements Call<T> {
 
     private okhttp3.Call rawCall;
     private Request<T, ? extends Request> request;
 
-    public RealCall(Request<T, ? extends Request> request) {
+    public HennaCall(Request<T, ? extends Request> request) {
         this.request = request;
         rawCall = request.getClient().newCall(request.generateRequest());
     }
@@ -58,11 +59,11 @@ public class RealCall<T> implements Call<T> {
                         HennaUtils.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                listener.onFailure(RealCall.this, e);
+                                listener.onFailure(HennaCall.this, e);
                             }
                         });
                     } else {
-                        listener.onFailure(RealCall.this, e);
+                        listener.onFailure(HennaCall.this, e);
                     }
                 }
             }
@@ -83,12 +84,12 @@ public class RealCall<T> implements Call<T> {
                             HennaUtils.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    listener.onResponse(RealCall.this, Response.success(finalRawResponse, object));
+                                    listener.onResponse(HennaCall.this, Response.success(finalRawResponse, object));
                                     listener.onFinish();
                                 }
                             });
                         } else {
-                            listener.onResponse(RealCall.this, Response.success(rawResponse, object));
+                            listener.onResponse(HennaCall.this, Response.success(rawResponse, object));
                             listener.onFinish();
                         }
                     } catch (IOException e) {
@@ -97,11 +98,11 @@ public class RealCall<T> implements Call<T> {
                         if (request.isUIThread()) {
                             HennaUtils.runOnUiThread(new Runnable() {
                                 @Override
-                                public void run() { listener.onFailure(RealCall.this, e);
+                                public void run() { listener.onFailure(HennaCall.this, e);
                                 }
                             });
                         } else {
-                            listener.onFailure(RealCall.this, e);
+                            listener.onFailure(HennaCall.this, e);
                         }
                     }
                 } else {
@@ -110,11 +111,11 @@ public class RealCall<T> implements Call<T> {
                         HennaUtils.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                listener.onFailure(RealCall.this, new HttpException(finalRawResponse1.code(), finalRawResponse1.message()));
+                                listener.onFailure(HennaCall.this, new HttpException(finalRawResponse1.code(), finalRawResponse1.message()));
                             }
                         });
                     } else {
-                        listener.onFailure(RealCall.this, new HttpException(rawResponse.code(), rawResponse.message()));
+                        listener.onFailure(HennaCall.this, new HttpException(rawResponse.code(), rawResponse.message()));
                     }
                 }
             }
@@ -138,7 +139,7 @@ public class RealCall<T> implements Call<T> {
 
     @Override
     public Call<T> clone() {
-        return new RealCall<>(request);
+        return new HennaCall<>(request);
     }
 
     @Override

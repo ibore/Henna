@@ -94,8 +94,8 @@ public class HttpException extends Exception {
 
     @Override
     public String toString() {
-        return "错误码: " + code + "\n"
-                + "错误信息：" + getMessage();
+        return "Error code: " + code + "\n"
+                + "Error message：" + getMessage();
     }
 
 }

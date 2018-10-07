@@ -1,9 +1,11 @@
 package me.ibore.henna;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import me.ibore.henna.convert.FileConverter;
-import me.ibore.henna.download.DownloadListener;
+import me.ibore.henna.interceptor.HttpInterceptor;
 import me.ibore.henna.progress.ProgressListener;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -97,7 +99,11 @@ public final class Henna {
         return new RequestNoBody<T>(this).url(url).method("TRACE");
     }
 
-    public void download(String fileDir, String url, DownloadListener downloadListener) {
+    public void download(String fileDir, String url, HennaListener<File> listener) {
+        download(fileDir, url, null, listener);
+    }
+
+    public void download(String fileDir, String url, ProgressListener progressListener, HennaListener<File> listener) {
         String fileName = HennaUtils.getUrlFileName(url);
         File file = new File(fileDir, fileName);
         Long range = 0L;
@@ -108,8 +114,8 @@ public final class Henna {
                 .method("GET")
                 .headers("RANGE", "bytes=" + range + "-")
                 .converter(FileConverter.create(fileDir))
-                .download(downloadListener)
-                .enqueue(downloadListener);
+                .download(progressListener)
+                .enqueue(listener);
     }
 
     public void cancelTag(Object tag) {
@@ -124,6 +130,19 @@ public final class Henna {
             }
         }
     }
+
+    /*public void isRunningTag(Object tag) {
+        for (Call call : client().dispatcher().queuedCalls()) {
+            if (tag.equals(call.request().tag())) {
+                call.cancel();
+            }
+        }
+        for (Call call : client().dispatcher().runningCalls()) {
+            if (tag.equals(call.request().tag())) {
+                call.cancel();
+            }
+        }
+    }*/
 
     public void cancelAll() {
         for (Call call : client().dispatcher().queuedCalls()) {
@@ -196,7 +215,17 @@ public final class Henna {
         }
 
         public Henna builder() {
-            HennaUtils.checkNotNull(client, "OkHttpClient can not be null");
+            if (null == client) {
+                HttpInterceptor logInterceptor = new HttpInterceptor();
+                logInterceptor.setPrintLevel(HttpInterceptor.Level.BODY);
+                logInterceptor.setColorLevel(Level.WARNING);
+                client = new OkHttpClient.Builder()
+                        .addInterceptor(logInterceptor)
+                        .readTimeout(10, TimeUnit.SECONDS)
+                        .writeTimeout(10, TimeUnit.SECONDS)
+                        .connectTimeout(10, TimeUnit.SECONDS)
+                        .build();
+            }
             return new Henna(client, refreshTime, maxRetry, headers, params, converter, callAdapter);
         }
     }

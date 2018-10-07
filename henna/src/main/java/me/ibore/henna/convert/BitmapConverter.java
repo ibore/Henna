@@ -27,7 +27,7 @@ public class BitmapConverter implements Converter<Bitmap> {
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
-            throw new ConvertException();
+            throw new ConvertException("Convert Error", e);
         }
     }
 }

@@ -1,9 +1,8 @@
 package me.ibore.henna.progress;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.Serializable;
 
-public final class Progress implements Parcelable {
+public final class Progress implements Serializable {
 
     /**
      * 当前已上传或下载的总长度
@@ -25,6 +24,8 @@ public final class Progress implements Parcelable {
      * 进度是否完成
      */
     private boolean finish;
+
+    private Object tag;
 
     public Progress() {
     }
@@ -69,6 +70,14 @@ public final class Progress implements Parcelable {
         return finish;
     }
 
+    public Object getTag() {
+        return tag;
+    }
+
+    public void setTag(Object tag) {
+        this.tag = tag;
+    }
+
     /**
      * 获取百分比,该计算舍去了小数点,如果你想得到更精确的值,请自行计算
      *
@@ -89,48 +98,4 @@ public final class Progress implements Parcelable {
         return getEachBytes() * 1000 / getIntervalTime();
     }
 
-    @Override
-    public String toString() {
-        return "Progress{" +
-                "currentBytes=" + currentBytes +
-                ", contentLength=" + contentLength +
-                ", eachBytes=" + eachBytes +
-                ", intervalTime=" + intervalTime +
-                ", finish=" + finish +
-                '}';
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(this.currentBytes);
-        dest.writeLong(this.contentLength);
-        dest.writeLong(this.intervalTime);
-        dest.writeLong(this.eachBytes);
-        dest.writeByte(this.finish ? (byte) 1 : (byte) 0);
-    }
-
-    protected Progress(Parcel in) {
-        this.currentBytes = in.readLong();
-        this.contentLength = in.readLong();
-        this.intervalTime = in.readLong();
-        this.eachBytes = in.readLong();
-        this.finish = in.readByte() != 0;
-    }
-
-    public static final Creator<Progress> CREATOR = new Creator<Progress>() {
-        @Override
-        public Progress createFromParcel(Parcel source) {
-            return new Progress(source);
-        }
-
-        @Override
-        public Progress[] newArray(int size) {
-            return new Progress[size];
-        }
-    };
 }

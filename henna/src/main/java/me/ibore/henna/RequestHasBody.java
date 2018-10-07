@@ -5,8 +5,13 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
+import me.ibore.henna.progress.ProgressListener;
+import me.ibore.henna.progress.ProgressRequestBody;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 public class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
@@ -101,38 +106,38 @@ public class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> params(String key, File file) {
-        getParams().put(key, file);
+    public RequestHasBody<T> upFile(String key, File file, boolean... isReplace) {
+        getParams().putFile(key, file, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> addFileParams(String key, List<File> files) {
-        getParams().putFileParams(key, files);
+    public RequestHasBody<T> upFiles(String key, List<File> files, boolean... isReplace) {
+        getParams().putFiles(key, files, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> addFileWrapperParams(String key, List<HttpParams.FileWrapper> fileWrappers) {
-        getParams().putFileWrapperParams(key, fileWrappers);
+    public RequestHasBody<T> upFileItems(String key, List<HttpParams.FileItem> fileItems, boolean... isReplace) {
+        getParams().putFileItems(key, fileItems, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> params(String key, File file, String fileName) {
-        getParams().put(key, file, fileName);
+    public RequestHasBody<T> upFile(String key, File file, String fileName, boolean... isReplace) {
+        getParams().putFile(key, file, fileName, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> params(String key, File file, String fileName, MediaType contentType) {
-        getParams().put(key, file, fileName, contentType);
+    public RequestHasBody<T> upFile(String key, File file, String fileName, MediaType contentType, boolean... isReplace) {
+        getParams().putFile(key, file, fileName, contentType, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> params(String key, HttpParams.FileWrapper fileWrapper) {
-        getParams().put(key, fileWrapper);
+    public RequestHasBody<T> upFile(String key, HttpParams.FileItem fileWrapper, boolean... isReplace) {
+        getParams().putFile(key, fileWrapper, isReplace);
         return this;
     }
 
@@ -148,13 +153,13 @@ public class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
         builder.method(getMethod(), generateRequestBody())
                 .url(getUrl())
                 .tag(getTag())
-                .headers(HennaUtils.appendHeaders(getHeaders()));
+                .headers(HennaUtils.generateHeaders(getHeaders()));
         return builder.build();
     }
 
     private RequestBody generateRequestBody() {
         if (null == requestBody) {
-            requestBody = HennaUtils.generateMultipartRequestBody(getParams(), isMultipart);
+            requestBody = HennaUtils.generateRequestBody(getParams(), isMultipart);
         }
         if (null != uploadListener) {
             requestBody = ProgressRequestBody.create(requestBody, uploadListener, isUIThread(), getRefreshTime());

@@ -162,8 +162,8 @@ public abstract class Request<T, R extends Request> {
     }
 
     @SuppressWarnings("unchecked")
-    public R addUrlParams(String key, List<String> values) {
-        params.putUrlParams(key, values);
+    public R params(String key, List<String> values, boolean... isReplace) {
+        params.put(key, values, isReplace);
         return (R) this;
     }
 
@@ -255,7 +255,7 @@ public abstract class Request<T, R extends Request> {
     }
 
     public Call<T> getCall() {
-        if (null == call) call = new RealCall<>(this);
+        if (null == call) call = new HennaCall<>(this);
         return call;
     }
 
