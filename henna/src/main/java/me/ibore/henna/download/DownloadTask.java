@@ -118,6 +118,7 @@ public class DownloadTask implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+
             IOUtils.close(bis, inputStream, tempFile);
         }
         try {
