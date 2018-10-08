@@ -12,7 +12,7 @@ public class Download {
     /**
      * TaskId
      */
-    private String taskId;
+    private Long taskId;
     /**
      * 文件目录
      */
@@ -51,7 +51,6 @@ public class Download {
     private Serializable extra1;
     private Serializable extra2;
 
-
     public String getUrl() {
         return url;
     }
@@ -60,11 +59,11 @@ public class Download {
         this.url = url;
     }
 
-    public String getTaskId() {
+    public Long getTaskId() {
         return taskId;
     }
 
-    public void setTaskId(String taskId) {
+    public void setTaskId(Long taskId) {
         this.taskId = taskId;
     }
 

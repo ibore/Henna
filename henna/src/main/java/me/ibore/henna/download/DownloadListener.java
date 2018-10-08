@@ -2,19 +2,19 @@ package me.ibore.henna.download;
 
 public interface DownloadListener {
 
-    void onQueue(DownloadTask downloadTask);
+    void onQueue();
 
-    void onConnecting(DownloadTask downloadTask);
+    void onStart();
 
-    void onStart(DownloadTask downloadTask);
+    void onProgress(Download download);
 
-    void onPause(DownloadTask downloadTask);
+    void onPause();
 
-    void onCancel(DownloadTask downloadTask);
+    void onCancel();
 
-    void onFinish(DownloadTask downloadTask);
+    void onError(Exception e);
 
-    void onError(DownloadTask downloadTask, int code);
+    void onFinish();
 
 
 }

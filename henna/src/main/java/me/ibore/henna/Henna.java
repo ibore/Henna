@@ -1,5 +1,7 @@
 package me.ibore.henna;
 
+import android.content.Context;
+
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -19,6 +21,7 @@ import okhttp3.OkHttpClient;
 
 public final class Henna {
 
+    private Context context;
     private OkHttpClient client;
     private int refreshTime;
     private int maxRetry;
@@ -26,6 +29,10 @@ public final class Henna {
     private HttpParams params;
     private Converter converter;
     private CallAdapter<?, ?> callAdapter;
+
+    public Context context() {
+        return context;
+    }
 
     public OkHttpClient client() {
         return client;
@@ -56,8 +63,9 @@ public final class Henna {
         return callAdapter;
     }
 
-    private Henna(OkHttpClient client, int refreshTime, int maxRetry, HttpHeaders headers,
+    private Henna(Context context, OkHttpClient client, int refreshTime, int maxRetry, HttpHeaders headers,
                   HttpParams params, Converter converter, CallAdapter callAdapter) {
+        this.context = context;
         this.client = client;
         this.refreshTime = refreshTime;
         this.maxRetry = maxRetry;
@@ -155,6 +163,7 @@ public final class Henna {
 
     public static class Builder {
 
+        private Context context;
         private OkHttpClient client;
         private int refreshTime;
         private int maxRetry;
@@ -179,6 +188,10 @@ public final class Henna {
             this.converter = henna.converter();
         }
 
+        public Builder context(Context context) {
+            this.context = context;
+            return this;
+        }
         public Builder client(OkHttpClient client) {
             this.client = HennaUtils.checkNotNull(client, "OkHttpClient can not be null");
             return this;
@@ -226,7 +239,7 @@ public final class Henna {
                         .connectTimeout(10, TimeUnit.SECONDS)
                         .build();
             }
-            return new Henna(client, refreshTime, maxRetry, headers, params, converter, callAdapter);
+            return new Henna(context, client, refreshTime, maxRetry, headers, params, converter, callAdapter);
         }
     }
 
