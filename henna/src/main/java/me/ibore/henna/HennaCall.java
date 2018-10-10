@@ -1,7 +1,5 @@
 package me.ibore.henna;
 
-import android.support.annotation.NonNull;
-
 import java.io.IOException;
 
 import me.ibore.henna.exception.ConvertException;
@@ -50,7 +48,7 @@ public class HennaCall<T> implements Call<T> {
         rawCall.enqueue(new okhttp3.Callback() {
             int retryCount = 0;
             @Override
-            public void onFailure(@NonNull okhttp3.Call call, @NonNull final IOException e) {
+            public void onFailure(okhttp3.Call call, final IOException e) {
                 if (retryCount < request.getMaxRetry()) {
                     call.clone().enqueue(this);
                     retryCount++;
@@ -69,7 +67,7 @@ public class HennaCall<T> implements Call<T> {
             }
 
             @Override
-            public void onResponse(@NonNull okhttp3.Call call, @NonNull okhttp3.Response rawResponse) throws IOException {
+            public void onResponse(okhttp3.Call call, okhttp3.Response rawResponse) throws IOException {
                 if (rawResponse.isSuccessful()) {
                     try {
                         if (null != request.getDownloadListener()) {

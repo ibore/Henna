@@ -1,12 +1,12 @@
 package me.ibore.henna.download;
 
-public interface DownloadListener {
+import me.ibore.henna.progress.ProgressListener;
+
+public interface DownloadListener extends ProgressListener {
 
     void onQueue();
 
     void onStart();
-
-    void onProgress(Download download);
 
     void onPause();
 

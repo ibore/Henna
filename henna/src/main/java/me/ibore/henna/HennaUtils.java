@@ -132,9 +132,9 @@ public class HennaUtils {
     }
 
     /** 根据响应头或者url获取文件名 */
-    public static String getResponseFileName(Response response) {
-        String fileName = getHeaderFileName(response);
-        if (TextUtils.isEmpty(fileName)) fileName = getUrlFileName(response.request().url().toString());
+    public static String getFileNameForResponse(Response response) {
+        String fileName = getFileNameFromHeader(response);
+        if (TextUtils.isEmpty(fileName)) fileName = getFileNameFromUrl(response.request().url().toString());
         if (TextUtils.isEmpty(fileName)) fileName = "temp_" + System.currentTimeMillis();
         try {
             fileName = URLDecoder.decode(fileName, "UTF-8");
@@ -149,7 +149,7 @@ public class HennaUtils {
      * Content-Disposition:attachment;filename=FileName.txt
      * Content-Disposition: attachment; filename*="UTF-8''%E6%9B%BF%E6%8D%A2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A.pdf"
      */
-    public static String getHeaderFileName(Response response) {
+    public static String getFileNameFromHeader(Response response) {
         String dispositionHeader = response.header(HttpHeaders.HEAD_KEY_CONTENT_DISPOSITION);
         if (dispositionHeader != null) {
             //文件名可能包含双引号，需要去除
@@ -180,7 +180,7 @@ public class HennaUtils {
      * 通过 ‘？’ 和 ‘/’ 判断文件名
      * http://mavin-manzhan.oss-cn-hangzhou.aliyuncs.com/1486631099150286149.jpg?x-oss-process=image/watermark,image_d2F0ZXJtYXJrXzIwMF81MC5wbmc
      */
-    public static String getUrlFileName(String url) {
+    public static String getFileNameFromUrl(String url) {
         String filename = null;
         String[] strings = url.split("/");
         for (String string : strings) {

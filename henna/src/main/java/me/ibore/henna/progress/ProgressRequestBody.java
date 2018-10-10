@@ -76,15 +76,11 @@ public final class ProgressRequestBody extends RequestBody {
             tempSize += byteCount;
             long curTime = SystemClock.elapsedRealtime();
             if (curTime - lastRefreshTime >= mRefreshTime || totalBytesRead == mProgress.getContentLength()) {
-                final long finalTempSize = tempSize;
-                final long finalTotalBytesRead = totalBytesRead;
-                final long finalIntervalTime = curTime - lastRefreshTime;
-                // Runnable 里的代码是通过 Handler 执行在主线程的,外面代码可能执行在其他线程
-                // 所以我必须使用 final ,保证在 Runnable 执行前使用到的变量,在执行时不会被修改
-                mProgress.setEachBytes(finalTempSize);
-                mProgress.setCurrentBytes(finalTotalBytesRead);
-                mProgress.setIntervalTime(finalIntervalTime);
-                mProgress.setFinish(finalTotalBytesRead == mProgress.getContentLength());
+                mProgress.setEachBytes(tempSize);
+                mProgress.setCurrentBytes(totalBytesRead);
+                mProgress.setIntervalTime(curTime - lastRefreshTime);
+                mProgress.setUsedTime(mProgress.getUsedTime() + mRefreshTime);
+                mProgress.setFinish(totalBytesRead == mProgress.getContentLength());
                 if (isUIThread) {
                     HennaUtils.runOnUiThread(new Runnable() {
                         @Override

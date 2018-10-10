@@ -21,6 +21,10 @@ public final class Progress implements Serializable {
      */
     private long eachBytes;
     /**
+     * 下载所花费的时间(毫秒)
+     */
+    private long usedTime;
+    /**
      * 进度是否完成
      */
     private boolean finish;
@@ -30,23 +34,27 @@ public final class Progress implements Serializable {
     public Progress() {
     }
 
-    void setCurrentBytes(long currentBytes) {
+    public void setCurrentBytes(long currentBytes) {
         this.currentBytes = currentBytes;
     }
 
-    void setContentLength(long contentLength) {
+    public void setContentLength(long contentLength) {
         this.contentLength = contentLength;
     }
 
-    void setIntervalTime(long intervalTime) {
+    public void setIntervalTime(long intervalTime) {
         this.intervalTime = intervalTime;
     }
 
-    void setEachBytes(long eachBytes) {
+    public void setEachBytes(long eachBytes) {
         this.eachBytes = eachBytes;
     }
 
-    void setFinish(boolean finish) {
+    public void setUsedTime(long usedTime) {
+        this.usedTime = usedTime;
+    }
+
+    public void setFinish(boolean finish) {
         this.finish = finish;
     }
 
@@ -64,6 +72,10 @@ public final class Progress implements Serializable {
 
     public long getEachBytes() {
         return eachBytes;
+    }
+
+    public long getUsedTime() {
+        return usedTime;
     }
 
     public boolean isFinish() {

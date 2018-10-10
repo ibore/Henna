@@ -38,8 +38,6 @@ public final class HennaDownload {
         mSQLite = LightSQLite.create(/*henna.context().getDatabasePath()*/"henna.db", Download.class);
     }
 
-
-
     public Henna getHenna() {
         return mHenna;
     }

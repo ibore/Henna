@@ -9,16 +9,24 @@ import me.ibore.henna.Converter;
 import me.ibore.henna.HennaUtils;
 import me.ibore.henna.exception.ConvertException;
 import okhttp3.Response;
+import okio.Buffer;
+import okio.BufferedSink;
+import okio.BufferedSource;
+import okio.Okio;
 
 public class FileConverter implements Converter<File> {
 
-    private File fileDir;
+    private String fileDir;
+    private File tempFile;
+    private boolean isBeginning = false;
 
     private FileConverter(String fileDir) {
-        this.fileDir = new File(fileDir);
-        if (!this.fileDir.isDirectory()) {
-            throw new NullPointerException("this file not is directory");
-        }
+        this.fileDir = fileDir;
+    }
+
+    private FileConverter(File tempFile, boolean isBeginning) {
+        this.tempFile = tempFile;
+        this.isBeginning = isBeginning;
     }
 
     public static FileConverter create() {
@@ -29,18 +37,27 @@ public class FileConverter implements Converter<File> {
         return new FileConverter(fileDir);
     }
 
+    public static FileConverter create(File tempFile, boolean isBeginning) {
+        return new FileConverter(tempFile, isBeginning);
+    }
+
     @Override
     public File convert(Response value) throws IOException, ConvertException {
         try {
-            File tempFile = new File(fileDir, HennaUtils.getUrlFileName(value.request().url().toString()));
-            InputStream is = value.body().byteStream();
-            byte[] buf = new byte[2048];
-            int len = 0;
-            FileOutputStream fos = new FileOutputStream(tempFile);
-            while ((len = is.read(buf)) != -1) {
-                fos.write(buf, 0, len);
+            if (null == tempFile) {
+                tempFile = new File(fileDir, HennaUtils.getFileNameForResponse(value));
             }
-            fos.flush();
+            if (isBeginning) {
+                if (tempFile.exists()) tempFile.createNewFile();
+            }
+            BufferedSink sink = Okio.buffer(Okio.sink(tempFile));
+            Buffer buffer = sink.buffer();
+            BufferedSource source = value.body().source();
+            while (source.read(buffer, 200 * 1024) != -1) {
+                sink.emit();
+            }
+            source.close();
+            sink.close();
             return tempFile;
         } catch (IOException e) {
             throw e;

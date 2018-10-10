@@ -90,7 +90,7 @@ public abstract class Request<T, R extends Request> {
     }
 
     @SuppressWarnings("unchecked")
-    public R headers(String key, String value) {
+    public R header(String key, String value) {
         headers.put(key, value);
         return (R) this;
     }
