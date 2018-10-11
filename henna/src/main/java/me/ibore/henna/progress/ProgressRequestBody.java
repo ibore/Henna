@@ -79,7 +79,7 @@ public final class ProgressRequestBody extends RequestBody {
                 mProgress.setEachBytes(tempSize);
                 mProgress.setCurrentBytes(totalBytesRead);
                 mProgress.setIntervalTime(curTime - lastRefreshTime);
-                mProgress.setUsedTime(mProgress.getUsedTime() + mRefreshTime);
+                mProgress.setUsedTime(mProgress.getUsedTime() + mProgress.getIntervalTime());
                 mProgress.setFinish(totalBytesRead == mProgress.getContentLength());
                 if (isUIThread) {
                     HennaUtils.runOnUiThread(new Runnable() {

@@ -55,7 +55,7 @@ public final class HennaDownload {
      */
     public void addTask(DownloadTask task) {
         Download taskEntity = task.getDownload();
-        if (taskEntity != null && taskEntity.getTaskStatus() != TaskStatus.TASK_STATUS_DOWNLOADING) {
+        if (taskEntity != null && taskEntity.getTaskStatus() != Download.TASK_STATUS_PROGRESS) {
             task.setHennaDownload(this);
             mCurrentTaskList.put(taskEntity.getTaskId(), task);
             if (!mQueue.contains(task)) {
@@ -91,11 +91,10 @@ public final class HennaDownload {
         if(task == null) return;
         Download download = task.getDownload();
         if (download != null) {
-            if(task.getDownload().getTaskStatus() == TaskStatus.TASK_STATUS_DOWNLOADING){
+            if(task.getDownload().getTaskStatus() == Download.TASK_STATUS_PROGRESS){
                 pauseTask(task);
                 mExecutor.remove(task);
             }
-
             if (mQueue.contains(task)) {
                 mQueue.remove(task);
             }
@@ -122,7 +121,7 @@ public final class HennaDownload {
             if (download != null) {
                 int status = download.getTaskStatus();
                 currTask = new DownloadTask(download);
-                if (status != TaskStatus.TASK_STATUS_FINISH) {
+                if (status != Download.TASK_STATUS_FINISH) {
                     mCurrentTaskList.put(taskId, currTask);
                 }
             }
@@ -159,8 +158,8 @@ public final class HennaDownload {
         for (Download download : downloads) {
             long currentBytes = download.getCurrentBytes();
             long contentLength = download.getContentLength();
-            if (currentBytes > 0 && currentBytes != contentLength && download.getTaskStatus() != TaskStatus.TASK_STATUS_PAUSE) {
-                download.setTaskStatus(TaskStatus.TASK_STATUS_PAUSE);
+            if (currentBytes > 0 && currentBytes != contentLength && download.getTaskStatus() != Download.TASK_STATUS_PAUSE) {
+                download.setTaskStatus(Download.TASK_STATUS_PAUSE);
             }
             mSQLite.update(download);
         }

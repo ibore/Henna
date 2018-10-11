@@ -34,27 +34,27 @@ public final class Progress implements Serializable {
     public Progress() {
     }
 
-    public void setCurrentBytes(long currentBytes) {
+    void setCurrentBytes(long currentBytes) {
         this.currentBytes = currentBytes;
     }
 
-    public void setContentLength(long contentLength) {
+    void setContentLength(long contentLength) {
         this.contentLength = contentLength;
     }
 
-    public void setIntervalTime(long intervalTime) {
+    void setIntervalTime(long intervalTime) {
         this.intervalTime = intervalTime;
     }
 
-    public void setEachBytes(long eachBytes) {
+    void setEachBytes(long eachBytes) {
         this.eachBytes = eachBytes;
     }
 
-    public void setUsedTime(long usedTime) {
+    void setUsedTime(long usedTime) {
         this.usedTime = usedTime;
     }
 
-    public void setFinish(boolean finish) {
+    void setFinish(boolean finish) {
         this.finish = finish;
     }
 

@@ -77,7 +77,7 @@ public final class ProgressResponseBody extends ResponseBody {
                 mProgress.setEachBytes(bytesRead != -1 ? tempSize : -1);
                 mProgress.setCurrentBytes(totalBytesRead);
                 mProgress.setIntervalTime(curTime - lastRefreshTime);
-                mProgress.setUsedTime(mProgress.getUsedTime() + mRefreshTime);
+                mProgress.setUsedTime(mProgress.getUsedTime() + mProgress.getIntervalTime());
                 mProgress.setFinish(bytesRead == -1 && totalBytesRead == mProgress.getContentLength());
                 if (isUIThread) {
                     HennaUtils.runOnUiThread(new Runnable() {
