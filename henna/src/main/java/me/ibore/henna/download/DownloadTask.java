@@ -8,10 +8,10 @@ import java.io.IOException;
 
 import me.ibore.henna.Converter;
 import me.ibore.henna.HennaUtils;
-import me.ibore.henna.convert.FileConverter;
+import me.ibore.henna.HttpsUtils;
+import me.ibore.henna.db.DownloadTable;
 import me.ibore.henna.exception.ConvertException;
 import me.ibore.henna.progress.Progress;
-import me.ibore.henna.progress.ProgressListener;
 import okhttp3.Response;
 import okio.Buffer;
 import okio.BufferedSink;
@@ -24,8 +24,17 @@ public class DownloadTask implements Runnable {
     private HennaDownload mHennaDownload;
     private DownloadListener mListener;
     Progress progress = new Progress();
+
     public DownloadTask(Download download) {
         this.mDownload = download;
+    }
+
+    public Download getDownload() {
+        return mDownload;
+    }
+
+    public void setListener(DownloadListener mListener) {
+        this.mListener = mListener;
     }
 
     public void setHennaDownload(HennaDownload hennaDownload) {
@@ -39,6 +48,7 @@ public class DownloadTask implements Runnable {
             String fileDir = TextUtils.isEmpty(mDownload.getFileDir()) ? HennaUtils.getDefaultFileDir() : mDownload.getFileDir();
             mDownload.setFileName(fileName);
             mDownload.setFileDir(fileDir);
+
             final File tempFile = new File(fileDir, fileName);
             if (tempFile.exists()) {
                 mDownload.setCurrentBytes(tempFile.length());
@@ -58,9 +68,10 @@ public class DownloadTask implements Runnable {
                     .header("RANGE", "bytes=" + progress.getCurrentBytes() + "-")
                     .uiThread(false)
                     .converter(new Converter<File>() {
-                        private long totalBytesRead = 0L;
+
                         private long lastRefreshTime = 0L;
                         private long tempSize = 0L;
+
                         @Override
                         public File convert(Response value) throws IOException, ConvertException {
                             BufferedSink sink = null;
@@ -75,12 +86,11 @@ public class DownloadTask implements Runnable {
                                 source = value.body().source();
                                 long bytesRead = 0;
                                 while ((bytesRead = source.read(buffer, 200 * 1024)) != -1) {
-                                    totalBytesRead += bytesRead;
                                     tempSize += bytesRead;
                                     long curTime = SystemClock.elapsedRealtime();
-                                    if (curTime - lastRefreshTime >= mHennaDownload.getHenna().refreshTime() || totalBytesRead == mDownload.getContentLength()) {
+                                    if (curTime - lastRefreshTime >= mHennaDownload.getHenna().refreshTime() || mDownload.getCurrentBytes() == mDownload.getContentLength()) {
                                         mDownload.setEachBytes(tempSize);
-                                        mDownload.setCurrentBytes(totalBytesRead);
+                                        mDownload.setCurrentBytes(mDownload.getCurrentBytes() + bytesRead);
                                         mDownload.setIntervalTime(curTime - lastRefreshTime);
                                         mDownload.setUsedTime(mDownload.getUsedTime() + mDownload.getIntervalTime());
                                         HennaUtils.runOnUiThread(new Runnable() {
@@ -107,32 +117,51 @@ public class DownloadTask implements Runnable {
                         }
                     })
                     .execute();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             String message;
             if (e instanceof IOException) {
                 message = "";
             }
             mDownload.setTaskStatus(Download.ERROR);
-            mListener.onError(e);
+            HennaUtils.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onError(e);
+                }
+            });
         }
 
     }
 
     void pause() {
         mDownload.setTaskStatus(Download.PAUSE);
-        mHennaDownload.getSQLite().update(mDownload);
+        DownloadTable.getInstance().update(mDownload);
+        HennaUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onPause();
+            }
+        });
     }
 
     void queue() {
         mDownload.setTaskStatus(Download.QUEUE);
+        HennaUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onQueue();
+            }
+        });
     }
 
     void cancel() {
         mDownload.setTaskStatus(Download.CANCEL);
-        mHennaDownload.getSQLite().delete(mDownload);
-    }
-
-    public Download getDownload() {
-        return mDownload;
+        DownloadTable.getInstance().update(mDownload);
+        HennaUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onCancel();
+            }
+        });
     }
 }

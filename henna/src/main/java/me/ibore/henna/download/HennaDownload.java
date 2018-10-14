@@ -14,18 +14,18 @@ import java.util.concurrent.TimeUnit;
 
 import me.ibore.henna.BuildConfig;
 import me.ibore.henna.Henna;
-import me.ibore.henna.db.LightSQLite;
+import me.ibore.henna.db.DownloadTable;
 
 public final class HennaDownload {
 
     private final int MAX_THREAD_COUNT = 15;
     private Henna mHenna;
-    private LightSQLite<Download> mSQLite;
     private LinkedBlockingQueue<Runnable> mQueue;
     private String mFileDir;
     private ThreadPoolExecutor mExecutor;
     private int mThreadCount;
     private Map<Long, DownloadTask> mCurrentTaskList;
+
 
     private HennaDownload(Henna henna, String fileDir, int threadCount) {
         this.mHenna = henna;
@@ -35,15 +35,10 @@ public final class HennaDownload {
         mExecutor = new ThreadPoolExecutor(mThreadCount, mThreadCount, 20, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
         mCurrentTaskList = new HashMap<>();
         mQueue = (LinkedBlockingQueue<Runnable>) mExecutor.getQueue();
-        mSQLite = LightSQLite.create(/*henna.context().getDatabasePath()*/"henna.db", Download.class);
     }
 
     public Henna getHenna() {
         return mHenna;
-    }
-
-    public LightSQLite<Download> getSQLite() {
-        return mSQLite;
     }
 
     public String getFileDir() {
@@ -55,7 +50,7 @@ public final class HennaDownload {
      */
     public void addTask(DownloadTask task) {
         Download taskEntity = task.getDownload();
-        if (taskEntity != null && taskEntity.getTaskStatus() != Download.TASK_STATUS_PROGRESS) {
+        if (taskEntity != null && taskEntity.getTaskStatus() != Download.DOWNLOADING) {
             task.setHennaDownload(this);
             mCurrentTaskList.put(taskEntity.getTaskId(), task);
             if (!mQueue.contains(task)) {
@@ -88,10 +83,10 @@ public final class HennaDownload {
      * cancel task
      */
     public void cancelTask(DownloadTask task) {
-        if(task == null) return;
+        if (task == null) return;
         Download download = task.getDownload();
         if (download != null) {
-            if(task.getDownload().getTaskStatus() == Download.TASK_STATUS_PROGRESS){
+            if (task.getDownload().getTaskStatus() == Download.DOWNLOADING) {
                 pauseTask(task);
                 mExecutor.remove(task);
             }
@@ -117,11 +112,11 @@ public final class HennaDownload {
     public DownloadTask getTask(Long taskId) {
         DownloadTask currTask = mCurrentTaskList.get(taskId);
         if (currTask == null) {
-            Download download = mSQLite.queryById(taskId);
+            Download download = DownloadTable.getInstance().queryById(taskId);
             if (download != null) {
                 int status = download.getTaskStatus();
                 currTask = new DownloadTask(download);
-                if (status != Download.TASK_STATUS_FINISH) {
+                if (status != Download.FINISH) {
                     mCurrentTaskList.put(taskId, currTask);
                 }
             }
@@ -131,7 +126,7 @@ public final class HennaDownload {
 
 
     public boolean isPauseTask(Long taskId) {
-        Download download = mSQLite.queryById(taskId);
+        Download download = DownloadTable.getInstance().queryById(taskId);
         if (download != null) {
             File file = new File(download.getFileDir(), download.getFileName());
             if (file.exists()) {
@@ -143,7 +138,7 @@ public final class HennaDownload {
     }
 
     public boolean isFinishTask(Long taskId) {
-        Download download = mSQLite.queryById(taskId);
+        Download download = DownloadTable.getInstance().queryById(taskId);
         if (download != null) {
             File file = new File(download.getFileDir(), download.getFileName());
             if (file.exists()) {
@@ -154,16 +149,17 @@ public final class HennaDownload {
     }
 
     private void recoveryTaskState() {
-        List<Download> downloads = mSQLite.queryAll();
+        List<Download> downloads = DownloadTable.getInstance().queryAll();
         for (Download download : downloads) {
             long currentBytes = download.getCurrentBytes();
             long contentLength = download.getContentLength();
-            if (currentBytes > 0 && currentBytes != contentLength && download.getTaskStatus() != Download.TASK_STATUS_PAUSE) {
-                download.setTaskStatus(Download.TASK_STATUS_PAUSE);
+            if (currentBytes > 0 && currentBytes != contentLength && download.getTaskStatus() != Download.PAUSE) {
+                download.setTaskStatus(Download.PAUSE);
             }
-            mSQLite.update(download);
+            DownloadTable.getInstance().update(download);
         }
     }
+
     /**
      * @return generate the appropriate thread count.
      */

@@ -2,6 +2,8 @@ package me.ibore.henna.download;
 
 import java.io.Serializable;
 
+import me.ibore.henna.db.Column;
+
 
 public class Download {
 
@@ -43,52 +45,71 @@ public class Download {
     /**
      * 当前下载的地址
      */
+    @Column(name = "url", notNull = true)
     private String url;
     /**
      * TaskId
      */
+    @Column(name = "taskId", primaryKey = true)
     private Long taskId;
     /**
      * 文件目录
      */
+    @Column(name = "fileDir", notNull = true)
     private String fileDir;
     /**
      * 下载的文件名
      */
+    @Column(name = "fileDir", notNull = true)
     private String fileName;
     /**
      * 下载的状态
      */
+    @Column(name = "taskStatus", notNull = true)
     private int taskStatus;
     /**
      * 当前已上传或下载的总长度
      */
+    @Column(name = "currentBytes", notNull = true)
     private long currentBytes;
     /**
      * 数据总长度
      */
+    @Column(name = "contentLength", notNull = true)
     private long contentLength;
     /**
      * 本次调用距离上一次被调用所间隔的时间(毫秒)
      */
+    @Column(name = "intervalTime")
     private long intervalTime;
     /**
      * 本次调用距离上一次被调用的间隔时间内上传或下载的byte长度
      */
+    @Column(name = "eachBytes")
     private long eachBytes;
     /**
      * 下载所花费的时间(毫秒)
      */
+    @Column(name = "usedTime", notNull = true)
     private long usedTime;
     /**
      * 下载的日期
      */
+    @Column(name = "date", notNull = true)
     private Long date;
     /**
      * 额外的信息
      */
+    @Column(name = "extra1")
     private Serializable extra1;
+    @Column(name = "extra2")
     private Serializable extra2;
+
+    private Download() {}
+
+    /*public Download(String url, ) {
+
+    }*/
 
     public String getUrl() {
         return url;

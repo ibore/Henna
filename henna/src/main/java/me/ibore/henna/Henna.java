@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import me.ibore.henna.convert.FileConverter;
+import me.ibore.henna.db.HennaDBHelper;
 import me.ibore.henna.interceptor.HttpInterceptor;
 import me.ibore.henna.progress.ProgressListener;
 import okhttp3.Call;
@@ -73,6 +74,7 @@ public final class Henna {
         this.params = params;
         this.converter = converter;
         this.callAdapter = callAdapter;
+        HennaDBHelper.init(context);
     }
 
     public <T> RequestNoBody<T> get(String url) {
@@ -108,20 +110,22 @@ public final class Henna {
     }
 
     public void download(String fileDir, String url, HennaListener<File> listener) {
-        download(fileDir, url, null, listener);
+        download(fileDir, url, null, listener, true);
     }
 
-    public void download(String fileDir, String url, ProgressListener progressListener, HennaListener<File> listener) {
-        String fileName = HennaUtils.getUrlFileName(url);
-        File file = new File(fileDir, fileName);
+    public void download(String fileDir, String url, ProgressListener progressListener, HennaListener<File> listener, boolean uiThread) {
+        /*String fileName = HennaUtils.getFileNameFromUrl(url);
+        File tempFile = new File(fileDir, fileName);
         Long range = 0L;
-        if (file.exists()) {
-            range = file.length();
-        }
-        new RequestNoBody<File>(this).url(url)
-                .method("GET")
-                .headers("RANGE", "bytes=" + range + "-")
+        if (tempFile.exists()) {
+            range = tempFile.length();
+        }*/
+
+        this.<File>get(url)
+                //.header("RANGE", "bytes=" + range + "-")
+                //.converter(FileConverter.create(tempFile, false))
                 .converter(FileConverter.create(fileDir))
+                .uiThread(uiThread)
                 .download(progressListener)
                 .enqueue(listener);
     }
@@ -192,6 +196,7 @@ public final class Henna {
             this.context = context;
             return this;
         }
+
         public Builder client(OkHttpClient client) {
             this.client = HennaUtils.checkNotNull(client, "OkHttpClient can not be null");
             return this;
