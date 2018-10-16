@@ -8,8 +8,6 @@ import java.io.IOException;
 
 import me.ibore.henna.Converter;
 import me.ibore.henna.HennaUtils;
-import me.ibore.henna.HttpsUtils;
-import me.ibore.henna.db.DownloadTable;
 import me.ibore.henna.exception.ConvertException;
 import me.ibore.henna.progress.Progress;
 import okhttp3.Response;
@@ -65,7 +63,7 @@ public class DownloadTask implements Runnable {
                 }
             });
             mHennaDownload.getHenna().<File>get(mDownload.getUrl())
-                    .header("RANGE", "bytes=" + progress.getCurrentBytes() + "-")
+                    .headers("RANGE", "bytes=" + progress.getCurrentBytes() + "-")
                     .uiThread(false)
                     .converter(new Converter<File>() {
 
@@ -135,7 +133,7 @@ public class DownloadTask implements Runnable {
 
     void pause() {
         mDownload.setTaskStatus(Download.PAUSE);
-        DownloadTable.getInstance().update(mDownload);
+        //DownloadTable.getInstance().update(mDownload);
         HennaUtils.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -156,7 +154,7 @@ public class DownloadTask implements Runnable {
 
     void cancel() {
         mDownload.setTaskStatus(Download.CANCEL);
-        DownloadTable.getInstance().update(mDownload);
+        //DownloadTable.getInstance().update(mDownload);
         HennaUtils.runOnUiThread(new Runnable() {
             @Override
             public void run() {

@@ -16,5 +16,4 @@ public interface DownloadListener {
 
     void onFinish();
 
-
 }

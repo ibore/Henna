@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import me.ibore.henna.convert.FileConverter;
-import me.ibore.henna.db.HennaDBHelper;
 import me.ibore.henna.interceptor.HttpInterceptor;
 import me.ibore.henna.progress.ProgressListener;
 import okhttp3.Call;
@@ -109,10 +108,6 @@ public final class Henna {
         return new RequestNoBody<T>(this).url(url).method("TRACE");
     }
 
-    public void download(String fileDir, String url, HennaListener<File> listener) {
-        download(fileDir, url, null, listener, true);
-    }
-
     public void download(String fileDir, String url, ProgressListener progressListener, HennaListener<File> listener, boolean uiThread) {
         /*String fileName = HennaUtils.getFileNameFromUrl(url);
         File tempFile = new File(fileDir, fileName);
@@ -120,7 +115,6 @@ public final class Henna {
         if (tempFile.exists()) {
             range = tempFile.length();
         }*/
-
         this.<File>get(url)
                 //.header("RANGE", "bytes=" + range + "-")
                 //.converter(FileConverter.create(tempFile, false))

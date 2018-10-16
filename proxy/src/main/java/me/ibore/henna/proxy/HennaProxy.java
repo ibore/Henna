@@ -12,9 +12,9 @@ import java.util.Map;
 import me.ibore.henna.Henna;
 import me.ibore.henna.HttpParams;
 import me.ibore.henna.HennaUtils;
-import me.ibore.henna.ProgressListener;
 import me.ibore.henna.RequestHasBody;
 import me.ibore.henna.RequestNoBody;
+import me.ibore.henna.progress.ProgressListener;
 import me.ibore.henna.proxy.http.Body;
 import me.ibore.henna.proxy.http.BytesBody;
 import me.ibore.henna.proxy.http.DELETE;
@@ -148,13 +148,13 @@ public class HennaProxy {
             } else if (annotation instanceof JsonBody) {
                 request.upJson((String) arg);
             } else if (annotation instanceof File) {
-                request.params(((File) annotation).value(), (java.io.File) arg);
+                request.fileParams(((File) annotation).value(), (java.io.File) arg);
             } else if (annotation instanceof FileMap) {
-                request.addFileWrapperParams(((FileMap) annotation).value(), (List<java.io.File>) arg);
+                request.fileParams(((FileMap) annotation).value(), (List<java.io.File>) arg);
             } else if (annotation instanceof FileWrapper) {
-                request.params(((FileWrapper) annotation).value(), (HttpParams.FileWrapper) arg);
+                request.fileItemParams(((FileWrapper) annotation).value(), (HttpParams.FileItem) arg);
             } else if (annotation instanceof FileWrapperList) {
-                request.addFileWrapperParams(((FileWrapperList) annotation).value(), (List<HttpParams.FileWrapper>) arg);
+                request.params(((FileWrapperList) annotation).value(), (List<HttpParams.FileItem>) arg);
             } else if (annotation instanceof UploadListener) {
                 request.upload((ProgressListener) arg);
             } else if (annotation instanceof DownloadListener) {

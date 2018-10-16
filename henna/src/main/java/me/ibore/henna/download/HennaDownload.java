@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 import me.ibore.henna.BuildConfig;
 import me.ibore.henna.Henna;
-import me.ibore.henna.db.DownloadTable;
 
 public final class HennaDownload {
 

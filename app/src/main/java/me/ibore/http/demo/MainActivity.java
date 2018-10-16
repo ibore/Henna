@@ -23,7 +23,7 @@ import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Henna xHttp;
+    private Henna xHenna;
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -44,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(logInterceptor)
                 .build();
-        xHttp = new Henna.Builder()
+        xHenna = new Henna.Builder()
+                .context(this)
                 .client(client)
                 .header("ce", "ddd")
                 .header("dddd", "dddddd")
@@ -58,8 +59,7 @@ public class MainActivity extends AppCompatActivity {
         strings.add("222222222222");
         strings.add("333333333333");
 
-
-        HennaProxy proxy = new HennaProxy(xHttp, "http://www.so.com/");
+        HennaProxy proxy = new HennaProxy(xHenna, "http://www.so.com/");
         ApiService apiService = proxy.create(ApiService.class);
         apiService.getSo("test", "test", "so.com")
                 .subscribeOn(Schedulers.io())

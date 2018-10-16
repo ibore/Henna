@@ -2,7 +2,7 @@ package me.ibore.henna.download;
 
 import java.io.Serializable;
 
-import me.ibore.henna.db.Column;
+import me.ibore.henna.db.LightSQLite;
 
 
 public class Download {
@@ -45,64 +45,64 @@ public class Download {
     /**
      * 当前下载的地址
      */
-    @Column(name = "url", notNull = true)
+    @LightSQLite.Column(columns = "url", isNull = false)
     private String url;
     /**
      * TaskId
      */
-    @Column(name = "taskId", primaryKey = true)
+    @LightSQLite.Id(columns = "url", autoincrement = false)
     private Long taskId;
     /**
      * 文件目录
      */
-    @Column(name = "fileDir", notNull = true)
+    @LightSQLite.Column(columns = "fileDir", isNull = false)
     private String fileDir;
     /**
      * 下载的文件名
      */
-    @Column(name = "fileDir", notNull = true)
+    @LightSQLite.Column(columns = "fileName", isNull = false)
     private String fileName;
     /**
      * 下载的状态
      */
-    @Column(name = "taskStatus", notNull = true)
+    @LightSQLite.Column(columns = "taskStatus", isNull = false)
     private int taskStatus;
     /**
      * 当前已上传或下载的总长度
      */
-    @Column(name = "currentBytes", notNull = true)
+    @LightSQLite.Column(columns = "currentBytes")
     private long currentBytes;
     /**
      * 数据总长度
      */
-    @Column(name = "contentLength", notNull = true)
+    @LightSQLite.Column(columns = "contentLength")
     private long contentLength;
     /**
      * 本次调用距离上一次被调用所间隔的时间(毫秒)
      */
-    @Column(name = "intervalTime")
+    @LightSQLite.Column(columns = "intervalTime")
     private long intervalTime;
     /**
      * 本次调用距离上一次被调用的间隔时间内上传或下载的byte长度
      */
-    @Column(name = "eachBytes")
+    @LightSQLite.Column(columns = "eachBytes")
     private long eachBytes;
     /**
      * 下载所花费的时间(毫秒)
      */
-    @Column(name = "usedTime", notNull = true)
+    @LightSQLite.Column(columns = "usedTime")
     private long usedTime;
     /**
      * 下载的日期
      */
-    @Column(name = "date", notNull = true)
+    @LightSQLite.Column(columns = "date", isNull = false)
     private Long date;
     /**
      * 额外的信息
      */
-    @Column(name = "extra1")
+    @LightSQLite.Column(columns = "extra1")
     private Serializable extra1;
-    @Column(name = "extra2")
+    @LightSQLite.Column(columns = "extra2")
     private Serializable extra2;
 
     private Download() {}

@@ -106,37 +106,37 @@ public class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> upFile(String key, File file, boolean... isReplace) {
+    public RequestHasBody<T> fileParams(String key, File file, boolean... isReplace) {
         getParams().putFile(key, file, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> upFiles(String key, List<File> files, boolean... isReplace) {
+    public RequestHasBody<T> fileParams(String key, List<File> files, boolean... isReplace) {
         getParams().putFiles(key, files, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> upFileItems(String key, List<HttpParams.FileItem> fileItems, boolean... isReplace) {
+    public RequestHasBody<T> fileItemParams(String key, List<HttpParams.FileItem> fileItems, boolean... isReplace) {
         getParams().putFileItems(key, fileItems, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> upFile(String key, File file, String fileName, boolean... isReplace) {
+    public RequestHasBody<T> fileParams(String key, File file, String fileName, boolean... isReplace) {
         getParams().putFile(key, file, fileName, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> upFile(String key, File file, String fileName, MediaType contentType, boolean... isReplace) {
+    public RequestHasBody<T> fileParams(String key, File file, String fileName, MediaType contentType, boolean... isReplace) {
         getParams().putFile(key, file, fileName, contentType, isReplace);
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public RequestHasBody<T> upFile(String key, HttpParams.FileItem fileWrapper, boolean... isReplace) {
+    public RequestHasBody<T> fileItemParams(String key, HttpParams.FileItem fileWrapper, boolean... isReplace) {
         getParams().putFile(key, fileWrapper, isReplace);
         return this;
     }
