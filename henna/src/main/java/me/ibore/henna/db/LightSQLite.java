@@ -5,8 +5,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -235,7 +237,7 @@ public final class LightSQLite<T> {
                     } else if (type == byte[].class) {
                         field.set(t, cursor.getBlob(cursor.getColumnIndex(columnName)));
                     } else if (type == Serializable.class) {
-                        field.set(t, cursor.getBlob(cursor.getColumnIndex(columnName)));
+                        field.set(t, toObject(cursor.getBlob(cursor.getColumnIndex(columnName))));
                     }
                 }
                 if (t != null) {
@@ -288,7 +290,6 @@ public final class LightSQLite<T> {
             if (fieldValue == null) {
                 continue;
             }
-
             Class<?> type = field.getType();
             if (type == String.class) {
                 contentValues.put(column, String.valueOf(fieldValue));
@@ -305,8 +306,7 @@ public final class LightSQLite<T> {
             } else if (type == byte[].class) {
                 contentValues.put(column, (byte[]) fieldValue);
             } else if (type == Serializable.class) {
-                // TODO 待实现
-                //contentValues.put(column, (Serializable) fieldValue);
+                contentValues.put(column, toByteArray(fieldValue));
             }
         }
         return contentValues;
@@ -323,6 +323,38 @@ public final class LightSQLite<T> {
         }
         return lightSQLite;
     }
+
+
+    public static byte[] toByteArray(Object input) {
+        ByteArrayOutputStream baos = null;
+        ObjectOutputStream oos = null;
+        try {
+            baos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(baos);
+            oos.writeObject(input);
+            oos.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (null != baos) {
+                    baos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (null != oos) {
+                    oos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
 
     public static Object toObject(byte[] input) {
         if (input == null) return null;

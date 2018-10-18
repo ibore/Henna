@@ -133,7 +133,7 @@ public class DownloadTask implements Runnable {
 
     void pause() {
         mDownload.setTaskStatus(Download.PAUSE);
-        //DownloadTable.getInstance().update(mDownload);
+        mHennaDownload.getSQLite().update(mDownload);
         HennaUtils.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -154,7 +154,7 @@ public class DownloadTask implements Runnable {
 
     void cancel() {
         mDownload.setTaskStatus(Download.CANCEL);
-        //DownloadTable.getInstance().update(mDownload);
+        mHennaDownload.getSQLite().update(mDownload);
         HennaUtils.runOnUiThread(new Runnable() {
             @Override
             public void run() {

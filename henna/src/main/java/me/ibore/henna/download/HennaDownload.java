@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import me.ibore.henna.BuildConfig;
 import me.ibore.henna.Henna;
+import me.ibore.henna.db.LightSQLite;
 
 public final class HennaDownload {
 
@@ -24,7 +25,7 @@ public final class HennaDownload {
     private ThreadPoolExecutor mExecutor;
     private int mThreadCount;
     private Map<Long, DownloadTask> mCurrentTaskList;
-
+    private LightSQLite<Download> mSQLite;
 
     private HennaDownload(Henna henna, String fileDir, int threadCount) {
         this.mHenna = henna;
@@ -42,6 +43,10 @@ public final class HennaDownload {
 
     public String getFileDir() {
         return mFileDir;
+    }
+
+    public LightSQLite<Download> getSQLite() {
+        return mSQLite;
     }
 
     /**
@@ -111,7 +116,7 @@ public final class HennaDownload {
     public DownloadTask getTask(Long taskId) {
         DownloadTask currTask = mCurrentTaskList.get(taskId);
         if (currTask == null) {
-            Download download = DownloadTable.getInstance().queryById(taskId);
+            Download download = mSQLite.queryById(taskId);
             if (download != null) {
                 int status = download.getTaskStatus();
                 currTask = new DownloadTask(download);
@@ -125,7 +130,7 @@ public final class HennaDownload {
 
 
     public boolean isPauseTask(Long taskId) {
-        Download download = DownloadTable.getInstance().queryById(taskId);
+        Download download = mSQLite.queryById(taskId);
         if (download != null) {
             File file = new File(download.getFileDir(), download.getFileName());
             if (file.exists()) {
@@ -137,7 +142,7 @@ public final class HennaDownload {
     }
 
     public boolean isFinishTask(Long taskId) {
-        Download download = DownloadTable.getInstance().queryById(taskId);
+        Download download = mSQLite.queryById(taskId);
         if (download != null) {
             File file = new File(download.getFileDir(), download.getFileName());
             if (file.exists()) {
@@ -148,14 +153,14 @@ public final class HennaDownload {
     }
 
     private void recoveryTaskState() {
-        List<Download> downloads = DownloadTable.getInstance().queryAll();
+        List<Download> downloads = mSQLite.queryAll();
         for (Download download : downloads) {
             long currentBytes = download.getCurrentBytes();
             long contentLength = download.getContentLength();
             if (currentBytes > 0 && currentBytes != contentLength && download.getTaskStatus() != Download.PAUSE) {
                 download.setTaskStatus(Download.PAUSE);
             }
-            DownloadTable.getInstance().update(download);
+            mSQLite.update(download);
         }
     }
 

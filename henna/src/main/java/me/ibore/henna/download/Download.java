@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import me.ibore.henna.db.LightSQLite;
 
-
+@LightSQLite.Table("download")
 public class Download {
 
     /**
@@ -107,9 +107,23 @@ public class Download {
 
     private Download() {}
 
-    /*public Download(String url, ) {
+    public Download(String url, String fileName) {
+        this.url = url;
+        this.fileName = fileName;
+    }
 
-    }*/
+    public Download(String url, String fileName, Serializable extra1) {
+        this.url = url;
+        this.fileName = fileName;
+        this.extra1 = extra1;
+    }
+
+    public Download(String url, String fileName, Serializable extra1, Serializable extra2) {
+        this.url = url;
+        this.fileName = fileName;
+        this.extra1 = extra1;
+        this.extra2 = extra2;
+    }
 
     public String getUrl() {
         return url;
