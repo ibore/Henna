@@ -31,6 +31,7 @@ public final class HennaDownload {
         this.mHenna = henna;
         this.mFileDir = fileDir;
         this.mThreadCount = threadCount;
+        mSQLite = LightSQLite.create(mHenna.context().getDatabasePath("henna.db").getAbsolutePath(), Download.class);
         mThreadCount = threadCount < 1 ? 1 : threadCount <= MAX_THREAD_COUNT ? threadCount : MAX_THREAD_COUNT;
         mExecutor = new ThreadPoolExecutor(mThreadCount, mThreadCount, 20, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
         mCurrentTaskList = new HashMap<>();
@@ -53,10 +54,11 @@ public final class HennaDownload {
      * add task
      */
     public void addTask(DownloadTask task) {
-        Download taskEntity = task.getDownload();
-        if (taskEntity != null && taskEntity.getTaskStatus() != Download.DOWNLOADING) {
+        Download download = task.getDownload();
+        if (download != null && download.getTaskStatus() != Download.DOWNLOADING) {
+            download.setFileDir(mFileDir);
             task.setHennaDownload(this);
-            mCurrentTaskList.put(taskEntity.getTaskId(), task);
+            mCurrentTaskList.put(download.getTaskId(), task);
             if (!mQueue.contains(task)) {
                 mExecutor.execute(task);
             }

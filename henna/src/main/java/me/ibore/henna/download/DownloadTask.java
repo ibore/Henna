@@ -116,10 +116,6 @@ public class DownloadTask implements Runnable {
                     })
                     .execute();
         } catch (final Exception e) {
-            String message;
-            if (e instanceof IOException) {
-                message = "";
-            }
             mDownload.setTaskStatus(Download.ERROR);
             HennaUtils.runOnUiThread(new Runnable() {
                 @Override

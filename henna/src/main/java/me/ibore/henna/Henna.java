@@ -73,7 +73,6 @@ public final class Henna {
         this.params = params;
         this.converter = converter;
         this.callAdapter = callAdapter;
-        HennaDBHelper.init(context);
     }
 
     public <T> RequestNoBody<T> get(String url) {
@@ -108,23 +107,7 @@ public final class Henna {
         return new RequestNoBody<T>(this).url(url).method("TRACE");
     }
 
-    public void download(String fileDir, String url, ProgressListener progressListener, HennaListener<File> listener, boolean uiThread) {
-        /*String fileName = HennaUtils.getFileNameFromUrl(url);
-        File tempFile = new File(fileDir, fileName);
-        Long range = 0L;
-        if (tempFile.exists()) {
-            range = tempFile.length();
-        }*/
-        this.<File>get(url)
-                //.header("RANGE", "bytes=" + range + "-")
-                //.converter(FileConverter.create(tempFile, false))
-                .converter(FileConverter.create(fileDir))
-                .uiThread(uiThread)
-                .download(progressListener)
-                .enqueue(listener);
-    }
-
-    public void cancelTag(Object tag) {
+    public void isRunningTag(Object tag) {
         for (Call call : client().dispatcher().queuedCalls()) {
             if (tag.equals(call.request().tag())) {
                 call.cancel();
@@ -136,19 +119,6 @@ public final class Henna {
             }
         }
     }
-
-    /*public void isRunningTag(Object tag) {
-        for (Call call : client().dispatcher().queuedCalls()) {
-            if (tag.equals(call.request().tag())) {
-                call.cancel();
-            }
-        }
-        for (Call call : client().dispatcher().runningCalls()) {
-            if (tag.equals(call.request().tag())) {
-                call.cancel();
-            }
-        }
-    }*/
 
     public void cancelAll() {
         for (Call call : client().dispatcher().queuedCalls()) {
