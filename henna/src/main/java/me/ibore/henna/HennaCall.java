@@ -34,17 +34,6 @@ public class HennaCall<T> implements Call<T> {
     @Override
     public void enqueue(final HennaListener<T> listener) {
         if (null == listener) throw new NullPointerException("HennaListener can not be null");
-        if (request.isUIThread()) {
-            HennaUtils.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    listener.onStart(request);
-                }
-            });
-        } else {
-            listener.onStart(request);
-        }
-
         rawCall.enqueue(new okhttp3.Callback() {
             int retryCount = 0;
             @Override
@@ -83,12 +72,10 @@ public class HennaCall<T> implements Call<T> {
                                 @Override
                                 public void run() {
                                     listener.onResponse(HennaCall.this, Response.success(finalRawResponse, object));
-                                    listener.onFinish();
                                 }
                             });
                         } else {
                             listener.onResponse(HennaCall.this, Response.success(rawResponse, object));
-                            listener.onFinish();
                         }
                     } catch (IOException e) {
                         throw e;

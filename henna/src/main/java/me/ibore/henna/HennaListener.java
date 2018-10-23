@@ -1,17 +1,10 @@
 package me.ibore.henna;
 
 
-public abstract class HennaListener<T> {
+public interface HennaListener<T> {
 
-    public void onStart(Request<T, ? extends Request> request) {
+    void onResponse(Call<T> call, Response<T> response);
 
-    }
+    void onFailure(Call<T> call, Throwable e);
 
-    public abstract void onResponse(Call<T> call, Response<T> response);
-
-    public abstract void onFailure(Call<T> call, Throwable e);
-
-    public void onFinish() {
-
-    }
 }
