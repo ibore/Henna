@@ -28,7 +28,7 @@ public class CallEnqueueObservable<T> extends Observable<Response<T>> {
         call.enqueue(callback);
     }
 
-    private static final class CallListener<T> extends HennaListener<T> implements Disposable {
+    private static final class CallListener<T> implements Disposable, HennaListener<T> {
 
         private final Call<T> call;
         private final Observer<? super Response<T>> observer;
@@ -54,6 +54,7 @@ public class CallEnqueueObservable<T> extends Observable<Response<T>> {
             if (call.isCanceled()) return;
             try {
                 observer.onNext(response);
+                observer.onComplete();
             } catch (Exception e) {
                 if (terminated) {
                     RxJavaPlugins.onError(e);
@@ -72,18 +73,6 @@ public class CallEnqueueObservable<T> extends Observable<Response<T>> {
             } catch (Throwable inner) {
                 Exceptions.throwIfFatal(inner);
                 RxJavaPlugins.onError(new CompositeException(e, inner));
-            }
-        }
-
-        @Override
-        public void onFinish() {
-            if (call.isCanceled()) return;
-            try {
-                terminated = true;
-                observer.onComplete();
-            } catch (Throwable inner) {
-                Exceptions.throwIfFatal(inner);
-                RxJavaPlugins.onError(inner);
             }
         }
     }

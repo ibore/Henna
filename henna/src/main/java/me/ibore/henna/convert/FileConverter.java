@@ -9,6 +9,7 @@ import me.ibore.henna.Converter;
 import me.ibore.henna.HennaUtils;
 import me.ibore.henna.exception.ConvertException;
 import okhttp3.Response;
+import okhttp3.internal.cache.DiskLruCache;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -34,6 +35,7 @@ public class FileConverter implements Converter<File> {
     }
 
     public static FileConverter create(String fileDir) {
+        DiskLruCache
         return new FileConverter(fileDir);
     }
 
