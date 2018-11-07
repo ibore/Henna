@@ -1,6 +1,6 @@
 package me.ibore.henna.exception;
 
-public class ConvertException extends Exception {
+public final class ConvertException extends RuntimeException {
 
     public ConvertException(String message) {
         super(message);
@@ -9,4 +9,9 @@ public class ConvertException extends Exception {
     public ConvertException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public ConvertException(Throwable cause) {
+        super(cause);
+    }
+
 }

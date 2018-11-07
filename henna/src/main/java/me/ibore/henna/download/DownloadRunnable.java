@@ -9,21 +9,27 @@ import java.io.IOException;
 import me.ibore.henna.Converter;
 import me.ibore.henna.HennaUtils;
 import me.ibore.henna.exception.ConvertException;
-import me.ibore.henna.progress.Progress;
 import okhttp3.Response;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 
-public class DownloadTask implements Runnable {
+public class DownloadRunnable implements Runnable {
 
     private Download mDownload;
     private HennaDownload mHennaDownload;
     private DownloadListener mListener;
-    Progress progress = new Progress();
 
-    public DownloadTask(Download download) {
+    public DownloadRunnable(String url) {
+        if (TextUtils.isEmpty(url)) {
+
+        } else {
+            mDownload = new Download(url);
+        }
+    }
+
+    public DownloadRunnable(Download download) {
         this.mDownload = download;
     }
 
@@ -63,7 +69,7 @@ public class DownloadTask implements Runnable {
                 }
             });
             mHennaDownload.getHenna().<File>get(mDownload.getUrl())
-                    .headers("RANGE", "bytes=" + progress.getCurrentBytes() + "-")
+                    .headers("RANGE", "bytes=" + mDownload.getCurrentBytes() + "-")
                     .uiThread(false)
                     .converter(new Converter<File>() {
 
@@ -82,7 +88,7 @@ public class DownloadTask implements Runnable {
                                 sink = Okio.buffer(Okio.sink(tempFile));
                                 buffer = sink.buffer();
                                 source = value.body().source();
-                                long bytesRead = 0;
+                                long bytesRead;
                                 while ((bytesRead = source.read(buffer, 200 * 1024)) != -1) {
                                     tempSize += bytesRead;
                                     long curTime = SystemClock.elapsedRealtime();

@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import okhttp3.MediaType;
 
-public class HttpParams implements Serializable {
+public final class HttpParams implements Serializable {
     private static final long serialVersionUID = 7369819159227055048L;
 
     public static final MediaType MEDIA_TYPE_PLAIN = MediaType.parse("text/plain;charset=utf-8");

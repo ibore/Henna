@@ -6,7 +6,7 @@ import me.ibore.henna.exception.ConvertException;
 import me.ibore.henna.exception.HttpException;
 import me.ibore.henna.progress.ProgressResponseBody;
 
-public class HennaCall<T> implements Call<T> {
+public final class HennaCall<T> implements Call<T> {
 
     private okhttp3.Call rawCall;
     private Request<T, ? extends Request> request;
@@ -26,7 +26,7 @@ public class HennaCall<T> implements Call<T> {
             }
             return Response.success(rawResponse, request.getConverter().convert(rawResponse));
         } else {
-            throw new HttpException(rawResponse.code(), rawResponse.message());
+            throw new HttpException(rawResponse);
         }
     }
 
@@ -96,11 +96,11 @@ public class HennaCall<T> implements Call<T> {
                         HennaUtils.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                listener.onFailure(HennaCall.this, new HttpException(finalRawResponse1.code(), finalRawResponse1.message()));
+                                listener.onFailure(HennaCall.this, new HttpException(finalRawResponse1));
                             }
                         });
                     } else {
-                        listener.onFailure(HennaCall.this, new HttpException(rawResponse.code(), rawResponse.message()));
+                        listener.onFailure(HennaCall.this, new HttpException(rawResponse));
                     }
                 }
             }

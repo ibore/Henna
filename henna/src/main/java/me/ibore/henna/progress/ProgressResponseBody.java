@@ -56,7 +56,7 @@ public final class ProgressResponseBody extends ResponseBody {
     protected final class CountingSource extends ForwardingSource {
 
         private long totalBytesRead = 0L;
-        private long lastRefreshTime = 0L;  //最后一次刷新的时间
+        private long lastRefreshTime = 0L;
         private long tempSize = 0L;
 
         public CountingSource(Source delegate) {
@@ -66,10 +66,9 @@ public final class ProgressResponseBody extends ResponseBody {
         @Override
         public long read(Buffer sink, long byteCount) throws IOException {
             long bytesRead = super.read(sink, byteCount);
-            if (mProgress.getContentLength() == 0) { //避免重复调用 contentLength()
+            if (mProgress.getContentLength() == 0) {
                 mProgress.setContentLength(contentLength());
             }
-            // read() returns the number of bytes read, or -1 if this source is exhausted.
             totalBytesRead += bytesRead != -1 ? bytesRead : 0;
             tempSize += bytesRead != -1 ? bytesRead : 0;
             long curTime = SystemClock.elapsedRealtime();

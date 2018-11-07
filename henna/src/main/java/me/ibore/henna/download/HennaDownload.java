@@ -24,7 +24,7 @@ public final class HennaDownload {
     private String mFileDir;
     private ThreadPoolExecutor mExecutor;
     private int mThreadCount;
-    private Map<Long, DownloadTask> mCurrentTaskList;
+    private Map<Long, DownloadRunnable> mCurrentTaskList;
     private LightSQLite<Download> mSQLite;
 
     private HennaDownload(Henna henna, String fileDir, int threadCount) {
@@ -53,7 +53,7 @@ public final class HennaDownload {
     /**
      * add task
      */
-    public void addTask(DownloadTask task) {
+    public void addTask(DownloadRunnable task) {
         Download download = task.getDownload();
         if (download != null && download.getTaskStatus() != Download.DOWNLOADING) {
             download.setFileDir(mFileDir);
@@ -71,7 +71,7 @@ public final class HennaDownload {
     /**
      * pauseTask task
      */
-    public void pauseTask(DownloadTask task) {
+    public void pauseTask(DownloadRunnable task) {
         if (mQueue.contains(task)) {
             mQueue.remove(task);
         }
@@ -81,14 +81,14 @@ public final class HennaDownload {
     /**
      * resumeTask task
      */
-    public void resumeTask(DownloadTask task) {
+    public void resumeTask(DownloadRunnable task) {
         addTask(task);
     }
 
     /**
      * cancel task
      */
-    public void cancelTask(DownloadTask task) {
+    public void cancelTask(DownloadRunnable task) {
         if (task == null) return;
         Download download = task.getDownload();
         if (download != null) {
@@ -115,13 +115,13 @@ public final class HennaDownload {
     /**
      * @return task
      */
-    public DownloadTask getTask(Long taskId) {
-        DownloadTask currTask = mCurrentTaskList.get(taskId);
+    public DownloadRunnable getTask(Long taskId) {
+        DownloadRunnable currTask = mCurrentTaskList.get(taskId);
         if (currTask == null) {
             Download download = mSQLite.queryById(taskId);
             if (download != null) {
                 int status = download.getTaskStatus();
-                currTask = new DownloadTask(download);
+                currTask = new DownloadRunnable(download);
                 if (status != Download.FINISH) {
                     mCurrentTaskList.put(taskId, currTask);
                 }

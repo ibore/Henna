@@ -35,7 +35,6 @@ public class FileConverter implements Converter<File> {
     }
 
     public static FileConverter create(String fileDir) {
-        DiskLruCache
         return new FileConverter(fileDir);
     }
 

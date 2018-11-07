@@ -14,7 +14,7 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
-public class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
+public final class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
 
     private RequestBody requestBody;
     private ProgressListener uploadListener;

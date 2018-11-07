@@ -1,6 +1,6 @@
 package me.ibore.henna;
 
-public class RequestNoBody<T> extends Request<T, RequestNoBody<T>> {
+public final class RequestNoBody<T> extends Request<T, RequestNoBody<T>> {
 
     private String appendUrl = "";
 

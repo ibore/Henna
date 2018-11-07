@@ -42,7 +42,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HennaUtils {
+public final class HennaUtils {
 
     public static <T> T checkNotNull(T object, String message) {
         if (object == null) {

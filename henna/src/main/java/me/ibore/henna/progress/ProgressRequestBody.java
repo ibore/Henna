@@ -59,7 +59,7 @@ public final class ProgressRequestBody extends RequestBody {
     protected final class CountingSink extends ForwardingSink {
 
         private long totalBytesRead = 0L;
-        private long lastRefreshTime = 0L;  //最后一次刷新的时间
+        private long lastRefreshTime = 0L;
         private long tempSize = 0L;
 
         public CountingSink(Sink delegate) {
@@ -69,7 +69,7 @@ public final class ProgressRequestBody extends RequestBody {
         @Override
         public void write(Buffer source, long byteCount) throws IOException {
             super.write(source, byteCount);
-            if (mProgress.getContentLength() == 0) { //避免重复调用 contentLength()
+            if (mProgress.getContentLength() == 0) {
                 mProgress.setContentLength(contentLength());
             }
             totalBytesRead += byteCount;
