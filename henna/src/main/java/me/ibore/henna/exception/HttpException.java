@@ -5,12 +5,11 @@ import me.ibore.henna.HennaUtils;
 
 
 /**
- * description:
+ * description: HTTP状态异常
  * author: Ibore Xie
  * date: 2018-01-19
  * website: ibore.me
  */
-
 public final class HttpException extends RuntimeException {
 
     private static String getMessage(okhttp3.Response response) {

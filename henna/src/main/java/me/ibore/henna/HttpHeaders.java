@@ -173,7 +173,7 @@ public final class HttpHeaders implements Serializable {
      */
     public static String getUserAgent() {
         if (TextUtils.isEmpty(userAgent)) {
-            String webUserAgent = "henna/ibore";
+            String webUserAgent = "henna";
             Locale locale = Locale.getDefault();
             StringBuffer buffer = new StringBuffer();
             // Add version

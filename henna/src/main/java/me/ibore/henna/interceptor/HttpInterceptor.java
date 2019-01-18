@@ -22,7 +22,7 @@ import okhttp3.internal.http.HttpHeaders;
 import okio.Buffer;
 
 /**
- * description:
+ * description: HTTP网络请求拦截器，打印日志，添加动态公共参数，接口数据签名
  * author: Ibore Xie
  * date: 2018-01-19 00:02
  * website: ibore.me
@@ -85,6 +85,12 @@ public class HttpInterceptor implements Interceptor {
         return logForResponse(response, tookMs);
     }
 
+    /**
+     * 可以重写此方法，添加公共参数
+     * @param chain
+     * @return Request
+     * @throws IOException IO异常
+     */
     protected Request rebuildRequest(Chain chain) throws IOException {
         return chain.request();
     }

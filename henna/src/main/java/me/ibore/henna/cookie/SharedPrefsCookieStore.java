@@ -24,7 +24,7 @@ import okhttp3.Cookie;
 
 public class SharedPrefsCookieStore implements CookieStore {
 
-    private static final String COOKIE_PREFS = "OkHttp_Cookies_Prefs";
+    private static final String COOKIE_PREFS = "Henna_Cookies_Prefs";
 
     private final SharedPreferences sharedPreferences;
 
@@ -54,14 +54,14 @@ public class SharedPrefsCookieStore implements CookieStore {
         for (Cookie cookie : cookies) {
             editor.putString(createCookieKey(cookie), new SerializableCookie().encode(cookie));
         }
-        editor.commit();
+        editor.apply();
     }
 
     @Override
     public void remove(Cookie cookie) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(createCookieKey(cookie));
-        editor.commit();
+        editor.apply();
     }
 
     @Override
@@ -70,12 +70,12 @@ public class SharedPrefsCookieStore implements CookieStore {
         for (Cookie cookie : cookies) {
             editor.remove(createCookieKey(cookie));
         }
-        editor.commit();
+        editor.apply();
     }
 
     @Override
     public void clear() {
-        sharedPreferences.edit().clear().commit();
+        sharedPreferences.edit().clear().apply();
     }
 
     private static String createCookieKey(Cookie cookie) {

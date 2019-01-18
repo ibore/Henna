@@ -59,7 +59,7 @@ public final class ProgressResponseBody extends ResponseBody {
         private long lastRefreshTime = 0L;
         private long tempSize = 0L;
 
-        public CountingSource(Source delegate) {
+        CountingSource(Source delegate) {
             super(delegate);
         }
 

@@ -4,36 +4,17 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.FileNameMap;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 import okhttp3.FormBody;
 import okhttp3.Headers;
@@ -55,7 +36,9 @@ public final class HennaUtils {
         e.printStackTrace();
     }
 
-    /** 将传递进来的参数拼接成 url */
+    /**
+     * 将传递进来的参数拼接成 url
+     */
     public static String generateUrlParams(String url, Map<String, List<String>> params) {
         try {
             StringBuilder sb = new StringBuilder();
@@ -78,7 +61,9 @@ public final class HennaUtils {
         return url;
     }
 
-    /** 通用的拼接请求头 */
+    /**
+     * 通用的拼接请求头
+     */
     public static Headers generateHeaders(HttpHeaders headers) {
         Headers.Builder headerBuilder = new Headers.Builder();
         if (null != headers) {
@@ -95,7 +80,9 @@ public final class HennaUtils {
         return headerBuilder.build();
     }
 
-    /** 生成类似表单的请求体 */
+    /**
+     * 生成类似表单的请求体
+     */
     public static RequestBody generateRequestBody(HttpParams params, boolean isMultipart) {
         if (params.fileParamsMap.isEmpty() && !isMultipart) {
             //表单提交，没有文件
@@ -131,10 +118,13 @@ public final class HennaUtils {
         }
     }
 
-    /** 根据响应头或者url获取文件名 */
+    /**
+     * 根据响应头或者url获取文件名
+     */
     public static String getFileNameForResponse(Response response) {
         String fileName = getFileNameFromHeader(response);
-        if (TextUtils.isEmpty(fileName)) fileName = getFileNameFromUrl(response.request().url().toString());
+        if (TextUtils.isEmpty(fileName))
+            fileName = getFileNameFromUrl(response.request().url().toString());
         if (TextUtils.isEmpty(fileName)) fileName = "temp_" + System.currentTimeMillis();
         try {
             fileName = URLDecoder.decode(fileName, "UTF-8");
@@ -156,16 +146,16 @@ public final class HennaUtils {
             dispositionHeader = dispositionHeader.replaceAll("\"", "");
             String splits[] = dispositionHeader.split(";");
             String split = null;
-            for (String s: splits) {
+            for (String s : splits) {
                 if (null == split && (s.contains("filename=") || s.contains("filename*="))) {
                     split = s;
                 }
             }
             if (null == split) {
                 return null;
-            } else if (split.contains("filename=")){
+            } else if (split.contains("filename=")) {
                 return split.replace("filename=", "");
-            } else if (split.contains("filename*=")){
+            } else if (split.contains("filename*=")) {
                 split = split.replace("filename*=", "");
                 String encode = "UTF-8''";
                 if (split.startsWith(encode)) {
@@ -198,7 +188,9 @@ public final class HennaUtils {
         return filename;
     }
 
-    /** 根据路径删除文件 */
+    /**
+     * 根据路径删除文件
+     */
     public static boolean deleteFile(String path) {
         if (TextUtils.isEmpty(path)) return true;
         File file = new File(path);
@@ -209,7 +201,9 @@ public final class HennaUtils {
         return false;
     }
 
-    /** 根据文件名获取MIME类型 */
+    /**
+     * 根据文件名获取MIME类型
+     */
     public static MediaType guessMimeType(String fileName) {
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         fileName = fileName.replace("#", "");   //解决文件名中含有#号异常的问题

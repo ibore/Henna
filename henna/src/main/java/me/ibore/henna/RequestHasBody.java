@@ -5,13 +5,10 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import me.ibore.henna.progress.ProgressListener;
 import me.ibore.henna.progress.ProgressRequestBody;
-import okhttp3.FormBody;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 public final class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
@@ -34,12 +31,15 @@ public final class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
         return this;
     }
 
-    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upString(String string) {
         requestBody = RequestBody.create(HttpParams.MEDIA_TYPE_PLAIN, string);
         return this;
     }
+
     /**
      * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
      * 该方法用于定制请求content-type
@@ -50,49 +50,63 @@ public final class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
         return this;
     }
 
-    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upJson(String json) {
         requestBody = RequestBody.create(HttpParams.MEDIA_TYPE_JSON, json);
         return this;
     }
 
-    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upJson(JSONObject jsonObject) {
         requestBody = RequestBody.create(HttpParams.MEDIA_TYPE_JSON, jsonObject.toString());
         return this;
     }
 
-    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upJson(JSONArray jsonArray) {
         requestBody = RequestBody.create(HttpParams.MEDIA_TYPE_JSON, jsonArray.toString());
         return this;
     }
 
-    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upBytes(byte[] bs) {
         requestBody = RequestBody.create(HttpParams.MEDIA_TYPE_STREAM, bs);
         return this;
     }
 
-    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upBytes(byte[] bs, MediaType mediaType) {
         requestBody = RequestBody.create(mediaType, bs);
         return this;
     }
 
-    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upFile(File file) {
         requestBody = RequestBody.create(HennaUtils.guessMimeType(file.getName()), file);
         return this;
     }
 
-    /** 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除 */
+    /**
+     * 注意使用该方法上传字符串会清空实体中其他所有的参数，头信息不清除
+     */
     @SuppressWarnings("unchecked")
     public RequestHasBody<T> upFile(File file, MediaType mediaType) {
         requestBody = RequestBody.create(mediaType, file);

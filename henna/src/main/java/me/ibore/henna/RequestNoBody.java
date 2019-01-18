@@ -17,6 +17,10 @@ public final class RequestNoBody<T> extends Request<T, RequestNoBody<T>> {
         return this;
     }
 
+    /**
+     * 拼接参数，生成Request
+     * @return okhttp3.Request
+     */
     @Override
     protected okhttp3.Request generateRequest() {
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder();

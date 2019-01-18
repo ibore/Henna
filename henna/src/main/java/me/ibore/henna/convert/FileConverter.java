@@ -1,15 +1,12 @@
 package me.ibore.henna.convert;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import me.ibore.henna.Converter;
 import me.ibore.henna.HennaUtils;
 import me.ibore.henna.exception.ConvertException;
 import okhttp3.Response;
-import okhttp3.internal.cache.DiskLruCache;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -19,15 +16,13 @@ public class FileConverter implements Converter<File> {
 
     private String fileDir;
     private File tempFile;
-    private boolean isBeginning = false;
 
     private FileConverter(String fileDir) {
         this.fileDir = fileDir;
     }
 
-    private FileConverter(File tempFile, boolean isBeginning) {
+    private FileConverter(File tempFile) {
         this.tempFile = tempFile;
-        this.isBeginning = isBeginning;
     }
 
     public static FileConverter create() {
@@ -38,8 +33,8 @@ public class FileConverter implements Converter<File> {
         return new FileConverter(fileDir);
     }
 
-    public static FileConverter create(File tempFile, boolean isBeginning) {
-        return new FileConverter(tempFile, isBeginning);
+    public static FileConverter create(File tempFile) {
+        return new FileConverter(tempFile);
     }
 
     @Override
@@ -48,9 +43,7 @@ public class FileConverter implements Converter<File> {
             if (null == tempFile) {
                 tempFile = new File(fileDir, HennaUtils.getFileNameForResponse(value));
             }
-            if (isBeginning) {
-                if (tempFile.exists()) tempFile.createNewFile();
-            }
+            tempFile.createNewFile();
             BufferedSink sink = Okio.buffer(Okio.sink(tempFile));
             Buffer buffer = sink.buffer();
             BufferedSource source = value.body().source();
