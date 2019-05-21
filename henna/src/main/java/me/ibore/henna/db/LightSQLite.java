@@ -46,8 +46,7 @@ public final class LightSQLite<T> {
         }
         mDbTableName = table.value();
         StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE IF NOT EXISTS ");
-        sb.append(mDbTableName + "(");
+        sb.append("CREATE TABLE IF NOT EXISTS ").append(mDbTableName).append("(");
         Field[] declaredFields = mEntity.getDeclaredFields();
         for (Field field : declaredFields) {
             //拼接数据库主键
@@ -314,9 +313,9 @@ public final class LightSQLite<T> {
 
     private static Map<String, LightSQLite> mLightSQLites = new HashMap<>();
 
-    public synchronized static <T> LightSQLite<T> create(String dbName, Class<T> entity) {
+    public synchronized static <T> LightSQLite create(String dbName, Class<T> entity) {
         String key = dbName + entity.getName();
-        LightSQLite<T> lightSQLite = mLightSQLites.get(key);
+        LightSQLite lightSQLite = mLightSQLites.get(key);
         if (null == lightSQLite) {
             lightSQLite = new LightSQLite<>(dbName, entity);
             mLightSQLites.put(key, lightSQLite);
@@ -325,7 +324,7 @@ public final class LightSQLite<T> {
     }
 
 
-    public static byte[] toByteArray(Object input) {
+    private static byte[] toByteArray(Object input) {
         ByteArrayOutputStream baos = null;
         ObjectOutputStream oos = null;
         try {
@@ -355,8 +354,7 @@ public final class LightSQLite<T> {
         return null;
     }
 
-
-    public static Object toObject(byte[] input) {
+    private static Object toObject(byte[] input) {
         if (input == null) return null;
         ByteArrayInputStream bais = null;
         ObjectInputStream ois = null;

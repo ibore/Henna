@@ -1,11 +1,16 @@
 package me.ibore.henna.proxy;
 
 import android.text.TextUtils;
+import android.util.Log;
+import android.util.Xml;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -43,12 +48,10 @@ import okhttp3.RequestBody;
 
 public class HennaProxy {
 
-    private String baseUrl;
     private Henna henna;
 
-    public HennaProxy(Henna henna, String baseUrl) {
+    public HennaProxy(Henna henna) {
         this.henna = henna;
-        this.baseUrl = baseUrl;
     }
 
     @SuppressWarnings("unchecked")
@@ -65,7 +68,7 @@ public class HennaProxy {
                 });
     }
 
-    private Object dispatcher(final Method method, Object[] args) {
+    private Object dispatcher(final Method method, Object[] args) throws UnsupportedEncodingException {
         String httpMethod = "";
         String url = "";
         boolean isMultiPart = false;
@@ -103,7 +106,7 @@ public class HennaProxy {
             throw new RuntimeException("you need to add annotation HTTP method");
         }
         if (TextUtils.isEmpty(url)) throw new RuntimeException("url is null");
-        if (!url.startsWith("http")) url = baseUrl + url;
+        if (!url.startsWith("http")) url = henna.baseUrl() + url;
         Annotation[] annotations = checkoutParameter(method);
         if (HennaUtils.hasBody(httpMethod)) {
             RequestHasBody request = new RequestHasBody<>(henna)
@@ -121,7 +124,7 @@ public class HennaProxy {
     }
 
     @SuppressWarnings("unchecked")
-    private Object invokeHasBody(RequestHasBody request, Annotation[] annotations, Object[] args) {
+    private Object invokeHasBody(RequestHasBody request, Annotation[] annotations, Object[] args) throws UnsupportedEncodingException {
         for (int i = 0; i < annotations.length; i++) {
             Annotation annotation = annotations[i];
             Object arg = args[i];
@@ -134,7 +137,7 @@ public class HennaProxy {
                 }
             } else if (annotation instanceof Path) {
                 String url = request.getUrl();
-                request.url(url.replaceAll("\\{" + ((Path) annotation).value() + "}", (String) arg));
+                request.url(url.replace("{" + ((Path) annotation).value() + "}", (String) arg));
             }  else if (annotation instanceof Param) {
                 request.params(((Param) annotation).value(), (String) arg);
             } else if (annotation instanceof ParamMap) {
@@ -167,7 +170,7 @@ public class HennaProxy {
     }
 
     @SuppressWarnings("unchecked")
-    private Object invokeNoBody(RequestNoBody request, Annotation[] annotations, Object[] args) {
+    private Object invokeNoBody(RequestNoBody request, Annotation[] annotations, Object[] args) throws UnsupportedEncodingException {
         for (int i = 0; i < annotations.length; i++) {
             Annotation annotation = annotations[i];
             Object arg = args[i];
@@ -180,9 +183,7 @@ public class HennaProxy {
                 }
             } else if (annotation instanceof Path) {
                 String url = request.getUrl();
-                String replace = "{" + ((Path) annotation).value() + "}";
-                String argss = (String) arg;
-                request.url(url.replace(replace, argss));
+                request.url(url.replace("{" + ((Path) annotation).value() + "}", (String) arg));
             } else if (annotation instanceof Param) {
                 request.params(((Param) annotation).value(), (String) arg);
             } else if (annotation instanceof ParamMap) {

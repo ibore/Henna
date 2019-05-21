@@ -1,8 +1,9 @@
 package me.ibore.henna.progress;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public final class Progress implements Serializable {
+public final class Progress implements Parcelable {
 
     /**
      * 当前已上传或下载的总长度
@@ -29,10 +30,47 @@ public final class Progress implements Serializable {
      */
     private boolean finish;
 
-    private Object tag;
+    private Parcelable tag;
 
     public Progress() {
     }
+
+
+    protected Progress(Parcel in) {
+        currentBytes = in.readLong();
+        contentLength = in.readLong();
+        intervalTime = in.readLong();
+        eachBytes = in.readLong();
+        usedTime = in.readLong();
+        finish = in.readByte() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(currentBytes);
+        dest.writeLong(contentLength);
+        dest.writeLong(intervalTime);
+        dest.writeLong(eachBytes);
+        dest.writeLong(usedTime);
+        dest.writeByte((byte) (finish ? 1 : 0));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Progress> CREATOR = new Creator<Progress>() {
+        @Override
+        public Progress createFromParcel(Parcel in) {
+            return new Progress(in);
+        }
+
+        @Override
+        public Progress[] newArray(int size) {
+            return new Progress[size];
+        }
+    };
 
     void setCurrentBytes(long currentBytes) {
         this.currentBytes = currentBytes;
@@ -82,11 +120,11 @@ public final class Progress implements Serializable {
         return finish;
     }
 
-    public Object getTag() {
+    public Parcelable getTag() {
         return tag;
     }
 
-    public void setTag(Object tag) {
+    public void setTag(Parcelable tag) {
         this.tag = tag;
     }
 
@@ -109,5 +147,7 @@ public final class Progress implements Serializable {
         if (getEachBytes() <= 0 || getIntervalTime() <= 0) return 0;
         return getEachBytes() * 1000 / getIntervalTime();
     }
+
+
 
 }

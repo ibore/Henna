@@ -164,8 +164,12 @@ public final class RequestHasBody<T> extends Request<T, RequestHasBody<T>> {
     @Override
     protected okhttp3.Request generateRequest() {
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
+        String url = getUrl();
+        if (!url.startsWith("http")) {
+            url = baseUrl() + url;
+        }
         builder.method(getMethod(), generateRequestBody())
-                .url(getUrl())
+                .url(url)
                 .tag(getTag())
                 .headers(HennaUtils.generateHeaders(getHeaders()));
         return builder.build();

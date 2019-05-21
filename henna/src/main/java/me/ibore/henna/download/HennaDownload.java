@@ -3,6 +3,7 @@ package me.ibore.henna.download;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.LongSparseArray;
 
 import java.io.File;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public final class HennaDownload {
     private String mFileDir;
     private ThreadPoolExecutor mExecutor;
     private int mThreadCount;
-    private Map<Long, DownloadRunnable> mCurrentTaskList;
+    private LongSparseArray<DownloadRunnable> mCurrentTaskList;
     private LightSQLite<Download> mSQLite;
 
     private HennaDownload(Henna henna, String fileDir, int threadCount) {
@@ -34,7 +35,7 @@ public final class HennaDownload {
         mSQLite = LightSQLite.create(mHenna.context().getDatabasePath("henna.db").getAbsolutePath(), Download.class);
         mThreadCount = threadCount < 1 ? 1 : threadCount <= MAX_THREAD_COUNT ? threadCount : MAX_THREAD_COUNT;
         mExecutor = new ThreadPoolExecutor(mThreadCount, mThreadCount, 20, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-        mCurrentTaskList = new HashMap<>();
+        mCurrentTaskList = new LongSparseArray<>();
         mQueue = (LinkedBlockingQueue<Runnable>) mExecutor.getQueue();
     }
 
@@ -166,12 +167,6 @@ public final class HennaDownload {
         }
     }
 
-    /**
-     * @return generate the appropriate thread count.
-     */
-    private int getAppropriateThreadCount() {
-        return Runtime.getRuntime().availableProcessors() * 2 + 1;
-    }
 
     public class Builder {
 

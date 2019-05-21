@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -15,8 +13,8 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import me.ibore.henna.Henna;
 import me.ibore.henna.Response;
-import me.ibore.henna.convert.StringConverter;
 import me.ibore.henna.adapter.rxjava2.RxJava2CallAdapter;
+import me.ibore.henna.convert.StringConverter;
 import me.ibore.henna.interceptor.HttpInterceptor;
 import me.ibore.henna.proxy.HennaProxy;
 import okhttp3.OkHttpClient;
@@ -33,10 +31,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String url = "test{path}";
-        String test = "{path}";
-        Log.d("----", url.replace(test, "test"));
-
         HttpInterceptor logInterceptor = new HttpInterceptor();
         logInterceptor.setPrintLevel(HttpInterceptor.Level.BODY);
         logInterceptor.setColorLevel(Level.WARNING);
@@ -47,40 +41,44 @@ public class MainActivity extends AppCompatActivity {
         xHenna = new Henna.Builder()
                 .context(this)
                 .client(client)
-                .header("ce", "ddd")
-                .header("dddd", "dddddd")
                 .maxRetry(3)
                 .converter(StringConverter.create())
                 .callAdapter(RxJava2CallAdapter.create())
                 .builder();
 
-        List<String> strings = new ArrayList<>();
-        strings.add("111111111111");
-        strings.add("222222222222");
-        strings.add("333333333333");
+        /*xHenna.<String>get("http://www.so.com/")
+                .enqueue(new HennaListener<String>() {
+                    @Override
+                    public void onResponse(Call<String> call, Response<String> response) {
+                        Log.d("----", "onResponse");
+                    }
+                    @Override
+                    public void onFailure(Call<String> call, Throwable e) {
+                        Log.d("----", e.toString());
+                    }
+                });*/
 
-        HennaProxy proxy = new HennaProxy(xHenna, "http://www.so.com/");
+
+        HennaProxy proxy = new HennaProxy(xHenna);
         ApiService apiService = proxy.create(ApiService.class);
-        apiService.getSo("test", "test", "so.com")
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        compositeDisposable.add(apiService.getSo("1111")
+                .compose(upstream -> upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
                 .subscribeWith(new DisposableObserver<Response<String>>() {
-
                     @Override
                     public void onNext(Response<String> stringResponse) {
-                        Log.d("----", stringResponse.body());
+                        Log.d("----", "onNext");
                     }
 
                     @Override
                     public void onError(Throwable e) {
-
+                        Log.d("----", e.getMessage());
                     }
 
                     @Override
                     public void onComplete() {
-
+                        Log.d("----", "onComplete");
                     }
-                });
+                }));
         /*new Thread(new Runnable() {
             @Override
             public void run() {

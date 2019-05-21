@@ -219,4 +219,7 @@ public final class Download {
     public void setExtra2(Serializable extra2) {
         this.extra2 = extra2;
     }
+
+
+
 }

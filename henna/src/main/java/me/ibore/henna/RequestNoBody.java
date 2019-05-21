@@ -25,6 +25,9 @@ public final class RequestNoBody<T> extends Request<T, RequestNoBody<T>> {
     protected okhttp3.Request generateRequest() {
         okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
         String url = getUrl() + appendUrl;
+        if (!url.startsWith("http")) {
+            url = baseUrl() + url;
+        }
         builder.method(getMethod(), null)
                 .url(HennaUtils.generateUrlParams(url, getParams().urlParamsMap))
                 .tag(getTag())

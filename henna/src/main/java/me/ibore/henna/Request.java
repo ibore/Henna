@@ -9,6 +9,7 @@ import okhttp3.OkHttpClient;
 public abstract class Request<T, R extends Request> {
 
     private OkHttpClient client;
+    private String baseUrl;
     private String method;
     private String url;
     private Object tag;
@@ -32,6 +33,7 @@ public abstract class Request<T, R extends Request> {
     @SuppressWarnings("unchecked")
     public Request(Henna henna) {
         client = henna.client();
+        baseUrl = henna.baseUrl();
         maxRetry = henna.maxRetry();
         refreshTime = henna.refreshTime();
         headers = henna.headers();
@@ -61,6 +63,7 @@ public abstract class Request<T, R extends Request> {
 
     @SuppressWarnings("unchecked")
     public R url(String url) {
+        HennaUtils.checkNotNull(url, "url can't be null");
         this.url = url;
         return (R) this;
     }
@@ -204,6 +207,10 @@ public abstract class Request<T, R extends Request> {
 
     public OkHttpClient getClient() {
         return HennaUtils.checkNotNull(client, "OkHttpClient can not be null");
+    }
+
+    public String baseUrl() {
+        return baseUrl;
     }
 
     public String getMethod() {

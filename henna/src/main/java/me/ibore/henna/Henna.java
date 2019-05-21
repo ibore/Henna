@@ -2,13 +2,10 @@ package me.ibore.henna;
 
 import android.content.Context;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import me.ibore.henna.convert.FileConverter;
 import me.ibore.henna.interceptor.HttpInterceptor;
-import me.ibore.henna.progress.ProgressListener;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
@@ -27,6 +24,7 @@ public final class Henna {
     private int maxRetry;
     private HttpHeaders headers;
     private HttpParams params;
+    private String baseUrl;
     private Converter converter;
     private CallAdapter<?, ?> callAdapter;
 
@@ -54,6 +52,10 @@ public final class Henna {
         return params;
     }
 
+    public String baseUrl() {
+        return baseUrl;
+    }
+
     @SuppressWarnings("unchecked")
     public <T> Converter<T> converter() {
         return converter;
@@ -64,13 +66,14 @@ public final class Henna {
     }
 
     private Henna(Context context, OkHttpClient client, int refreshTime, int maxRetry, HttpHeaders headers,
-                  HttpParams params, Converter converter, CallAdapter callAdapter) {
+                  HttpParams params, String baseUrl, Converter converter, CallAdapter callAdapter) {
         this.context = context;
         this.client = client;
         this.refreshTime = refreshTime;
         this.maxRetry = maxRetry;
         this.headers = headers;
         this.params = params;
+        this.baseUrl = baseUrl;
         this.converter = converter;
         this.callAdapter = callAdapter;
     }
@@ -139,6 +142,7 @@ public final class Henna {
         private HttpParams params;
         private Converter converter;
         private CallAdapter callAdapter;
+        private String baseUrl;
 
         public Builder() {
             this.refreshTime = 300;
@@ -154,6 +158,7 @@ public final class Henna {
             this.headers = henna.headers();
             this.params = henna.params();
             this.converter = henna.converter();
+            this.baseUrl = henna.baseUrl();
         }
 
         public Builder context(Context context) {
@@ -186,6 +191,11 @@ public final class Henna {
             return this;
         }
 
+        public Builder baseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+            return this;
+        }
+
         public Builder converter(Converter converter) {
             this.converter = converter;
             return this;
@@ -208,9 +218,8 @@ public final class Henna {
                         .connectTimeout(10, TimeUnit.SECONDS)
                         .build();
             }
-            return new Henna(context, client, refreshTime, maxRetry, headers, params, converter, callAdapter);
+            return new Henna(context, client, refreshTime, maxRetry, headers, params, baseUrl, converter, callAdapter);
         }
     }
-
 
 }

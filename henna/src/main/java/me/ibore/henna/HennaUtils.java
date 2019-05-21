@@ -242,6 +242,13 @@ public final class HennaUtils {
         return fileDir;
     }
 
+    /**
+     * @return generate the appropriate thread count.
+     */
+    private int getAppropriateThreadCount() {
+        return Runtime.getRuntime().availableProcessors() * 2 + 1;
+    }
+
     public static void close(Closeable... closeables) {
         for (Closeable io : closeables) {
             if (io != null) {

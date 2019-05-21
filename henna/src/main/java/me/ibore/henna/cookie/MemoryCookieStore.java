@@ -16,26 +16,26 @@ public class MemoryCookieStore implements CookieStore {
 
     @Override
     public List<Cookie> loadAll() {
-        return cookies;
+        return this.cookies;
     }
 
     @Override
     public void saveAll(Collection<Cookie> cookies) {
-        cookies.addAll(cookies);
+        this.cookies.addAll(cookies);
     }
 
     @Override
     public void remove(Cookie cookie) {
-        cookies.remove(cookie);
+        this.cookies.remove(cookie);
     }
 
     @Override
     public void removeAll(Collection<Cookie> cookies) {
-        cookies.removeAll(cookies);
+        this.cookies.removeAll(cookies);
     }
 
     @Override
     public void clear() {
-        cookies.clear();
+        this.cookies.clear();
     }
 }

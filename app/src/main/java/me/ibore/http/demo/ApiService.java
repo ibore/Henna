@@ -16,8 +16,8 @@ import me.ibore.henna.proxy.http.UploadListener;
 
 public interface ApiService {
 
-    @GET("s{path}")
-    Observable<Response<String>> getSo(@Header("test") String test, @Path("path") String path, @Param("q") String q);
+    @GET("https://www.baidu.com/")
+    Observable<Response<String>> getSo(@Header("test") String test);
 
     @POST()
     Call<String> getSo(@UploadListener ProgressListener uploadListener, @DownloadListener ProgressListener downloadListener, @Param("src") String string);
